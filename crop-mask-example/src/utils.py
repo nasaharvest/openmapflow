@@ -2,8 +2,8 @@ from typing import Tuple
 import numpy as np
 import random
 from pathlib import Path
-import json
 import subprocess
+import yaml
 
 try:
     import torch
@@ -19,7 +19,8 @@ models_dir = data_dir / "models"
 raw_dir = data_dir / "raw"
 models_file = data_dir / "models.json"
 
-openmapflow_config = json.loads(openmapflow_file.read_bytes())
+with (root / "openmapflow.json").open() as f:
+    openmapflow_config = yaml.safe_load(f)
 
 
 def set_seed(seed: int = 42):
