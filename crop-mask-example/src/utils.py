@@ -15,7 +15,8 @@ project_root = Path(__file__).parent.parent
 data_dir = project_root / "data"
 features_dir = data_dir / "features"
 models_dir = data_dir / "models"
-raw_dir = data_dir / "raw"
+raw_dir = data_dir / "raw_labels"
+processed_dir = data_dir / "processed_labels"
 models_file = data_dir / "models.json"
 
 with (project_root / "openmapflow.yaml").open() as f:

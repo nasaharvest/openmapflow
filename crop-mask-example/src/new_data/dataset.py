@@ -18,6 +18,8 @@ from .processor import Processor
 from .data_instance import DataInstance
 from src.utils import (
     data_dir,
+    raw_dir,
+    processed_dir,
     features_dir,
     memoize,
     distance,
@@ -228,8 +230,8 @@ class LabeledDataset:
     processors: Tuple[Processor, ...] = ()
 
     def __post_init__(self):
-        self.raw_labels_dir = data_dir / "raw" / self.dataset
-        self.labels_path = data_dir / "processed" / (self.dataset + ".csv")
+        self.raw_labels_dir = raw_dir / self.dataset
+        self.labels_path = processed_dir / (self.dataset + ".csv")
         self._cached_labels_csv = None
 
     def summary(self, df=None):

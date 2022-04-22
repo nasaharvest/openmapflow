@@ -19,6 +19,7 @@ from src.constants import (
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import zipfile
 
 # https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2
 min_date = date(2015, 7, 1)
@@ -107,6 +108,10 @@ class Processor:
             except UnicodeDecodeError:
                 df = pd.read_csv(file_path, engine="python")
         else:
+            if file_path.suffix == ".zip":
+                with zipfile.ZipFile(file_path, 'r') as zip_ref:
+                    zip_ref.extractall(file_path.parent)
+
             df = gpd.read_file(file_path)
 
         if self.latitude_col:
