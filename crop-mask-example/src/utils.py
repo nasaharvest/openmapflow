@@ -11,15 +11,14 @@ try:
 except ImportError:
     TORCH_INSTALLED = False
 
-root = Path(__file__).parent.parent
-openmapflow_file = root / "openmapflow.json"
-data_dir = root / "data"
+project_root = Path(__file__).parent.parent
+data_dir = project_root / "data"
 features_dir = data_dir / "features"
 models_dir = data_dir / "models"
 raw_dir = data_dir / "raw"
 models_file = data_dir / "models.json"
 
-with (root / "openmapflow.json").open() as f:
+with (project_root / "openmapflow.yaml").open() as f:
     openmapflow_config = yaml.safe_load(f)
 
 
