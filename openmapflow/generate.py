@@ -1,5 +1,5 @@
 """
-Generates an openmapflow.json and and sets up the project.
+Generates an openmapflow.yaml and and sets up the project.
 """
 
 from google.cloud import storage  # type: ignore

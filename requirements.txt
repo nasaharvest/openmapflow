@@ -2,4 +2,4 @@ black
 cropharvest==0.3.0
 dvc[gdrive]==2.10.1
 mypy
-pyyaml
+pyyaml==5.4.1
