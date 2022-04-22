@@ -44,17 +44,19 @@ from src.constants import (
     TIF_PATHS,
 )
 
+def try_txt_read(file_path: Path) -> List[str]:
+    try:
+        return pd.read_csv(file_path, sep="\n", header=None)[0].tolist()
+    except:
+        return []
+
+
 # TODO make more robust
 TIF_BUCKET = openmapflow_config["new_data"]["labeled_tifs_bucket"]
 
-unexported_file = data_dir / "unexported.txt"
-unexported = pd.read_csv(unexported_file, sep="\n", header=None)[0].tolist()
-
-missing_data_file = data_dir / "missing_data.txt"
-missing_data = pd.read_csv(missing_data_file, sep="\n", header=None)[0].tolist()
-
-duplicates_data_file = data_dir / "duplicates.txt"
-duplicates_data = pd.read_csv(duplicates_data_file, sep="\n", header=None)[0].tolist()
+unexported = try_txt_read(data_dir / "unexported.txt")
+missing_data = try_txt_read(data_dir / "missing_data.txt")
+duplicates_data = try_txt_read(data_dir / "duplicates.txt")
 
 temp_dir = tempfile.gettempdir()
 
