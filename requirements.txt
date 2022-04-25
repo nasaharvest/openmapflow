@@ -1,5 +1,6 @@
 black
 cropharvest==0.3.0
 dvc[gdrive]==2.10.1
-mypy
+flake8
+mypy==0.812
 pyyaml==5.4.1
