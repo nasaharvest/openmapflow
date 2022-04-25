@@ -13,8 +13,7 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 sys.path.append("..")
 
-from openmapflow.dataset import load_all_features_as_df  # noqa: E402
-from openmapflow.utils import get_config, get_paths  # noqa: E402
+from openmapflow import get_config, get_paths, load_all_features_as_df  # noqa: E402
 from datasets import datasets  # noqa: E402
 
 project_root = Path(__file__).parent
