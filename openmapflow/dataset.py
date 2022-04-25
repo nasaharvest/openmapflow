@@ -16,8 +16,8 @@ import tempfile
 
 from .processor import Processor
 from .data_instance import DataInstance
-from utils import memoize, distance, distance_point_from_center, find_nearest
-from constants import (
+from .utils import memoize, distance, distance_point_from_center, find_nearest
+from .constants import (
     ALREADY_EXISTS,
     COUNTRY,
     CLASS_PROB,
