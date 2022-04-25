@@ -34,17 +34,6 @@ def get_dvc_dir(dvc_dir_name: str) -> Path:
     return dvc_dir
 
 
-def memoize(f):
-    memo = {}
-
-    def helper(x="default"):
-        if x not in memo:
-            memo[x] = f() if x == "default" else f(x)
-        return memo[x]
-
-    return helper
-
-
 def get_config(project_root: Path = Path(os.getcwd())) -> dict:
     config_path = project_root / "openmapflow.yaml"
     if not config_path.exists():
