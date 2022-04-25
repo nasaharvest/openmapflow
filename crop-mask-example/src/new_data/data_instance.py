@@ -3,6 +3,7 @@ from typing import Union
 
 import numpy as np
 
+
 @dataclass
 class DataInstance:
     instance_lat: float

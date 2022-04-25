@@ -25,7 +25,7 @@ from src.utils import (
     distance,
     distance_point_from_center,
     find_nearest,
-    openmapflow_config
+    openmapflow_config,
 )
 from src.constants import (
     ALREADY_EXISTS,
@@ -46,6 +46,7 @@ from src.constants import (
     TIF_PATHS,
 )
 
+
 def try_txt_read(file_path: Path) -> List[str]:
     try:
         return pd.read_csv(file_path, sep="\n", header=None)[0].tolist()
@@ -56,8 +57,9 @@ def try_txt_read(file_path: Path) -> List[str]:
 # TODO make more robust
 TIF_BUCKET = openmapflow_config["new_data"]["labeled_tifs_bucket"]
 
+missing_data_file = data_dir / "missing_data.txt"
+missing_data = try_txt_read(missing_data_file)
 unexported = try_txt_read(data_dir / "unexported.txt")
-missing_data = try_txt_read(data_dir / "missing_data.txt")
 duplicates_data = try_txt_read(data_dir / "duplicates.txt")
 
 temp_dir = tempfile.gettempdir()
@@ -69,8 +71,11 @@ def bbox_from_path(p: Path):
     """
     decimals_in_p = re.findall(r"=-?\d*\.?\d*", p.stem)
     coords = [float(d[1:]) for d in decimals_in_p[0:4]]
-    bbox = BBox(min_lat=coords[0], min_lon=coords[1], max_lat=coords[2], max_lon=coords[3])
+    bbox = BBox(
+        min_lat=coords[0], min_lon=coords[1], max_lat=coords[2], max_lon=coords[3]
+    )
     return bbox
+
 
 @memoize
 def generate_bbox_from_paths() -> Dict[Path, BBox]:
@@ -99,7 +104,9 @@ def match_labels_to_tifs(labels: pd.DataFrame) -> pd.Series:
     )
     # Get all tif paths and bboxes
     path_to_bbox = {
-        p: bbox for p, bbox in generate_bbox_from_paths().items() if bbox_for_labels.contains_bbox(bbox)
+        p: bbox
+        for p, bbox in generate_bbox_from_paths().items()
+        if bbox_for_labels.contains_bbox(bbox)
     }
 
     # Match labels to tif files
@@ -134,7 +141,9 @@ def find_matching_point(
         local_path = Path(f"{temp_dir}/{p.name}")
         blob.download_to_filename(str(local_path))
         tif_slope_tuples.append(
-            Engineer.load_tif(str(local_path), start_date=start_date, num_timesteps=None)
+            Engineer.load_tif(
+                str(local_path), start_date=start_date, num_timesteps=None
+            )
         )
         if local_path.exists():
             local_path.unlink()
@@ -175,7 +184,9 @@ def find_matching_point(
 
 
 def create_pickled_labeled_dataset(labels):
-    for label in tqdm(labels.to_dict(orient="records"), desc="Creating pickled instances"):
+    for label in tqdm(
+        labels.to_dict(orient="records"), desc="Creating pickled instances"
+    ):
         (labelled_array, tif_lon, tif_lat, tif_file) = find_matching_point(
             start=label[START],
             tif_paths=label[TIF_PATHS],
@@ -184,6 +195,9 @@ def create_pickled_labeled_dataset(labels):
         )
 
         if labelled_array is None:
+            if not missing_data_file.exists():
+                missing_data_file.touch()
+
             with open(missing_data_file, "a") as f:
                 f.write("\n" + label[FEATURE_FILENAME])
             continue
@@ -236,7 +250,9 @@ class LabeledDataset:
 
     def summary(self, df=None):
         if df is None:
-            df = self.load_labels(allow_processing=False, fail_if_missing_features=False)
+            df = self.load_labels(
+                allow_processing=False, fail_if_missing_features=False
+            )
         text = f"{self.dataset} "
         timesteps = get_label_timesteps(df).unique()
         text += f"(Timesteps: {','.join([str(int(t)) for t in timesteps])})\n"
@@ -323,10 +339,16 @@ class LabeledDataset:
         unexported_labels = labels[FEATURE_FILENAME].isin(unexported)
         missing_data_labels = labels[FEATURE_FILENAME].isin(missing_data)
         duplicate_labels = labels[FEATURE_FILENAME].isin(duplicates_data)
-        labels = labels[~unexported_labels & ~missing_data_labels & ~duplicate_labels].copy()
+        labels = labels[
+            ~unexported_labels & ~missing_data_labels & ~duplicate_labels
+        ].copy()
         labels["feature_dir"] = str(features_dir)
-        labels[FEATURE_PATH] = labels["feature_dir"] + "/" + labels[FEATURE_FILENAME] + ".pkl"
-        labels[ALREADY_EXISTS] = np.vectorize(lambda p: Path(p).exists())(labels[FEATURE_PATH])
+        labels[FEATURE_PATH] = (
+            labels["feature_dir"] + "/" + labels[FEATURE_FILENAME] + ".pkl"
+        )
+        labels[ALREADY_EXISTS] = np.vectorize(lambda p: Path(p).exists())(
+            labels[FEATURE_PATH]
+        )
         if fail_if_missing_features and not labels[ALREADY_EXISTS].all():
             raise FileNotFoundError(
                 f"{self.dataset} has missing features: {labels[FEATURE_FILENAME].to_list()}"
@@ -365,7 +387,9 @@ class LabeledDataset:
         # -------------------------------------------------
         # STEP 3: Match labels to tif files (X)
         # -------------------------------------------------
-        labels_with_no_features[TIF_PATHS] = match_labels_to_tifs(labels_with_no_features)
+        labels_with_no_features[TIF_PATHS] = match_labels_to_tifs(
+            labels_with_no_features
+        )
         tifs_found = labels_with_no_features[TIF_PATHS].str.len() > 0
 
         labels_with_no_tifs = labels_with_no_features.loc[~tifs_found].copy()
@@ -377,8 +401,12 @@ class LabeledDataset:
         if len(labels_with_no_tifs) > 0:
             print(f"{len(labels_with_no_tifs )} labels not matched")
             if not disable_gee_export:
-                labels_with_no_tifs[START] = pd.to_datetime(labels_with_no_tifs[START]).dt.date
-                labels_with_no_tifs[END] = pd.to_datetime(labels_with_no_tifs[END]).dt.date
+                labels_with_no_tifs[START] = pd.to_datetime(
+                    labels_with_no_tifs[START]
+                ).dt.date
+                labels_with_no_tifs[END] = pd.to_datetime(
+                    labels_with_no_tifs[END]
+                ).dt.date
                 EarthEngineExporter(
                     check_ee=True,
                     check_gcp=True,
@@ -390,5 +418,7 @@ class LabeledDataset:
         # -------------------------------------------------
         if len(labels_with_tifs_but_no_features) > 0:
             create_pickled_labeled_dataset(labels=labels_with_tifs_but_no_features)
-            labels[ALREADY_EXISTS] = np.vectorize(lambda p: Path(p).exists())(labels[FEATURE_PATH])
+            labels[ALREADY_EXISTS] = np.vectorize(lambda p: Path(p).exists())(
+                labels[FEATURE_PATH]
+            )
         return self.summary(labels)

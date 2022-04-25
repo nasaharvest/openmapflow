@@ -66,7 +66,9 @@ class Processor:
             return d.date()
 
     @staticmethod
-    def train_val_test_split(df: pd.DataFrame, train_val_test: Tuple[float, float, float]):
+    def train_val_test_split(
+        df: pd.DataFrame, train_val_test: Tuple[float, float, float]
+    ):
         _, val, test = train_val_test
         random_float = np.random.rand(len(df))
 
@@ -107,11 +109,11 @@ class Processor:
                 df = pd.read_csv(file_path)
             except UnicodeDecodeError:
                 df = pd.read_csv(file_path, engine="python")
+        elif file_path.suffix == ".zip":
+            with zipfile.ZipFile(file_path, "r") as zip_ref:
+                zip_ref.extractall(file_path.parent)
+            df = gpd.read_file(file_path.parent / file_path.stem)
         else:
-            if file_path.suffix == ".zip":
-                with zipfile.ZipFile(file_path, 'r') as zip_ref:
-                    zip_ref.extractall(file_path.parent)
-
             df = gpd.read_file(file_path)
 
         if self.latitude_col:
@@ -155,9 +157,9 @@ class Processor:
         elif self.plant_date_col:
             df[START] = np.vectorize(self._to_date)(df[self.plant_date_col])
             df[START] = np.vectorize(lambda d: d.replace(month=1, day=1))(df[START])
-            df[END] = np.vectorize(lambda d: d.replace(year=d.year + 1, month=12, day=31))(
-                df[START]
-            )
+            df[END] = np.vectorize(
+                lambda d: d.replace(year=d.year + 1, month=12, day=31)
+            )(df[START])
         else:
             raise ValueError("Must specify either start_year or plant_date_col")
 
@@ -180,7 +182,9 @@ class Processor:
             y = df.geometry.centroid.y.values
 
             if self.transform_crs_from:
-                transformer = Transformer.from_crs(crs_from=self.transform_crs_from, crs_to=4326)
+                transformer = Transformer.from_crs(
+                    crs_from=self.transform_crs_from, crs_to=4326
+                )
                 y, x = transformer.transform(xx=x, yy=y)
 
             df[LON] = x

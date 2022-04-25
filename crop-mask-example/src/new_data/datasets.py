@@ -2,7 +2,7 @@ from src.new_data.dataset import LabeledDataset
 from src.new_data.processor import Processor
 
 datasets = [
-  LabeledDataset(
+    LabeledDataset(
         dataset="Togo_2019",
         country="Togo",
         processors=(

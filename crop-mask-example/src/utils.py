@@ -7,6 +7,7 @@ import yaml
 
 try:
     import torch
+
     TORCH_INSTALLED = True
 except ImportError:
     TORCH_INSTALLED = False
