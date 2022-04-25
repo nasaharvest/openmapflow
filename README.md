@@ -1,5 +1,5 @@
 # OpenMapFlow 🌍
-A tool for creating maps with machine learning models and earth observation data.
+Creating maps with machine learning models and earth observation data.
 
 
 ### How it works
