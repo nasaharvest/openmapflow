@@ -31,5 +31,7 @@ jobs:
       run: pip install -r requirements.txt
     - name: black
       run: python -m black --check --diff .
+    - name: flake8
+      run: python flake8 .
     - name: mypy
       run: python -m mypy .
