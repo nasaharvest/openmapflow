@@ -2,8 +2,16 @@ version: 0.0.1
 description: An example of an OpenMapFlow generated project
 github_project: nasaharvest/openmapflow
 project_directory: crop-mask-example
+labeled_tifs_bucket: crop-mask-tifs2
 dvc_remote_storage: ''
-new_data:
-  labeled_tifs_bucket: crop-mask-tifs2
-training: 
-map_creation: 
+data_paths:
+  raw: "raw_labels"
+  processed: "processed_labels"
+  features: "features"
+  compressed_features: "compressed_features.tar.gz"
+  models: "models"
+  metrics: "metrics.json"
+  datasets: "datasets.txt"
+  missing: "missing.txt"
+  duplicates: "duplicates.txt"
+  unexported: "unexported.txt"
