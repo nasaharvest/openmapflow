@@ -1,4 +1,5 @@
 -e .
 black
 flake8
+jupyter
 mypy==0.812
