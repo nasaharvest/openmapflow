@@ -8,6 +8,8 @@ import tarfile
 
 from pathlib import Path
 
+project_root = Path(__file__).parent.parent.resolve()
+
 # Change the working directory to the directory of this script
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
@@ -16,8 +18,7 @@ sys.path.append("..")
 from openmapflow import get_config, get_paths, load_all_features_as_df  # noqa: E402
 from datasets import datasets  # noqa: E402
 
-project_root = Path(__file__).parent
-tif_bucket_name = get_config(project_root)["tif_bucket_name"]
+tif_bucket_name = get_config(project_root)["labeled_tifs_bucket"]
 paths = get_paths(project_root)
 
 
