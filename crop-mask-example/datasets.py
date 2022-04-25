@@ -1,7 +1,8 @@
-from src.new_data.dataset import LabeledDataset
-from src.new_data.processor import Processor
+from typing import List
+from openmapflow.dataset import LabeledDataset
+from openmapflow.processor import Processor
 
-datasets = [
+datasets: List[LabeledDataset] = [
     LabeledDataset(
         dataset="Togo_2019",
         country="Togo",

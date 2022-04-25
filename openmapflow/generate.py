@@ -2,7 +2,7 @@
 Generates an openmapflow.yaml and and sets up the project.
 """
 
-from google.cloud import storage  # type: ignore
+# from google.cloud import storage  # type: ignore
 
 
 gcloud_project_id = input("Gcloud Project ID:")

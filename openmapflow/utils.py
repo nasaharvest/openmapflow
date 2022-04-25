@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Dict, Tuple
 import numpy as np
 import random
 from pathlib import Path
@@ -11,17 +11,6 @@ try:
     TORCH_INSTALLED = True
 except ImportError:
     TORCH_INSTALLED = False
-
-project_root = Path(__file__).parent.parent
-data_dir = project_root / "data"
-features_dir = data_dir / "features"
-models_dir = data_dir / "models"
-raw_dir = data_dir / "raw_labels"
-processed_dir = data_dir / "processed_labels"
-models_file = data_dir / "models.json"
-
-with (project_root / "openmapflow.yaml").open() as f:
-    openmapflow_config = yaml.safe_load(f)
 
 
 def set_seed(seed: int = 42):
@@ -53,6 +42,17 @@ def memoize(f):
         return memo[x]
 
     return helper
+
+
+@memoize
+def get_config(project_root: Path) -> dict:
+    with (project_root / "openmapflow.yaml").open() as f:
+        return yaml.safe_load(f)
+
+
+def get_paths(project_root: Path) -> Dict[str, Path]:
+    config = get_config(project_root=project_root)
+    return {k: project_root / f"data/{p}" for k, p in config["data_paths"].items()}
 
 
 def find_nearest(array, value: float) -> Tuple[float, int]:

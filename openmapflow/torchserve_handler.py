@@ -12,6 +12,7 @@ from cropharvest.inference import Inference
 temp_dir = tempfile.gettempdir()
 
 # TODO: use env file
+dest_bucket_name = "something-preds"
 
 
 class ModelHandler(BaseHandler):
