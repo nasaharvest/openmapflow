@@ -32,6 +32,6 @@ jobs:
     - name: black
       run: python -m black --check --diff .
     - name: flake8
-      run: python flake8 .
+      run: python -m flake8 .
     - name: mypy
       run: python -m mypy .
