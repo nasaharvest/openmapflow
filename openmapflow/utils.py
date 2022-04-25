@@ -3,6 +3,7 @@ import numpy as np
 import random
 from pathlib import Path
 import subprocess
+import os
 import yaml
 
 try:
@@ -44,13 +45,17 @@ def memoize(f):
     return helper
 
 
-@memoize
-def get_config(project_root: Path) -> dict:
-    with (project_root / "openmapflow.yaml").open() as f:
+def get_config(project_root: Path = Path(os.getcwd())) -> dict:
+    config_path = project_root / "openmapflow.yaml"
+    if not config_path.exists():
+        raise FileExistsError(
+            f"{str(config_path)} was not found in: {project_root}. You may need to pass project_root explicitly."
+        )
+    with config_path.open() as f:
         return yaml.safe_load(f)
 
 
-def get_paths(project_root: Path) -> Dict[str, Path]:
+def get_paths(project_root: Path = Path(os.getcwd())) -> Dict[str, Path]:
     config = get_config(project_root=project_root)
     return {k: project_root / f"data/{p}" for k, p in config["data_paths"].items()}
 
