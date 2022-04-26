@@ -1,10 +1,10 @@
+from cropharvest.utils import set_seed
 from dataclasses import dataclass
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 from pathlib import Path
 from typing import Callable, Tuple, Optional, Union
 from pyproj import Transformer
-from .utils import set_seed
 from .constants import (
     SOURCE,
     CLASS_PROB,
