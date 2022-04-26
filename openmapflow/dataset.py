@@ -2,6 +2,7 @@ from cropharvest.countries import BBox
 from cropharvest.eo import EarthEngineExporter
 from cropharvest.eo.eo import get_cloud_tif_list
 from cropharvest.engineer import Engineer
+from cropharvest.utils import memoized
 from datetime import datetime
 from dataclasses import dataclass
 from google.cloud import storage
@@ -14,9 +15,10 @@ import numpy as np
 import re
 import tempfile
 
+from .config import full_paths, relative_paths, tif_bucket_name
 from .processor import Processor
 from .data_instance import DataInstance
-from .utils import memoize, distance, distance_point_from_center, find_nearest
+from .utils import try_txt_read
 from .constants import (
     ALREADY_EXISTS,
     COUNTRY,
@@ -36,16 +38,37 @@ from .constants import (
     TIF_PATHS,
 )
 
-
-@memoize
-def try_txt_read(file_path: Path) -> List[str]:
-    try:
-        return pd.read_csv(file_path, sep="\n", header=None)[0].tolist()
-    except FileNotFoundError:
-        return []
-
-
 temp_dir = tempfile.gettempdir()
+
+missing_data = try_txt_read(full_paths["missing"])
+unexported = try_txt_read(full_paths["unexported"])
+duplicates_data = try_txt_read(full_paths["duplicates"])
+
+
+def find_nearest(array, value: float) -> Tuple[float, int]:
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return array[idx], idx
+
+
+def distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """
+    haversince formula, inspired by:
+    https://stackoverflow.com/questions/41336756/find-the-closest-latitude-and-longitude/41337005
+    """
+    p = 0.017453292519943295
+    a = (
+        0.5
+        - np.cos((lat2 - lat1) * p) / 2
+        + np.cos(lat1 * p) * np.cos(lat2 * p) * (1 - np.cos((lon2 - lon1) * p)) / 2
+    )
+    return 12742 * np.arcsin(np.sqrt(a))
+
+
+def distance_point_from_center(lat_idx: int, lon_idx: int, tif) -> int:
+    x_dist = np.abs((len(tif.x) - 1) / 2 - lon_idx)
+    y_dist = np.abs((len(tif.y) - 1) / 2 - lat_idx)
+    return x_dist + y_dist
 
 
 def bbox_from_path(p: Path):
@@ -60,7 +83,7 @@ def bbox_from_path(p: Path):
     return bbox
 
 
-@memoize
+@memoized
 def generate_bbox_from_paths(tif_bucket_name: str) -> Dict[Path, BBox]:
     cloud_tif_paths = [Path(p) for p in get_cloud_tif_list(tif_bucket_name)]
     return {
@@ -165,9 +188,7 @@ def find_matching_point(
     return labelled_np, closest_lon, closest_lat, source_file
 
 
-def create_pickled_labeled_dataset(
-    labels: pd.DataFrame, tif_bucket_name: str, missing_data_file: Path
-):
+def create_pickled_labeled_dataset(labels: pd.DataFrame):
     tif_bucket = storage.Client().bucket(tif_bucket_name)
     for label in tqdm(
         labels.to_dict(orient="records"), desc="Creating pickled instances"
@@ -181,6 +202,7 @@ def create_pickled_labeled_dataset(
         )
 
         if labelled_array is None:
+            missing_data_file = full_paths["missing"]
             if not missing_data_file.exists():
                 missing_data_file.touch()
 
@@ -205,23 +227,6 @@ def get_label_timesteps(labels):
     return (diff / np.timedelta64(1, "M")).round().astype(int)
 
 
-def load_all_features_as_df(features_dir: Path, duplicates_file: Path) -> pd.DataFrame:
-    features = []
-    files = list(features_dir.glob("*.pkl"))
-    print("------------------------------")
-    print("Loading all features...")
-    non_duplicated_files = []
-    duplicates_data = try_txt_read(duplicates_file)
-    for p in files:
-        if p.stem not in duplicates_data:
-            non_duplicated_files.append(p)
-            with p.open("rb") as f:
-                features.append(pickle.load(f))
-    df = pd.DataFrame([feat.__dict__ for feat in features])
-    df["filename"] = non_duplicated_files
-    return df
-
-
 @dataclass
 class LabeledDataset:
     dataset: str = ""
@@ -231,9 +236,8 @@ class LabeledDataset:
     processors: Tuple[Processor, ...] = ()
 
     def __post_init__(self):
-        self.unexported = []
-        self.missing_data = []
-        self.duplicates_data = []
+        self.raw_dir = full_paths["raw"] / self.dataset
+        self.labels_path = full_paths["processed"] / (self.dataset + ".csv")
         self._cached_labels_csv = None
 
     def summary(self, df=None):
@@ -329,13 +333,13 @@ class LabeledDataset:
         else:
             raise FileNotFoundError(f"{self.labels_path} does not exist")
         labels = labels[labels[CLASS_PROB] != 0.5]
-        unexported_labels = labels[FEATURE_FILENAME].isin(self.unexported)
-        missing_data_labels = labels[FEATURE_FILENAME].isin(self.missing_data)
-        duplicate_labels = labels[FEATURE_FILENAME].isin(self.duplicates_data)
+        unexported_labels = labels[FEATURE_FILENAME].isin(unexported)
+        missing_data_labels = labels[FEATURE_FILENAME].isin(missing_data)
+        duplicate_labels = labels[FEATURE_FILENAME].isin(duplicates_data)
         labels = labels[
             ~unexported_labels & ~missing_data_labels & ~duplicate_labels
         ].copy()
-        labels["feature_dir"] = str(self.features_dir)
+        labels["feature_dir"] = str(relative_paths["features"])
         labels[FEATURE_PATH] = (
             labels["feature_dir"] + "/" + labels[FEATURE_FILENAME] + ".pkl"
         )
@@ -347,17 +351,6 @@ class LabeledDataset:
                 f"{self.dataset} has missing features: {labels[FEATURE_FILENAME].to_list()}"
             )
         return labels
-
-    def set_attributes(self, paths: Dict[str, Path], tif_bucket_name: str):
-        self.raw_dir = paths["raw"] / self.dataset
-        self.labels_path = paths["processed"] / (self.dataset + ".csv")
-        self.features_dir = paths["features"]
-        self.missing_data_file = paths["missing"]
-        self.missing_data = try_txt_read(paths["missing"])
-        self.unexported = try_txt_read(paths["unexported"])
-        self.duplicates_data = try_txt_read(paths["duplicates"])
-
-        self.tif_bucket_name = tif_bucket_name
 
     def create_features(self, disable_gee_export: bool = False) -> str:
         """
@@ -421,11 +414,7 @@ class LabeledDataset:
         # STEP 5: Create the features (X, y)
         # -------------------------------------------------
         if len(labels_with_tifs_but_no_features) > 0:
-            create_pickled_labeled_dataset(
-                labels=labels_with_tifs_but_no_features,
-                tif_bucket_name=self.tif_bucket_name,
-                missing_data_file=self.missing_data_file,
-            )
+            create_pickled_labeled_dataset(labels=labels_with_tifs_but_no_features)
             labels[ALREADY_EXISTS] = np.vectorize(lambda p: Path(p).exists())(
                 labels[FEATURE_PATH]
             )
