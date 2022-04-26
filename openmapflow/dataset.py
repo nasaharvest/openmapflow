@@ -84,7 +84,7 @@ def bbox_from_path(p: Path):
 
 
 @memoized
-def generate_bbox_from_paths(tif_bucket_name: str) -> Dict[Path, BBox]:
+def generate_bbox_from_paths() -> Dict[Path, BBox]:
     cloud_tif_paths = [Path(p) for p in get_cloud_tif_list(tif_bucket_name)]
     return {
         p: bbox_from_path(p)
@@ -101,7 +101,7 @@ def get_tif_paths(path_to_bbox, lat, lon, start_date, end_date, pbar):
     return candidate_paths
 
 
-def match_labels_to_tifs(labels: pd.DataFrame, tif_bucket_name: str) -> pd.Series:
+def match_labels_to_tifs(labels: pd.DataFrame) -> pd.Series:
     bbox_for_labels = BBox(
         min_lon=labels[LON].min(),
         min_lat=labels[LAT].min(),
@@ -385,7 +385,7 @@ class LabeledDataset:
         # STEP 3: Match labels to tif files (X)
         # -------------------------------------------------
         labels_with_no_features[TIF_PATHS] = match_labels_to_tifs(
-            labels_with_no_features, tif_bucket_name=self.tif_bucket_name
+            labels_with_no_features
         )
         tifs_found = labels_with_no_features[TIF_PATHS].str.len() > 0
 
@@ -407,7 +407,7 @@ class LabeledDataset:
                 EarthEngineExporter(
                     check_ee=True,
                     check_gcp=True,
-                    dest_bucket=self.tif_bucket_name,
+                    dest_bucket=tif_bucket_name,
                 ).export_for_labels(labels=labels_with_no_tifs)
 
         # -------------------------------------------------

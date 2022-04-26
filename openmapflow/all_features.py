@@ -6,7 +6,7 @@ from .utils import try_txt_read
 
 
 class AllFeatures:
-    def __init__(self) -> pd.DataFrame:
+    def __init__(self) -> None:
         duplicates_data = try_txt_read(full_paths["duplicates"])
         features = []
         files = list(full_paths["features"].glob("*.pkl"))
