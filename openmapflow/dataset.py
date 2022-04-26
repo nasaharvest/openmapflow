@@ -111,7 +111,7 @@ def match_labels_to_tifs(labels: pd.DataFrame) -> pd.Series:
     # Get all tif paths and bboxes
     path_to_bbox = {
         p: bbox
-        for p, bbox in generate_bbox_from_paths(tif_bucket_name=tif_bucket_name).items()
+        for p, bbox in generate_bbox_from_paths().items()
         if bbox_for_labels.contains_bbox(bbox)
     }
 
