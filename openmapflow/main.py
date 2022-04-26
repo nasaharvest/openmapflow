@@ -1,56 +1,49 @@
-from collections import namedtuple
 from typing import List, Optional
-
 import subprocess
 import tarfile
 
-from .config import project_root, relative_paths, full_paths
+from .config import relative_paths, full_paths
 from .all_features import AllFeatures
 from .dataset import LabeledDataset
 
+training_data_path_keys = ["raw", "processed", "compressed_features.tar.gz"]
 
-def _dvc(command: str, dvc_dir_name: Optional[str] = None):
+
+def _dvc(command: str, path_key: Optional[str] = None):
     if command not in ["pull", "commit", "push"]:
         raise ValueError(f"Unknown command: {command}")
 
-    if dvc_dir_name is None:
+    if path_key not in ["raw", "processed", "compressed_features.tar.gz", "models"]:
+        raise ValueError(f"Unknown path_key: {path_key}")
+
+    if path_key is None:
         return subprocess.run(["dvc", "command"], check=True)
 
-    dvc_dir = project_root / f"data/{dvc_dir_name}"
+    dvc_dir = full_paths[path_key]
     if not dvc_dir.exists():
-        subprocess.run(["dvc", "pull", f"data/{dvc_dir_name}"], check=True)
+        subprocess.run(["dvc", "pull", relative_paths[path_key]], check=True)
         if not dvc_dir.exists():
             raise FileExistsError(f"{str(dvc_dir)} was not found.")
         if not any(dvc_dir.iterdir()):
             raise FileExistsError(f"{str(dvc_dir)} should not be empty.")
 
 
-def dvc_pull(dvc_dir_name: str):
-    _dvc("pull", dvc_dir_name)
-
-
-def dvc_commit(dvc_dir_name: str):
-    _dvc("commit", dvc_dir_name)
-
-
-def dvc_push():
-    _dvc("push")
+def dvc_pull(path_key: str):
+    _dvc("pull", path_key)
 
 
 def get_training_data():
-    dvc_pull(relative_paths["raw"])
-    dvc_pull(relative_paths["processed"])
-    dvc_pull(relative_paths["compressed_features.tar.gz"])
+    for path_key in training_data_path_keys:
+        _dvc("pull", path_key)
     tar = tarfile.open(relative_paths["compressed_features.tar.gz"], "r:gz")
     tar.extractall()
     tar.close()
 
 
 def push_new_training_data():
-    dvc_commit(relative_paths["raw"])
-    dvc_commit(relative_paths["processed"])
-    dvc_commit(relative_paths["compressed_features.tar.gz"])
-    dvc_push()
+    for path_key in training_data_path_keys:
+        _dvc("commit", path_key)
+    _dvc("push")
 
 
 def create_features(datasets: List[LabeledDataset]):
