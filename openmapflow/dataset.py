@@ -15,11 +15,10 @@ import numpy as np
 import re
 import tempfile
 
-from .config import full_paths, relative_paths, tif_bucket_name
 from .processor import Processor
 from .data_instance import DataInstance
 from .utils import try_txt_read
-from .constants import (
+from .config import (
     ALREADY_EXISTS,
     COUNTRY,
     CLASS_PROB,
@@ -36,13 +35,16 @@ from .constants import (
     SUBSET,
     DATASET,
     TIF_PATHS,
+    FULL_PATHS,
+    RELATIVE_PATHS,
+    TIF_BUCKET_NAME,
 )
 
 temp_dir = tempfile.gettempdir()
 
-missing_data = try_txt_read(full_paths["missing"])
-unexported = try_txt_read(full_paths["unexported"])
-duplicates_data = try_txt_read(full_paths["duplicates"])
+missing_data = try_txt_read(FULL_PATHS["missing"])
+unexported = try_txt_read(FULL_PATHS["unexported"])
+duplicates_data = try_txt_read(FULL_PATHS["duplicates"])
 
 
 def find_nearest(array, value: float) -> Tuple[float, int]:
@@ -85,7 +87,7 @@ def bbox_from_path(p: Path):
 
 @memoized
 def generate_bbox_from_paths() -> Dict[Path, BBox]:
-    cloud_tif_paths = [Path(p) for p in get_cloud_tif_list(tif_bucket_name)]
+    cloud_tif_paths = [Path(p) for p in get_cloud_tif_list(TIF_BUCKET_NAME)]
     return {
         p: bbox_from_path(p)
         for p in tqdm(cloud_tif_paths, desc="Generating BBoxes from paths")
@@ -189,7 +191,7 @@ def find_matching_point(
 
 
 def create_pickled_labeled_dataset(labels: pd.DataFrame):
-    tif_bucket = storage.Client().bucket(tif_bucket_name)
+    tif_bucket = storage.Client().bucket(TIF_BUCKET_NAME)
     for label in tqdm(
         labels.to_dict(orient="records"), desc="Creating pickled instances"
     ):
@@ -202,7 +204,7 @@ def create_pickled_labeled_dataset(labels: pd.DataFrame):
         )
 
         if labelled_array is None:
-            missing_data_file = full_paths["missing"]
+            missing_data_file = FULL_PATHS["missing"]
             if not missing_data_file.exists():
                 missing_data_file.touch()
 
@@ -236,8 +238,8 @@ class LabeledDataset:
     processors: Tuple[Processor, ...] = ()
 
     def __post_init__(self):
-        self.raw_dir = full_paths["raw"] / self.dataset
-        self.labels_path = full_paths["processed"] / (self.dataset + ".csv")
+        self.raw_dir = FULL_PATHS["raw"] / self.dataset
+        self.labels_path = FULL_PATHS["processed"] / (self.dataset + ".csv")
         self._cached_labels_csv = None
 
     def summary(self, df=None):
@@ -339,7 +341,7 @@ class LabeledDataset:
         labels = labels[
             ~unexported_labels & ~missing_data_labels & ~duplicate_labels
         ].copy()
-        labels["feature_dir"] = str(relative_paths["features"])
+        labels["feature_dir"] = str(RELATIVE_PATHS["features"])
         labels[FEATURE_PATH] = (
             labels["feature_dir"] + "/" + labels[FEATURE_FILENAME] + ".pkl"
         )
@@ -407,7 +409,7 @@ class LabeledDataset:
                 EarthEngineExporter(
                     check_ee=True,
                     check_gcp=True,
-                    dest_bucket=tif_bucket_name,
+                    dest_bucket=TIF_BUCKET_NAME,
                 ).export_for_labels(labels=labels_with_no_tifs)
 
         # -------------------------------------------------

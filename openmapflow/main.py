@@ -1,7 +1,7 @@
 from typing import List
 import tarfile
 
-from .config import full_paths
+from .config import FULL_PATHS
 from .all_features import AllFeatures
 from .dataset import LabeledDataset
 
@@ -22,10 +22,10 @@ def create_features(datasets: List[LabeledDataset]):
     print(duplicates_text)
     report += "\n\nAll data:\n" + empty_text + "\n" + duplicates_text
 
-    with full_paths["datasets"].open("w") as f:
+    with FULL_PATHS["datasets"].open("w") as f:
         f.write(report)
 
     # Compress features for faster CI/CD
     print("Compressing features...")
-    with tarfile.open(full_paths["datasets"], "w:gz") as tar:
-        tar.add(full_paths["datasets"], arcname="features")
+    with tarfile.open(FULL_PATHS["datasets"], "w:gz") as tar:
+        tar.add(FULL_PATHS["datasets"], arcname="features")

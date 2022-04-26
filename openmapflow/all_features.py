@@ -1,15 +1,15 @@
 import pandas as pd
 import pickle
 
-from .config import full_paths
+from .config import FULL_PATHS
 from .utils import try_txt_read
 
 
 class AllFeatures:
     def __init__(self) -> None:
-        duplicates_data = try_txt_read(full_paths["duplicates"])
+        duplicates_data = try_txt_read(FULL_PATHS["duplicates"])
         features = []
-        files = list(full_paths["features"].glob("*.pkl"))
+        files = list(FULL_PATHS["features"].glob("*.pkl"))
         print("------------------------------")
         print("Loading all features...")
         non_duplicated_files = []
