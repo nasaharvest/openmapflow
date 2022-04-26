@@ -35,7 +35,8 @@ class AllFeatures:
 
     def check_duplicates(self) -> str:
         """
-        Can happen when not all tifs have been downloaded and different labels are matched to same tif
+        Duplicates can occur when not all tifs have been downloaded
+        and different labels are matched to same tif
         """
         cols_to_check = ["instance_lon", "instance_lat", "source_file"]
         duplicates = self.df[self.df.duplicated(subset=cols_to_check)]
