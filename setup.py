@@ -23,7 +23,12 @@ setup(
     ],
     packages=["openmapflow"]
     + [f"openmapflow.{f}" for f in find_packages("openmapflow")],
-    install_requires=["cropharvest>=0.3.0", "dvc[gdrive]>=2.10.1", "pyyaml==5.4.1"],
+    install_requires=[
+        "cropharvest>=0.3.0",
+        "dvc[gdrive]>=2.10.1",
+        "earthengine-api",
+        "pyyaml==5.4.1",
+    ],
     python_requires=">=3.6",
     include_package_data=True,
 )
