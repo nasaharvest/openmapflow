@@ -17,11 +17,13 @@ def _dvc(command: str, path_key: Optional[str] = None):
         raise ValueError(f"Unknown path_key: {path_key}")
 
     if path_key is None:
-        return subprocess.run(["dvc", "command"], check=True)
+        return subprocess.run(["dvc", command], check=True, capture_output=True)
 
     dvc_dir = full_paths[path_key]
     if not dvc_dir.exists():
-        subprocess.run(["dvc", "pull", relative_paths[path_key]], check=True)
+        subprocess.run(
+            ["dvc", command, relative_paths[path_key]], check=True, capture_output=True
+        )
         if not dvc_dir.exists():
             raise FileExistsError(f"{str(dvc_dir)} was not found.")
         if not any(dvc_dir.iterdir()):
