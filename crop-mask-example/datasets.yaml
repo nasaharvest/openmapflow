@@ -1,0 +1,50 @@
+- dataset: Togo_2019
+  country: Togo
+  subsets:
+  - filename: crop_merged_v2.zip
+    class_prob: 1.0
+    split:
+    - train: 0.8
+    - val: 0.2
+    start_year: 2019
+
+  - filename: noncrop_merged_v2.zip
+    class_prob: 0.0
+    split:
+    - train: 0.8
+    - val: 0.2
+    start_year: 2019
+
+  - filename: random_sample_hrk.zip
+    class_prob_col: hrk-label
+    transform_crs_from: 32631
+    split:
+    - train: 0.0
+    - val: 0.0
+    - test: 1.0
+    start_year: 2019
+
+  - filename: random_sample_cn.zip
+    class_prob_col: cn_labels
+    split:
+    - train: 0.0
+    - val: 0.0
+    - test: 1.0
+    start_year: 2019
+
+  - filename: BB_random_sample_1k.zip
+    class_prob_col: bb_label
+    split:
+    - train: 0.0
+    - val: 0.0
+    - test: 1.0
+    start_year: 2019
+
+  - filename: random_sample_bm.zip
+    class_prob_col: bm_labels
+    split:
+    - train: 0.0
+    - val: 0.0
+    - test: 1.0
+    start_year: 2019
+
