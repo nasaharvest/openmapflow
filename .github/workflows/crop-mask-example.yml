@@ -5,8 +5,8 @@ on:
     branches: [ main ]
     tags:
       - '*'
-    paths:
-    - 'crop-mask-example/**'
+    # paths:
+    # - 'crop-mask-example/**'
   pull_request:
     branches: [ main ]
 
