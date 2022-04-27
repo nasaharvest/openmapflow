@@ -28,6 +28,7 @@ setup(
         "dvc[gdrive]>=2.10.1",
         "earthengine-api",
         "pyyaml==5.4.1",
+        "torch",
     ],
     python_requires=">=3.6",
     include_package_data=True,

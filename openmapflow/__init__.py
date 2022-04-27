@@ -1,11 +1,13 @@
 from openmapflow import config
 from openmapflow.main import create_features
-from openmapflow.dataset import LabeledDataset
+from openmapflow.labeled_dataset import LabeledDataset
 from openmapflow.processor import Processor
+from openmapflow.pytorch_dataset import PyTorchDataset
 
 __all__ = [
     "config",
     "create_features",
     "LabeledDataset",
     "Processor",
+    "PyTorchDataset",
 ]
