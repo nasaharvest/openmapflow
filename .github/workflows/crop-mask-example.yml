@@ -1,0 +1,34 @@
+name: Crop Mask Example
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - '*'
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: test
+    needs: ["code-quality"]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: crop-mask-example
+    steps:
+    - name: Clone repo
+      uses: actions/checkout@v2
+    - name: Set up python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+    - name: Install dependencies
+      run: pip install -r ../requirements.txt
+    - name: dvc pull data
+      run: |
+        dvc pull data/processed -f
+        dvc pull data/compressed_features.tar.gz -f
+        tar -xvzf data/compressed_features.tar.gz -C data/
+    - name: Integration test - Data integrity
+      run: python -m unittest integration_test_data.py
