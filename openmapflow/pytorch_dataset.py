@@ -185,7 +185,10 @@ class PyTorchDataset(Dataset):
             target_datainstance = pickle.load(f)
 
         x = target_datainstance.labelled_array
-        x = x[self.start_month_index : self.start_month_index + self.input_months]
+        x = x[
+            self.start_month_index : self.start_month_index  # noqa: E203
+            + self.input_months
+        ]
 
         # If x is a partial time series, pad it to full length
         if x.shape[0] < self.input_months:
