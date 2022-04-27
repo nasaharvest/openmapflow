@@ -27,6 +27,8 @@ jobs:
     - name: Install dependencies
       run: pip install -e ..
     - name: dvc pull data
+      env:
+        GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
       run: |
         dvc pull data/processed_labels -f
         dvc pull data/compressed_features.tar.gz -f
