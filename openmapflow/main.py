@@ -60,6 +60,8 @@ def generate_project():
     # dvc remote add -d gdrive \
     #   gdrive://1EMHILcNFwdusMHHs4eC4OVIJ0Ncp9fiY/crop-mask-example-dvc-store
 
+    # https://dvc.org/doc/user-guide/setup-google-drive-remote#authorization
+
     # from google.cloud import storage  # type: ignore
 
 
