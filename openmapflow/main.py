@@ -35,6 +35,7 @@ def generate_project():
     """
     Generates an openmapflow.yaml and and sets up the project.
     """
+    pass
 
     # - take unique project name - set it inside the notebooks
     # - bucket creation: remote storage, tifs, earth engine, press, preds-merged
@@ -56,20 +57,14 @@ def generate_project():
     # Set dvc remote, Google Drive by default for simplicity
     # https://dvc.org/doc/user-guide/setup-google-drive-remote
 
-    # dvc remote add -d gdrive gdrive://1EMHILcNFwdusMHHs4eC4OVIJ0Ncp9fiY/crop-mask-example-dvc-store
+    # dvc remote add -d gdrive \
+    #   gdrive://1EMHILcNFwdusMHHs4eC4OVIJ0Ncp9fiY/crop-mask-example-dvc-store
 
     # from google.cloud import storage  # type: ignore
 
 
 def generate_gcloud_architecture():
-    gcloud_project_id = input("Gcloud Project ID:")
-    project_id = input("Project ID:")
-
-    labeled_tifs_bucket_name = f"{project_id}-labeled-tifs"
-    tifs_bucket_name = f"{project_id}-inference-tifs"
-    preds_bucket_name = f"{project_id}-preds"
-    preds_merged_bucket_name = f"{project_id}-preds-merged"
-
+    pass
     # Check if any of them exist, if yes, choose new project id
 
     # Create all buckets
