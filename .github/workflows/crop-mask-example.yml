@@ -5,6 +5,8 @@ on:
     branches: [ main ]
     tags:
       - '*'
+    paths:
+    - 'crop-mask-example/**'
   pull_request:
     branches: [ main ]
 
@@ -26,7 +28,7 @@ jobs:
       run: pip install -e ..
     - name: dvc pull data
       run: |
-        dvc pull data/processed -f
+        dvc pull data/processed_labels -f
         dvc pull data/compressed_features.tar.gz -f
         tar -xvzf data/compressed_features.tar.gz -C data/
     - name: Integration test - Data integrity
