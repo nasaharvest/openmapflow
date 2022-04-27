@@ -26,7 +26,7 @@ from openmapflow.config import (  # noqa: E402
 )
 
 from openmapflow.data_instance import DataInstance  # noqa: E402
-from openmapflow.dataset import (  # noqa: E402
+from openmapflow.labeled_dataset import (  # noqa: E402
     unexported,
     duplicates_data,
     get_label_timesteps,

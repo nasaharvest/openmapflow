@@ -3,7 +3,7 @@ import tarfile
 
 from .config import FULL_PATHS
 from .all_features import AllFeatures
-from .dataset import LabeledDataset
+from .labeled_dataset import LabeledDataset
 
 training_data_path_keys = ["raw", "processed", "compressed_features.tar.gz"]
 
