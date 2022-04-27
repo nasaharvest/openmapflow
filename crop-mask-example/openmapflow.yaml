@@ -15,3 +15,9 @@ data_paths:
   missing: "missing.txt"
   duplicates: "duplicates.txt"
   unexported: "unexported.txt"
+gcloud:
+  project_id: "bsos-geog-harves1"
+  labeled_tifs_bucket_name: f"{project_id}-labeled-tifs"
+  tifs_bucket_name: "{project_id}-inference-tifs"
+  preds_bucket_name: "{project_id}-preds"
+  preds_merged_bucket_name: "{project_id}-preds-merged"
