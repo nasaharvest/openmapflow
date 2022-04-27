@@ -13,7 +13,7 @@ import unittest
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append("..")
 
-from openmapflow.config import (
+from openmapflow.config import (  # noqa: E402
     ALREADY_EXISTS,
     FEATURE_FILENAME,
     FULL_PATHS,
@@ -25,11 +25,15 @@ from openmapflow.config import (
     SUBSET,
 )
 
-from openmapflow.data_instance import DataInstance
-from openmapflow.dataset import unexported, duplicates_data, get_label_timesteps
-from openmapflow.all_features import AllFeatures
+from openmapflow.data_instance import DataInstance  # noqa: E402
+from openmapflow.dataset import (  # noqa: E402
+    unexported,
+    duplicates_data,
+    get_label_timesteps,
+)
+from openmapflow.all_features import AllFeatures  # noqa: E402
 
-from datasets import datasets
+from datasets import datasets  # noqa: E402
 
 
 def load_feature(p):
@@ -53,7 +57,7 @@ class IntegrationTestLabeledData(TestCase):
             try:
                 datasets_dict[d.dataset] = d.load_labels()
                 if is_print:
-                    print(d.summary(datasets[d.dataset]))
+                    print(d.summary(datasets_dict[d.dataset]))
             except FileNotFoundError:
                 continue
         return datasets_dict
@@ -134,7 +138,7 @@ class IntegrationTestLabeledData(TestCase):
 
     def test_features_for_duplicates(self):
         # If this test is failing you can temporarily set remove_duplicates to True
-        # and rerun create_features.py
+        # and rerun create_features()
         add_to_duplicates_file = False
         features_df = load_features()
         cols_to_check = ["instance_lon", "instance_lat", "source_file"]
@@ -144,7 +148,7 @@ class IntegrationTestLabeledData(TestCase):
             feature_filenames = duplicates.filename.apply(
                 lambda p: Path(p).stem
             ).tolist()
-            with FULL_PATHS["duplicate"].open("w") as f:
+            with FULL_PATHS["duplicates"].open("w") as f:
                 f.write("\n".join(duplicates_data + feature_filenames))
         self.assertTrue(num_dupes == 0, f"Found {num_dupes} duplicates")
 
