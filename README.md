@@ -12,9 +12,9 @@ openmapflow generate
 ```
 This will generate the following worflow: 
 
-Data processing pipeline ➡ ML model training ➡ Efficient map creation
+Data processing pipeline ➞ ML model training ➞ Efficient map creation
 
-## Crop Mask Example Project
+## Crop Mask Example
 
 [![Status](https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example.yml/badge.svg)](https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example.yml)
 
