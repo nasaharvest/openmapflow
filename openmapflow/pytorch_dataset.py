@@ -34,7 +34,7 @@ class PyTorchDataset(Dataset):
         up_to_year: Optional[int] = None,
     ) -> None:
 
-        assert subset in ["training", "validation", "test"]
+        assert subset in ["training", "validation", "testing"]
 
         df = df.copy()
 
