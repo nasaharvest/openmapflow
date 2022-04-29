@@ -1,16 +1,20 @@
 import numpy as np
 import pandas as pd
 import pickle
-import torch
+
+try:
+    import torch
+    from torch.utils.data import Dataset
+    from torch import Tensor
+except ImportError:
+    print("PyTorch must be installed to use the PyTorch dataset.")
+
 
 from cropharvest.countries import BBox
 from dateutil.relativedelta import relativedelta
 from pathlib import Path
 from tqdm import tqdm
 from typing import cast, Tuple, Optional, List, Dict, Union
-
-from torch.utils.data import Dataset
-from torch import Tensor
 
 from .config import CLASS_PROB, FEATURE_PATH, LAT, LON, START, END, MONTHS
 
