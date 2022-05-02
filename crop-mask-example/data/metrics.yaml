@@ -1,0 +1,8 @@
+Togo_2019_February:
+  params: https://wandb.ai/izvonkov/crop-mask-example/runs/151acgog
+  test_metrics:
+    accuracy: 0.5016
+    f1: 0.5674
+    precision: 0.4056
+    recall: 0.9439
+    roc_auc: 0.73
