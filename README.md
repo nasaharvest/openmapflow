@@ -18,8 +18,13 @@ Data processing pipeline ➞ ML model training ➞ Efficient map creation
 
 [![Status](https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example.yml/badge.svg)](https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example.yml)
 
+<img src="https://storage.googleapis.com/harvest-public-assets/openmapflow/crop-mask-example-map.png" width="40%"/>
+
 Adding data: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/crop-mask-example/notebooks/new_data.ipynb) 
 
 Training a model: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/crop-mask-example/notebooks/train.ipynb)
 
 Creating a map: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/crop-mask-example/notebooks/create_map.ipynb)
+
+
+
