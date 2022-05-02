@@ -22,4 +22,4 @@ Adding data: [![Open In Colab](https://colab.research.google.com/assets/colab-ba
 
 Training a model: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/crop-mask-example/notebooks/train.ipynb)
 
-Creating a map: TODO
+Creating a map: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/crop-mask-example/notebooks/create_map.ipynb)
