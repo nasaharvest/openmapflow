@@ -3,6 +3,20 @@ from openmapflow import LabeledDataset, Processor
 
 datasets: List[LabeledDataset] = [
     LabeledDataset(
+        dataset="geowiki_landcover_2017",
+        country="global",
+        processors=(
+            Processor(
+                filename="loc_all_2.txt",
+                longitude_col="loc_cent_X",
+                latitude_col="loc_cent_Y",
+                class_prob=lambda df: df.sumcrop / 100,
+                start_year=2017,
+                x_y_from_centroid=False,
+            ),
+        ),
+    ),
+    LabeledDataset(
         dataset="Togo_2019",
         country="Togo",
         processors=(
