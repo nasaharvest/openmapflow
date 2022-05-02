@@ -73,8 +73,8 @@ class IntegrationTestLabeledData(TestCase):
         amount = len(features_with_no_label)
         self.assertTrue(amount == 0, f"Found {amount} features with no labels")
 
-    def test_each_pickle_file_is_crop_data_instance(self):
-        each_pickle_file_is_crop_data_instance = True
+    def test_each_pickle_file_is_data_instance(self):
+        each_pickle_file_is_data_instance = True
         for name, labels in self.load_labels().items():
             labels = labels[labels[ALREADY_EXISTS]].copy()
             all_features = labels[FEATURE_PATH].apply(load_feature)
@@ -86,13 +86,13 @@ class IntegrationTestLabeledData(TestCase):
                 mark = "\u2714"
             else:
                 mark = "\u2716"
-                each_pickle_file_is_crop_data_instance = False
+                each_pickle_file_is_data_instance = False
             print(
                 f"{mark} {name} has {len(good_features)} features out of {len(all_features)}."
             )
         self.assertTrue(
-            each_pickle_file_is_crop_data_instance,
-            "Not all pickle files are crop data instances, check logs for details.",
+            each_pickle_file_is_data_instance,
+            "Not all pickle files are data instances, check logs for details.",
         )
 
     def test_label_feature_subset_amounts(self):
