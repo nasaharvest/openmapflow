@@ -40,6 +40,7 @@ docker build . \
 docker push $TAG
 
 gcloud run deploy $PROJECT --image $TAG:latest \
+        --cpu=4 \
         --memory=8Gi \
         --platform=managed \
         --region=$GCLOUD_LOCATION \
