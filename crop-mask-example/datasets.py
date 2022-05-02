@@ -1,5 +1,6 @@
 from typing import List
-from openmapflow import LabeledDataset, Processor
+from openmapflow.labeled_dataset import LabeledDataset
+from openmapflow.processor import Processor
 
 datasets: List[LabeledDataset] = [
     LabeledDataset(
