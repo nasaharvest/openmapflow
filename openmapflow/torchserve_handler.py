@@ -56,7 +56,7 @@ class ModelHandler(BaseHandler):
         properties = context.system_properties
         model_dir = properties.get("model_dir")
         sys.path.append(model_dir)
-        self.inference_module = Inference(model=self.model)
+        self.inference_module = Inference(model=self.model, normalizing_dict=None)
 
     def preprocess(self, data) -> str:
         print(data)
