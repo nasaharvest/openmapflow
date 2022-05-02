@@ -10,7 +10,7 @@ data_paths:
   features: "features"
   compressed_features: "compressed_features.tar.gz"
   models: "models"
-  metrics: "metrics.json"
+  metrics: "metrics.yaml"
   datasets: "datasets.txt"
   missing: "missing.txt"
   duplicates: "duplicates.txt"
