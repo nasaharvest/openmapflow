@@ -28,7 +28,7 @@ def create_features(datasets: List[LabeledDataset]):
     # Compress features for faster CI/CD
     print("Compressing features...")
     with tarfile.open(FULL_PATHS["compressed_features"], "w:gz") as tar:
-        tar.add(FULL_PATHS["compressed_features"], arcname="features")
+        tar.add(FULL_PATHS["features"], arcname="features")
 
 
 def generate_project():
