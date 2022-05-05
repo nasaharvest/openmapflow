@@ -22,6 +22,7 @@ GCLOUD_LOCATION = CONFIG_YML["gcloud"]["location"]
 TIF_BUCKET_NAME = CONFIG_YML["gcloud"]["buckets"]["labeled_tifs"]
 DOCKER_TAG = f"{GCLOUD_LOCATION}-docker.pkg.dev/{GCLOUD_PROJECT_ID}/{PROJECT}/{PROJECT}"
 
+
 # -------------- Helper functions ---------------------------------------------
 def get_model_names_as_str():
     return " ".join([p.stem for p in Path(FULL_PATHS["models"]).glob("*.pt")])
