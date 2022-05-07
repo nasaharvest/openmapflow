@@ -27,7 +27,6 @@ class PyTorchDataset(Dataset):
         cache: bool = True,
         upsample: bool = False,
         target_bbox: BBox = None,
-        wandb_logger=None,
         start_month: str = "January",
         probability_threshold: float = 0.5,
         input_months: int = 12,
@@ -35,8 +34,6 @@ class PyTorchDataset(Dataset):
     ) -> None:
 
         assert subset in ["training", "validation", "testing"]
-
-        df = df.copy()
 
         if subset == "training" and up_to_year is not None:
             df = df[pd.to_datetime(df[START]).dt.year <= up_to_year]
@@ -55,13 +52,6 @@ class PyTorchDataset(Dataset):
         else:
             df["is_local"] = True
 
-        if subset != "training":
-            outside_model_bbox = (~df["is_local"]).sum()
-            assert outside_model_bbox == 0, (
-                f"{outside_model_bbox} points outside model bbox: "
-                + f"({df[LAT].min()}, {df[LON].min()}, {df[LAT].max()}, {df[LON].max()})"
-            )
-
         local_positive_class = len(df[df["is_local"] & df["is_positive_class"]])
         local_negative_class = len(df[df["is_local"] & ~df["is_positive_class"]])
         local_difference = np.abs(local_positive_class - local_negative_class)
@@ -70,26 +60,25 @@ class PyTorchDataset(Dataset):
             start_col=df[START], end_col=df[END]
         )
 
-        if wandb_logger:
-            to_log: Dict[str, Union[float, int]] = {}
-            if df["is_local"].any():
-                to_log[f"local_{subset}_original_size"] = len(df[df["is_local"]])
-                to_log[f"local_{subset}_positive_class_percentage"] = round(
-                    local_positive_class / len(df[df["is_local"]]), 4
-                )
+        dataset_info: Dict[str, Union[float, int]] = {}
+        if df["is_local"].any():
+            dataset_info[f"local_{subset}_original_size"] = len(df[df["is_local"]])
+            dataset_info[f"local_{subset}_positive_class_percentage"] = round(
+                local_positive_class / len(df[df["is_local"]]), 4
+            )
 
-            if not df["is_local"].all():
-                to_log[f"global_{subset}_original_size"] = len(df[~df["is_local"]])
-                to_log[f"global_{subset}_positive_class_percentage"] = round(
-                    len(df[~df["is_local"] & df["is_positive_class"]])
-                    / len(df[~df["is_local"]]),
-                    4,
-                )
+        if not df["is_local"].all():
+            dataset_info[f"global_{subset}_original_size"] = len(df[~df["is_local"]])
+            dataset_info[f"global_{subset}_positive_class_percentage"] = round(
+                len(df[~df["is_local"] & df["is_positive_class"]])
+                / len(df[~df["is_local"]]),
+                4,
+            )
 
-            if upsample:
-                to_log[f"{subset}_upsampled_size"] = len(df) + local_difference
+        if upsample:
+            dataset_info[f"{subset}_upsampled_size"] = len(df) + local_difference
 
-            wandb_logger.experiment.config.update(to_log)
+        self.dataset_info = dataset_info
 
         if upsample:
             if local_positive_class > local_negative_class:
