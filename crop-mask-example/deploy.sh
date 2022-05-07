@@ -15,7 +15,7 @@ env | grep OPENMAPFLOW
 
 
 echo "2/7 Ensuring latest models are available for deployment"
-dvc pull $OPENMAPFLOW_MODELS_DIR.dvc
+dvc pull $OPENMAPFLOW_MODELS_DIR.dvc -f
 
 export OPENMAPFLOW_MODELS=$(
         python -c \
