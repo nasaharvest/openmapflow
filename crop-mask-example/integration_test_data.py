@@ -157,7 +157,7 @@ class IntegrationTestLabeledData(TestCase):
         num_empty_features = len(features_df[is_empty])
         self.assertTrue(
             num_empty_features == 0,
-            f"Found {num_empty_features} empty features, run labeled_dataset.create_all_features() to solve this.",
+            f"Found {num_empty_features} empty features, run create_all_features() to fix.",
         )
 
     def test_all_features_have_18_bands(self):

@@ -16,7 +16,7 @@ import re
 import tempfile
 import tarfile
 
-from .features import AllFeatures
+from .all_features import AllFeatures
 from .processor import Processor
 from .data_instance import DataInstance
 from .utils import try_txt_read
