@@ -23,7 +23,7 @@ from openmapflow.constants import (  # noqa: E402
     END,
     SUBSET,
 )
-from openmapflow.config import FULL_PATHS
+from openmapflow.config import FULL_PATHS  # noqa: E402
 from openmapflow.data_instance import DataInstance  # noqa: E402
 from openmapflow.labeled_dataset import (  # noqa: E402
     unexported,
