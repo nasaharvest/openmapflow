@@ -1,6 +1,7 @@
 # OpenMapFlow 🌍
 
-[![Status](https://github.com/nasaharvest/openmapflow/actions/workflows/ci.yml/badge.svg)](https://github.com/nasaharvest/openmapflow/actions/workflows/ci.yml)
+[![CI Status](https://github.com/nasaharvest/openmapflow/actions/workflows/ci.yml/badge.svg)](https://github.com/nasaharvest/openmapflow/actions/workflows/ci.yml)
+[![Docker Status](https://github.com/nasaharvest/openmapflow/actions/workflows/docker.yml/badge.svg)](https://github.com/nasaharvest/openmapflow/actions/workflows/docker.yml)
 
 Rapid map creation with machine learning and earth observation data.
 
