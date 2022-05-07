@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:experimental
-FROM nasaharvest/openmapflow
+FROM ivanzvonkov/openmapflow
 
 # Ensures that everytime models.dvc is updated 
 # This following docker steps are rerun
@@ -19,6 +19,7 @@ RUN for m in $MODELS; \
     --export-path=model-store; \
     done
 
+ENV DEST_BUCKET ${DEST_BUCKET}
 ENV MODELS ${MODELS}
 CMD ["/usr/local/bin/start.sh", "\"${MODELS}\""]
 

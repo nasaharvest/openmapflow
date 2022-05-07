@@ -1,6 +1,7 @@
 import sys
 import tempfile
 import time
+import os
 
 from pathlib import Path
 from google.cloud import storage  # type: ignore
@@ -11,8 +12,8 @@ from cropharvest.inference import Inference
 
 temp_dir = tempfile.gettempdir()
 
-# TODO: use env file
-dest_bucket_name = "something-preds"
+dest_bucket_name = os.environ.get("DEST_BUCKET")
+print(f"HANDLER: Dest bucket: {dest_bucket_name}")
 
 
 class ModelHandler(BaseHandler):
