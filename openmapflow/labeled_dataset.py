@@ -18,7 +18,7 @@ import tempfile
 from .processor import Processor
 from .data_instance import DataInstance
 from .utils import try_txt_read
-from .config import (
+from .constants import (
     ALREADY_EXISTS,
     COUNTRY,
     CLASS_PROB,
@@ -35,10 +35,8 @@ from .config import (
     SUBSET,
     DATASET,
     TIF_PATHS,
-    FULL_PATHS,
-    RELATIVE_PATHS,
-    TIF_BUCKET_NAME,
 )
+from .config import FULL_PATHS, RELATIVE_PATHS, GCLOUD_BUCKET_LABELED_TIFS
 
 temp_dir = tempfile.gettempdir()
 
@@ -87,7 +85,7 @@ def bbox_from_path(p: Path):
 
 @memoized
 def generate_bbox_from_paths() -> Dict[Path, BBox]:
-    cloud_tif_paths = [Path(p) for p in get_cloud_tif_list(TIF_BUCKET_NAME)]
+    cloud_tif_paths = [Path(p) for p in get_cloud_tif_list(GCLOUD_BUCKET_LABELED_TIFS)]
     return {
         p: bbox_from_path(p)
         for p in tqdm(cloud_tif_paths, desc="Generating BBoxes from paths")
@@ -191,7 +189,7 @@ def find_matching_point(
 
 
 def create_pickled_labeled_dataset(labels: pd.DataFrame):
-    tif_bucket = storage.Client().bucket(TIF_BUCKET_NAME)
+    tif_bucket = storage.Client().bucket(GCLOUD_BUCKET_LABELED_TIFS)
     for label in tqdm(
         labels.to_dict(orient="records"), desc="Creating pickled instances"
     ):
@@ -409,7 +407,7 @@ class LabeledDataset:
                 EarthEngineExporter(
                     check_ee=True,
                     check_gcp=True,
-                    dest_bucket=TIF_BUCKET_NAME,
+                    dest_bucket=GCLOUD_BUCKET_LABELED_TIFS,
                 ).export_for_labels(labels=labels_with_no_tifs)
 
         # -------------------------------------------------

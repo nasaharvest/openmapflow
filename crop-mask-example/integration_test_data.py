@@ -13,10 +13,9 @@ import unittest
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append("..")
 
-from openmapflow.config import (  # noqa: E402
+from openmapflow.constants import (  # noqa: E402
     ALREADY_EXISTS,
     FEATURE_FILENAME,
-    FULL_PATHS,
     LAT,
     LON,
     FEATURE_PATH,
@@ -24,7 +23,7 @@ from openmapflow.config import (  # noqa: E402
     END,
     SUBSET,
 )
-
+from openmapflow.config import FULL_PATHS
 from openmapflow.data_instance import DataInstance  # noqa: E402
 from openmapflow.labeled_dataset import (  # noqa: E402
     unexported,
