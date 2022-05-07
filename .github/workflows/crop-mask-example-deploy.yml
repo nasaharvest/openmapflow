@@ -11,7 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
+    - name: Set up python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
     - name: Install dependencies
       run: pip install -e .
     - uses: google-github-actions/setup-gcloud@v0
