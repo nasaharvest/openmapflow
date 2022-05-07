@@ -48,6 +48,7 @@ if [ -z "$(gcloud artifacts repositories list --format='get(name)' --filter $OPE
 fi
 
 echo "5/7 Build and push inference docker image to Google Cloud artifact registry"
+gcloud auth configure-docker ${OPENMAPFLOW_GCLOUD_LOCATION}-docker.pkg.dev
 docker build . \
         -f $OPENMAPFLOW_LIBRARY_DIR/Dockerfile \
         --build-arg MODELS="$OPENMAPFLOW_MODELS" \
