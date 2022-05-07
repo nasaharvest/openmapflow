@@ -17,7 +17,7 @@ def find_project_root(files_to_check: List[str]) -> Path:
 
 
 # -------------- Load configuration -------------------------------------------
-PROJECT_ROOT = find_project_root(["openmapflow.yaml", "data"])
+PROJECT_ROOT = find_project_root(["openmapflow.yaml"])
 
 with (PROJECT_ROOT / "openmapflow.yaml").open() as f:
     CONFIG_YML = yaml.safe_load(f)

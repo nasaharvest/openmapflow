@@ -24,6 +24,8 @@ jobs:
         export_default_credentials: true   
     - uses: iterative/setup-dvc@v1
     - name: Deploy Google Cloud Architecture
+      env:
+          GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
       run: |
         cd crop-mask-example
         chmod +x ./deploy.sh
