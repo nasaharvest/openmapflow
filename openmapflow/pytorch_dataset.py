@@ -16,7 +16,7 @@ from pathlib import Path
 from tqdm import tqdm
 from typing import cast, Tuple, Optional, List, Dict, Union
 
-from .config import CLASS_PROB, FEATURE_PATH, LAT, LON, START, END, MONTHS
+from .constants import CLASS_PROB, FEATURE_PATH, LAT, LON, START, END, MONTHS
 
 
 class PyTorchDataset(Dataset):
