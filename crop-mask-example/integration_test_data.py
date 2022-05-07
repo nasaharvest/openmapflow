@@ -137,7 +137,7 @@ class IntegrationTestLabeledData(TestCase):
 
     def test_features_for_duplicates(self):
         # If this test is failing you can temporarily set remove_duplicates to True
-        # and rerun create_features()
+        # and rerun labeled_dataset.create_all_features()
         add_to_duplicates_file = False
         features_df = load_features()
         cols_to_check = ["instance_lon", "instance_lat", "source_file"]
@@ -157,7 +157,7 @@ class IntegrationTestLabeledData(TestCase):
         num_empty_features = len(features_df[is_empty])
         self.assertTrue(
             num_empty_features == 0,
-            f"Found {num_empty_features} empty features, run create_features.py to solve this.",
+            f"Found {num_empty_features} empty features, run labeled_dataset.create_all_features() to solve this.",
         )
 
     def test_all_features_have_18_bands(self):
