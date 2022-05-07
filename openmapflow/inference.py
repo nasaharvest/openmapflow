@@ -8,8 +8,8 @@ import ee
 import os
 import re
 
-
 from .config import GCLOUD_BUCKET_INFERENCE_TIFS, GCLOUD_BUCKET_PREDS, GCLOUD_PROJECT_ID
+
 
 #######################################################
 # Status functions
@@ -91,7 +91,8 @@ def find_missing_predictions(model_name_version, verbose=False):
         print("-----------------------------------------------------------------------")
     if batches_with_issues > 0:
         print(
-            f"\u2716 {batches_with_issues}/{len(tif_files.keys())} batches have a total {tif_amount - pred_amount} missing predictions"
+            f"\u2716 {batches_with_issues}/{len(tif_files.keys())} "
+            + f"batches have a total {tif_amount - pred_amount} missing predictions"
         )
         if verbose:
             for batch, files in missing.items():
@@ -100,7 +101,7 @@ def find_missing_predictions(model_name_version, verbose=False):
                 print("\t--------------------------------------------------")
                 [print(f"\t{f}") for f in files]
     else:
-        print(f"\u2714 all files in each batch match")
+        print("\u2714 all files in each batch match")
     return missing
 
 
