@@ -16,7 +16,9 @@ Data processing pipeline ➞ ML model training ➞ Efficient map creation
 
 ## Crop Mask Example
 
-[![Status](https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example.yml/badge.svg)](https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example.yml)
+[![Test Status](https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-test.yml/badge.svg)](https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-test.yml)
+
+[![Deploy Status](https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-deploy.yml/badge.svg)](https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-deploy.yml)
 
 <img src="https://storage.googleapis.com/harvest-public-assets/openmapflow/crop-mask-example-map.png" width="40%"/>
 
