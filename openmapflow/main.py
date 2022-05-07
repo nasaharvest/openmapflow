@@ -1,7 +1,3 @@
-from typing import List
-
-from .config import FULL_PATHS
-
 training_data_path_keys = ["raw", "processed", "compressed_features.tar.gz"]
 
 
