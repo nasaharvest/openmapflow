@@ -6,7 +6,9 @@ on:
     tags:
       - '*'
     paths:
-    - 'crop-mask-example/**'
+    - 'crop-mask-example/data/**'
+    - 'crop-mask-example/datasets.py'
+    - 'crop-mask-example/integration_test_data.py'
   pull_request:
     branches: [ main ]
 
