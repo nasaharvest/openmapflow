@@ -13,16 +13,30 @@ openmapflow generate
 This will generate all the following workflow: 
 Adding data ➞ Training a model ➞ Creating a map
 
-Each step of the workflow is accessible through a notebook:s
+[cb]: https://colab.research.google.com/assets/colab-badge.svg
+[1]: https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/new_data.ipynb
+[2]: https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/train.ipynb
+[3]: https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/create_map.ipynb
+
+
+Each step of the workflow is accessible through a notebook:
 | Adding data  | Training a model | Creating a map |
 | ------------ | ---------------- | -------------- |
-| [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks//new_data.ipynb)    |   [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/train.ipynb)  |   [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/create_map.ipynb) |
+| [![cb]][1]   | [![cb]][2]       | [![cb]][3]     |
 
 ## Examples
 
-| Crop mask  | [WIP] Crop type | [WIP] Buildings |
-| ------------ | ---------------- | -------------- |
-| [![Test Status](https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-test.yml/badge.svg)](https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-test.yml) [![Deploy Status](https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-deploy.yml/badge.svg)](https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-deploy.yml) | ---------------- | -------------- |
-| <img src="https://storage.googleapis.com/harvest-public-assets/openmapflow/crop-mask-example-map.png" />              | <img src="https://storage.googleapis.com/harvest-public-assets/openmapflow/crop-mask-example-map.png" />            |    <img src="https://storage.googleapis.com/harvest-public-assets/openmapflow/crop-mask-example-map.png" />         |
+[img1]: https://storage.googleapis.com/harvest-public-assets/openmapflow/crop-mask-example-map.png
+
+[ta1]: https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-test.yml
+[tb1]: https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-test.yml/badge.svg
+[da1]: https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-deploy.yml
+[db1]: https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-deploy.yml/badge.svg
+
+
+| Crop mask                     | [WIP] Crop type           | [WIP] Buildings       |
+| ------------                  | ----------------          | --------------        |
+| [![tb1]][ta1] [![db1]][da1]   | ----------------          | --------------        |
+| ![Crop mask][img1]            | ![Crop type][img1]        | ![Buildings][img1]    |
 
 
