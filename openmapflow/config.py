@@ -25,7 +25,7 @@ with (PROJECT_ROOT / "openmapflow.yaml").open() as f:
 PROJECT = CONFIG_YML["project"]
 
 # -------------- PATHS --------------------------------------------------------
-RELATIVE_PATHS = {k: f"data/{v}" for k, v in CONFIG_YML["data"]["paths"].items()}
+RELATIVE_PATHS = {k: f"data/{v}" for k, v in CONFIG_YML["data_paths"].items()}
 FULL_PATHS = {k: PROJECT_ROOT / v for k, v in RELATIVE_PATHS.items()}
 LIBRARY_DIR = Path(__file__).parent
 
