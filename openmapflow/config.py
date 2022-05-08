@@ -22,7 +22,7 @@ PROJECT_ROOT = find_project_root(["openmapflow.yaml"])
 with (PROJECT_ROOT / "openmapflow.yaml").open() as f:
     CONFIG_YML = yaml.safe_load(f)
 
-PROJECT = CONFIG_YML["project"]["id"]
+PROJECT = CONFIG_YML["project"]
 
 # -------------- PATHS --------------------------------------------------------
 RELATIVE_PATHS = {k: f"data/{v}" for k, v in CONFIG_YML["data"]["paths"].items()}
@@ -34,10 +34,10 @@ LIBRARY_DIR = Path(__file__).parent
 GCLOUD_PROJECT_ID = CONFIG_YML["gcloud"]["project_id"]
 GCLOUD_LOCATION = CONFIG_YML["gcloud"]["location"]
 
-GCLOUD_BUCKET_LABELED_TIFS = CONFIG_YML["gcloud"]["buckets"]["labeled_tifs"]
-GCLOUD_BUCKET_INFERENCE_TIFS = CONFIG_YML["gcloud"]["buckets"]["inference_tifs"]
-GCLOUD_BUCKET_PREDS = CONFIG_YML["gcloud"]["buckets"]["preds"]
-GCLOUD_BUCKET_PREDS_MERGED = CONFIG_YML["gcloud"]["buckets"]["preds_merged"]
+GCLOUD_BUCKET_LABELED_TIFS = CONFIG_YML["gcloud"]["bucket_labeled_tifs"]
+GCLOUD_BUCKET_INFERENCE_TIFS = CONFIG_YML["gcloud"]["bucket_inference_tifs"]
+GCLOUD_BUCKET_PREDS = CONFIG_YML["gcloud"]["bucket_preds"]
+GCLOUD_BUCKET_PREDS_MERGED = CONFIG_YML["gcloud"]["bucket_preds_merged"]
 
 DOCKER_TAG = f"{GCLOUD_LOCATION}-docker.pkg.dev/{GCLOUD_PROJECT_ID}/{PROJECT}/{PROJECT}"
 

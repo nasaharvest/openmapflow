@@ -1,28 +1,22 @@
 version: 0.0.1
-project: 
-  id: crop-mask-example
-  description: An example of an OpenMapFlow generated project with crop/non-crop data
-  github: nasaharvest/openmapflow
-  directory: crop-mask-example
-data:
-  dvc_remote_storage: ''
-  paths:
-    raw: raw_labels
-    processed: processed_labels
-    features: features
-    compressed_features: compressed_features.tar.gz
-    models: models
-    metrics: metrics.yaml
-    datasets: datasets.txt
-    missing: missing.txt
-    duplicates: duplicates.txt
-    unexported: unexported.txt
+project: crop-mask-example
+description: An example of an OpenMapFlow generated project with crop/non-crop data
+data_paths:
+  raw: raw_labels
+  processed: processed_labels
+  features: features
+  compressed_features: compressed_features.tar.gz
+  models: models
+  metrics: metrics.yaml
+  datasets: datasets.txt
+  missing: missing.txt
+  duplicates: duplicates.txt
+  unexported: unexported.txt
 gcloud:
   project_id: bsos-geog-harvest1
   location: us-central1
-  buckets:
-    labeled_tifs: crop-mask-tifs2
-    inference_tifs: crop-mask-example-inference-tifs
-    preds: crop-mask-example-preds
-    preds_merged: crop-mask-example-preds-merged
+  bucket_labeled_tifs: crop-mask-tifs2
+  bucket_inference_tifs: crop-mask-example-inference-tifs
+  bucket_preds: crop-mask-example-preds
+  bucket_preds_merged: crop-mask-example-preds-merged
   
