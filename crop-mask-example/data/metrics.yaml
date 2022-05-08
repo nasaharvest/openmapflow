@@ -1,6 +1,6 @@
 Togo_2019_February:
-  local_validation_original_size: 309
-  local_validation_positive_class_percentage: 0.3463
+  local_testing_original_size: 309
+  local_testing_positive_class_percentage: 0.3463
   params: https://wandb.ai/izvonkov/crop-mask-example/runs/3jp4pr8o
   test_metrics:
     accuracy: 0.7152
