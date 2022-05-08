@@ -35,6 +35,8 @@ class PyTorchDataset(Dataset):
 
         assert subset in ["training", "validation", "testing"]
 
+        df = df.copy()  # To avoid indexing errors
+
         if subset == "training" and up_to_year is not None:
             df = df[pd.to_datetime(df[START]).dt.year <= up_to_year]
 
