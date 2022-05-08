@@ -1,6 +1,3 @@
-training_data_path_keys = ["raw", "processed", "compressed_features.tar.gz"]
-
-
 def generate_project():
     """
     Generates an openmapflow.yaml and and sets up the project.
