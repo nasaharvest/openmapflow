@@ -19,6 +19,7 @@ RUN for m in $MODELS; \
     --export-path=model-store; \
     done
 
+ARG DEST_BUCKET
 ENV DEST_BUCKET ${DEST_BUCKET}
 ENV MODELS ${MODELS}
 CMD ["/usr/local/bin/start.sh", "\"${MODELS}\""]
