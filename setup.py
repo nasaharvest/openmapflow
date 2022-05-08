@@ -23,6 +23,7 @@ setup(
     ],
     packages=["openmapflow"]
     + [f"openmapflow.{f}" for f in find_packages("openmapflow")],
+    scripts=["openmapflow/scripts/openmapflow-deploy"],
     install_requires=[
         "cropharvest>=0.3.0",
         "dvc[gdrive]>=2.10.1",

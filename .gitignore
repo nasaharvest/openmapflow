@@ -3,6 +3,8 @@
 
 .vscode/
 
+build/
+dist/
 venv/
 
 **/wandb
