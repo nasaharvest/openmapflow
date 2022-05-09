@@ -5,7 +5,7 @@ config_file = "openmapflow.yaml"
 
 possible_roots = [Path.cwd(), Path.cwd().parent]
 try:
-    root = next(r for r in possible_roots if (root / config_file).exists())
+    root = next(r for r in possible_roots if (r / config_file).exists())
 except StopIteration:
     raise FileExistsError(f"{config_file} not found in {possible_roots}.")
 
