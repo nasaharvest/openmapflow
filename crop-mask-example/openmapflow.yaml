@@ -1,17 +1,6 @@
 version: 0.0.1
 project: crop-mask-example
-description: An example of an OpenMapFlow generated project with crop/non-crop data
-data_paths:
-  raw: raw_labels
-  processed: processed_labels
-  features: features
-  compressed_features: compressed_features.tar.gz
-  models: models
-  metrics: metrics.yaml
-  datasets: datasets.txt
-  missing: missing.txt
-  duplicates: duplicates.txt
-  unexported: unexported.txt
+description: An example of an OpenMapFlow project with crop/non-crop data
 gcloud:
   project_id: bsos-geog-harvest1
   location: us-central1
@@ -19,4 +8,3 @@ gcloud:
   bucket_inference_tifs: crop-mask-example-inference-tifs
   bucket_preds: crop-mask-example-preds
   bucket_preds_merged: crop-mask-example-preds-merged
-  

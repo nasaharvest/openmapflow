@@ -1,39 +1,40 @@
 import yaml
 from pathlib import Path
-from typing import List
 
+config_file = "openmapflow.yaml"
 
-def find_project_root(files_to_check: List[str]) -> Path:
-    """
-    Find the project root directory by checking for existence of certain files
-    """
-    possible_roots = [Path.cwd(), Path.cwd().parent]
+possible_roots = [Path.cwd(), Path.cwd().parent]
+try:
+    root = next(r for r in possible_roots if (root / config_file).exists())
+except StopIteration:
+    raise FileExistsError(f"{config_file} not found in {possible_roots}.")
 
-    for root in possible_roots:
-        if all([(root / c).exists() for c in files_to_check]):
-            return root
-
-    raise FileExistsError(f"{files_to_check} not found in {possible_roots}.")
-
-
-# -------------- Load configuration -------------------------------------------
-PROJECT_ROOT = find_project_root(["openmapflow.yaml"])
-
-with (PROJECT_ROOT / "openmapflow.yaml").open() as f:
+with (root / config_file).open() as f:
     CONFIG_YML = yaml.safe_load(f)
 
 PROJECT = CONFIG_YML["project"]
 
-# -------------- PATHS --------------------------------------------------------
-RELATIVE_PATHS = {k: f"data/{v}" for k, v in CONFIG_YML["data_paths"].items()}
-FULL_PATHS = {k: PROJECT_ROOT / v for k, v in RELATIVE_PATHS.items()}
+default_data_names = {
+    "raw": "raw_labels",
+    "processed": "processed_labels",
+    "features": "features",
+    "compressed_features": "compressed_features.tar.gz",
+    "models": "models",
+    "metrics": "metrics.yaml",
+    "datasets": "datasets.txt",
+    "missing": "missing.txt",
+    "duplicates": "duplicates.txt",
+    "unexported": "unexported.txt",
+}
+names_from_config = CONFIG_YML.get("data_paths", {})
+data_names = {k: names_from_config.get(k, v) for k, v in default_data_names.items()}
+RELATIVE_PATHS = {k: f"data/{v}" for k, v in data_names.items()}
+FULL_PATHS = {k: root / v for k, v in RELATIVE_PATHS.items()}
 LIBRARY_DIR = Path(__file__).parent
-
 
 # -------------- GCLOUD -------------------------------------------------------
 GCLOUD_PROJECT_ID = CONFIG_YML["gcloud"]["project_id"]
 GCLOUD_LOCATION = CONFIG_YML["gcloud"]["location"]
-
 GCLOUD_BUCKET_LABELED_TIFS = CONFIG_YML["gcloud"]["bucket_labeled_tifs"]
 GCLOUD_BUCKET_INFERENCE_TIFS = CONFIG_YML["gcloud"]["bucket_inference_tifs"]
 GCLOUD_BUCKET_PREDS = CONFIG_YML["gcloud"]["bucket_preds"]
