@@ -27,8 +27,7 @@ setup(
     install_requires=[
         "cropharvest>=0.3.0",
         "dvc[gdrive]>=2.10.1",
-        "earthengine-api",
-        "pyyaml==5.4.1",
+        "pyyaml>=6.0",
     ],
     python_requires=">=3.6",
     include_package_data=True,
