@@ -17,6 +17,7 @@ with (root / config_file).open() as f:
 
 PROJECT = CONFIG_YML["project"]
 
+# -------------- Defaults ---------------------------------------------------------
 default_data_names = {
     "raw": "raw_labels",
     "processed": "processed_labels",
@@ -29,6 +30,14 @@ default_data_names = {
     "duplicates": "duplicates.txt",
     "unexported": "unexported.txt",
 }
+
+default_bucket_names = {
+    "bucket_labeled_tifs": f"{PROJECT}-labeled-tifs",
+    "bucket_inference_tifs": f"{PROJECT}-inference-tifs",
+    "bucket_preds": f"{PROJECT}-preds",
+    "bucket_preds_merged": f"{PROJECT}-preds-merged"
+}
+
 names_from_config = CONFIG_YML.get("data_paths", {})
 data_names = {k: names_from_config.get(k, v) for k, v in default_data_names.items()}
 RELATIVE_PATHS = {k: f"data/{v}" for k, v in data_names.items()}
@@ -36,12 +45,15 @@ FULL_PATHS = {k: root / v for k, v in RELATIVE_PATHS.items()}
 LIBRARY_DIR = Path(__file__).parent
 
 # -------------- GCLOUD -------------------------------------------------------
-GCLOUD_PROJECT_ID = CONFIG_YML["gcloud"]["project_id"]
-GCLOUD_LOCATION = CONFIG_YML["gcloud"]["location"]
-GCLOUD_BUCKET_LABELED_TIFS = CONFIG_YML["gcloud"]["bucket_labeled_tifs"]
-GCLOUD_BUCKET_INFERENCE_TIFS = CONFIG_YML["gcloud"]["bucket_inference_tifs"]
-GCLOUD_BUCKET_PREDS = CONFIG_YML["gcloud"]["bucket_preds"]
-GCLOUD_BUCKET_PREDS_MERGED = CONFIG_YML["gcloud"]["bucket_preds_merged"]
+gcloud_config = CONFIG_YML.get("gcloud", {})
+bucket_names = {k: gcloud_config.get(k, v) for k, v in default_bucket_names.items()}
+GCLOUD_PROJECT_ID = gcloud_config.get("project_id", "")
+GCLOUD_LOCATION = gcloud_config.get("location", "")
+GCLOUD_BUCKET_LABELED_TIFS = bucket_names["bucket_labeled_tifs"]
+GCLOUD_BUCKET_INFERENCE_TIFS = bucket_names["bucket_inference_tifs"]
+GCLOUD_BUCKET_PREDS = bucket_names["bucket_preds"]
+GCLOUD_BUCKET_PREDS_MERGED = bucket_names["bucket_preds_merged"]
+)
 
 DOCKER_TAG = f"{GCLOUD_LOCATION}-docker.pkg.dev/{GCLOUD_PROJECT_ID}/{PROJECT}/{PROJECT}"
 
