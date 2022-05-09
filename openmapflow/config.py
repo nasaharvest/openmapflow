@@ -7,7 +7,10 @@ possible_roots = [Path.cwd(), Path.cwd().parent]
 try:
     root = next(r for r in possible_roots if (r / config_file).exists())
 except StopIteration:
-    raise FileExistsError(f"{config_file} not found in {possible_roots}.")
+    raise FileExistsError(
+        f"Could not find {config_file} in {[str(p) for p in possible_roots]} "
+        + f"please cd to a directory with {config_file} or create a new one."
+    )
 
 with (root / config_file).open() as f:
     CONFIG_YML = yaml.safe_load(f)
