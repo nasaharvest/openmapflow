@@ -8,7 +8,7 @@ Rapid map creation with machine learning and earth observation data.
 ### How it works
 ```bash
 pip install openmapflow
-openmapflow generate
+openmapflow-generate
 ```
 This will generate all the following workflow: 
 Adding data ➞ Training a model ➞ Creating a map
