@@ -35,6 +35,7 @@ from openmapflow.all_features import AllFeatures  # noqa: E402
 from datasets import datasets  # noqa: E402
 
 
+@memoized
 def load_feature(p):
     with Path(p).open("rb") as f:
         return pickle.load(f)
