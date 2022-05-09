@@ -35,7 +35,7 @@ default_bucket_names = {
     "bucket_labeled_tifs": f"{PROJECT}-labeled-tifs",
     "bucket_inference_tifs": f"{PROJECT}-inference-tifs",
     "bucket_preds": f"{PROJECT}-preds",
-    "bucket_preds_merged": f"{PROJECT}-preds-merged"
+    "bucket_preds_merged": f"{PROJECT}-preds-merged",
 }
 
 names_from_config = CONFIG_YML.get("data_paths", {})
@@ -53,7 +53,6 @@ GCLOUD_BUCKET_LABELED_TIFS = bucket_names["bucket_labeled_tifs"]
 GCLOUD_BUCKET_INFERENCE_TIFS = bucket_names["bucket_inference_tifs"]
 GCLOUD_BUCKET_PREDS = bucket_names["bucket_preds"]
 GCLOUD_BUCKET_PREDS_MERGED = bucket_names["bucket_preds_merged"]
-)
 
 DOCKER_TAG = f"{GCLOUD_LOCATION}-docker.pkg.dev/{GCLOUD_PROJECT_ID}/{PROJECT}/{PROJECT}"
 
