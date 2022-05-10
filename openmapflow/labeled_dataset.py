@@ -409,7 +409,7 @@ class LabeledDataset:
                 EarthEngineExporter(
                     check_ee=True,
                     check_gcp=True,
-                    dest_bucket=GCLOUD_BUCKET_LABELED_TIFS,
+                    dest_bucket=BucketNames.LABELED_TIFS,
                 ).export_for_labels(labels=labels_with_no_tifs)
 
         # -------------------------------------------------
