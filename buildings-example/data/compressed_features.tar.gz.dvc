@@ -1,0 +1,4 @@
+outs:
+- md5: 50992342f38808a7b16a959254571409
+  size: 149
+  path: compressed_features.tar.gz

@@ -1,0 +1,7 @@
+version: 0.0.1
+project: buildings-example
+description: 
+gcloud:
+    project_id: 
+    location: us-central-1
+    bucket_labeled_tifs: crop-mask-tifs2
