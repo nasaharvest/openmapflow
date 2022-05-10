@@ -3,7 +3,8 @@ File for storing references to datasets.
 """
 from typing import List
 from openmapflow.labeled_dataset import LabeledDataset
-from openmapflow.processor import Processor
+
+# from openmapflow.processor import Processor
 
 datasets: List[LabeledDataset] = [
     # --------------------------------------------------------------------------
