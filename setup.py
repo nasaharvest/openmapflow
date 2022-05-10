@@ -28,10 +28,11 @@ setup(
             "Dockerfile",
             "notebooks/*.ipynb",
             "trigger_inference_function/*",
-            "github_workflows/*",
+            "templates/*",
         ]
     },
     scripts=[
+        "openmapflow/scripts/openmapflow-create-features",
         "openmapflow/scripts/openmapflow-deploy",
         "openmapflow/scripts/openmapflow-dir",
         "openmapflow/scripts/openmapflow-datapath",
