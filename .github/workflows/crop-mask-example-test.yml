@@ -20,7 +20,7 @@ jobs:
       with:
         python-version: 3.8
     - name: Install dependencies
-      run: python ../setup.py install
+      run: python setup.py install
     - name: dvc pull data
       env:
         # https://dvc.org/doc/user-guide/setup-google-drive-remote#authorization
