@@ -11,7 +11,7 @@ def try_txt_read(file_path: Path) -> List[str]:
         return []
 
 
-def colab_gee_gcloud_login(project_id: str = ""):
+def colab_gee_gcloud_login(project_id: str):
     import google
     import ee
 

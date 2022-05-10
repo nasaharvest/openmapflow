@@ -2,6 +2,6 @@ version: 0.0.1
 project: buildings-example
 description: 
 gcloud:
-    project_id: 
+    project_id: bsos-geog-harvest1
     location: us-central-1
     bucket_labeled_tifs: crop-mask-tifs2
