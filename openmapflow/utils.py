@@ -3,8 +3,6 @@ from typing import List
 
 import pandas as pd
 
-from .config import GCLOUD_PROJECT_ID
-
 
 def try_txt_read(file_path: Path) -> List[str]:
     try:
@@ -13,7 +11,7 @@ def try_txt_read(file_path: Path) -> List[str]:
         return []
 
 
-def colab_gee_gcloud_login():
+def colab_gee_gcloud_login(project_id: str = ""):
     import google
     import ee
 
@@ -25,4 +23,4 @@ def colab_gee_gcloud_login():
         "https://www.googleapis.com/auth/earthengine",
     ]
     CREDENTIALS, _ = google.auth.default(default_scopes=SCOPES)
-    ee.Initialize(CREDENTIALS, project=GCLOUD_PROJECT_ID)
+    ee.Initialize(CREDENTIALS, project=project_id)

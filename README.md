@@ -24,6 +24,11 @@ Each step of the workflow is accessible through a notebook:
 | ------------ | ---------------- | -------------- |
 | [![cb]][1]   | [![cb]][2]       | [![cb]][3]     |
 
+Notebooks can also be run locally by pulling them from the package 
+```
+cp -r $(openmapflow-dir)/notebooks .
+```
+
 ## Examples
 
 [img1]: https://storage.googleapis.com/harvest-public-assets/openmapflow/crop-mask-example-map.png
@@ -33,10 +38,15 @@ Each step of the workflow is accessible through a notebook:
 [da1]: https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-deploy.yml
 [db1]: https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-deploy.yml/badge.svg
 
+[ta2]: https://github.com/nasaharvest/openmapflow/actions/workflows/buildings-example-test.yml
+[tb2]: https://github.com/nasaharvest/openmapflow/actions/workflows/buildings-example-test.yml/badge.svg
+[da2]: https://github.com/nasaharvest/openmapflow/actions/workflows/buildings-example-deploy.yml
+[db2]: https://github.com/nasaharvest/openmapflow/actions/workflows/buildings-example-deploy.yml/badge.svg
 
-| Crop mask                     | [WIP] Crop type           | [WIP] Buildings       |
-| ------------                  | ----------------          | --------------        |
-| [![tb1]][ta1] [![db1]][da1]   | ----------------          | --------------        |
-| ![Crop mask][img1]            | ![Crop type][img1]        | ![Buildings][img1]    |
+
+| Crop mask                     | [WIP] Buildings               | [WIP] Crop Type       |
+| ------------                  | ----------------              | --------------        |
+| [![tb1]][ta1] [![db1]][da1]   | [![tb1]][ta1] [![db1]][da1]   | --------------        |
+| ![Crop mask][img1]            | ![Buildings][img1]            | ![Crop Type][img1]    |
 
 

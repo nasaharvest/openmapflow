@@ -26,6 +26,8 @@ class AllFeatures:
         """
         Some exported tif data may have nan values
         """
+        if len(self.df) == 0:
+            return "No features found"
         empties = self.df[self.df["labelled_array"].isnull()]
         num_empty = len(empties)
         if num_empty > 0:
@@ -38,6 +40,8 @@ class AllFeatures:
         Duplicates can occur when not all tifs have been downloaded
         and different labels are matched to same tif
         """
+        if len(self.df) == 0:
+            return "No features found"
         cols_to_check = ["instance_lon", "instance_lat", "source_file"]
         duplicates = self.df[self.df.duplicated(subset=cols_to_check)]
         num_dupes = len(duplicates)
