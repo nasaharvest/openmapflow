@@ -1,15 +1,15 @@
 import pandas as pd
 import pickle
 
-from .config import FULL_PATHS
+from .config import PROJECT_ROOT, DataPaths
 from .utils import try_txt_read
 
 
 class AllFeatures:
     def __init__(self) -> None:
-        duplicates_data = try_txt_read(FULL_PATHS["duplicates"])
+        duplicates_data = try_txt_read(PROJECT_ROOT / DataPaths.DUPLICATES)
         features = []
-        files = list(FULL_PATHS["features"].glob("*.pkl"))
+        files = list((PROJECT_ROOT / DataPaths.FEATURES).glob("*.pkl"))
         print("------------------------------")
         print("Loading all features...")
         non_duplicated_files = []

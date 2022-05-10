@@ -38,13 +38,13 @@ from .constants import (
     DATASET,
     TIF_PATHS,
 )
-from .config import FULL_PATHS, RELATIVE_PATHS, GCLOUD_BUCKET_LABELED_TIFS
+from .config import PROJECT_ROOT, BucketNames, DataPaths as dp
 
 temp_dir = tempfile.gettempdir()
 
-missing_data = try_txt_read(FULL_PATHS["missing"])
-unexported = try_txt_read(FULL_PATHS["unexported"])
-duplicates_data = try_txt_read(FULL_PATHS["duplicates"])
+missing_data = try_txt_read(PROJECT_ROOT / dp.MISSING)
+unexported = try_txt_read(PROJECT_ROOT / dp.UNEXPORTED)
+duplicates_data = try_txt_read(PROJECT_ROOT / dp.DUPLICATES)
 
 
 def find_nearest(array, value: float) -> Tuple[float, int]:
@@ -87,7 +87,7 @@ def bbox_from_path(p: Path):
 
 @memoized
 def generate_bbox_from_paths() -> Dict[Path, BBox]:
-    cloud_tif_paths = [Path(p) for p in get_cloud_tif_list(GCLOUD_BUCKET_LABELED_TIFS)]
+    cloud_tif_paths = [Path(p) for p in get_cloud_tif_list(BucketNames.LABELED_TIFS)]
     return {
         p: bbox_from_path(p)
         for p in tqdm(cloud_tif_paths, desc="Generating BBoxes from paths")
@@ -191,7 +191,7 @@ def find_matching_point(
 
 
 def create_pickled_labeled_dataset(labels: pd.DataFrame):
-    tif_bucket = storage.Client().bucket(GCLOUD_BUCKET_LABELED_TIFS)
+    tif_bucket = storage.Client().bucket(BucketNames.LABELED_TIFS)
     for label in tqdm(
         labels.to_dict(orient="records"), desc="Creating pickled instances"
     ):
@@ -204,7 +204,7 @@ def create_pickled_labeled_dataset(labels: pd.DataFrame):
         )
 
         if labelled_array is None:
-            missing_data_file = FULL_PATHS["missing"]
+            missing_data_file = PROJECT_ROOT / dp.MISSING
             if not missing_data_file.exists():
                 missing_data_file.touch()
 
@@ -238,8 +238,8 @@ class LabeledDataset:
     processors: Tuple[Processor, ...] = ()
 
     def __post_init__(self):
-        self.raw_dir = FULL_PATHS["raw"] / self.dataset
-        self.labels_path = FULL_PATHS["processed"] / (self.dataset + ".csv")
+        self.raw_dir = PROJECT_ROOT / dp.RAW_LABELS / self.dataset
+        self.labels_path = PROJECT_ROOT / dp.PROCESSED_LABELS / (self.dataset + ".csv")
         self._cached_labels_csv = None
 
     def summary(self, df=None):
@@ -341,7 +341,7 @@ class LabeledDataset:
         labels = labels[
             ~unexported_labels & ~missing_data_labels & ~duplicate_labels
         ].copy()
-        labels["feature_dir"] = str(RELATIVE_PATHS["features"])
+        labels["feature_dir"] = str(dp.FEATURES)
         labels[FEATURE_PATH] = (
             labels["feature_dir"] + "/" + labels[FEATURE_FILENAME] + ".pkl"
         )
@@ -436,10 +436,10 @@ def create_all_features(datasets: List[LabeledDataset]):
     print(duplicates_text)
     report += "\n\nAll data:\n" + empty_text + "\n" + duplicates_text
 
-    with FULL_PATHS["datasets"].open("w") as f:
+    with (PROJECT_ROOT / dp.DATASETS).open("w") as f:
         f.write(report)
 
     # Compress features for faster CI/CD
     print("Compressing features...")
-    with tarfile.open(FULL_PATHS["compressed_features"], "w:gz") as tar:
-        tar.add(FULL_PATHS["features"], arcname="features")
+    with tarfile.open(PROJECT_ROOT / dp.COMPRESSED_FEATURES, "w:gz") as tar:
+        tar.add(PROJECT_ROOT / dp.FEATURES, arcname=Path(dp.FEATURES).name)
