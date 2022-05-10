@@ -1,79 +1,73 @@
 import yaml
 from pathlib import Path
 
-config_file = "openmapflow.yaml"
+from .constants import CONFIG_FILE
 
 possible_roots = [Path.cwd(), Path.cwd().parent]
 try:
-    root = next(r for r in possible_roots if (r / config_file).exists())
+    PROJECT_ROOT = next(r for r in possible_roots if (r / CONFIG_FILE).exists())
 except StopIteration:
     raise FileExistsError(
-        f"Could not find {config_file} in {[str(p) for p in possible_roots]} "
-        + f"please cd to a directory with {config_file} or create a new one."
+        f"Could not find {CONFIG_FILE} in {[str(p) for p in possible_roots]} "
+        + f"please cd to a directory with {CONFIG_FILE} or create a new one."
     )
 
-with (root / config_file).open() as f:
+with (PROJECT_ROOT / CONFIG_FILE).open() as f:
     CONFIG_YML = yaml.safe_load(f)
 
+_data_paths = CONFIG_YML.get("data_paths", {})
+_gcloud = CONFIG_YML.get("gcloud", {})
+
 PROJECT = CONFIG_YML["project"]
-
-# -------------- Defaults ---------------------------------------------------------
-default_data_names = {
-    "raw": "raw_labels",
-    "processed": "processed_labels",
-    "features": "features",
-    "compressed_features": "compressed_features.tar.gz",
-    "models": "models",
-    "metrics": "metrics.yaml",
-    "datasets": "datasets.txt",
-    "missing": "missing.txt",
-    "duplicates": "duplicates.txt",
-    "unexported": "unexported.txt",
-}
-
-default_bucket_names = {
-    "bucket_labeled_tifs": f"{PROJECT}-labeled-tifs",
-    "bucket_inference_tifs": f"{PROJECT}-inference-tifs",
-    "bucket_preds": f"{PROJECT}-preds",
-    "bucket_preds_merged": f"{PROJECT}-preds-merged",
-}
-
-names_from_config = CONFIG_YML.get("data_paths", {})
-data_names = {k: names_from_config.get(k, v) for k, v in default_data_names.items()}
-RELATIVE_PATHS = {k: f"data/{v}" for k, v in data_names.items()}
-FULL_PATHS = {k: root / v for k, v in RELATIVE_PATHS.items()}
 LIBRARY_DIR = Path(__file__).parent
-
-# -------------- GCLOUD -------------------------------------------------------
-gcloud_config = CONFIG_YML.get("gcloud", {})
-bucket_names = {k: gcloud_config.get(k, v) for k, v in default_bucket_names.items()}
-GCLOUD_PROJECT_ID = gcloud_config.get("project_id", "")
-GCLOUD_LOCATION = gcloud_config.get("location", "")
-GCLOUD_BUCKET_LABELED_TIFS = bucket_names["bucket_labeled_tifs"]
-GCLOUD_BUCKET_INFERENCE_TIFS = bucket_names["bucket_inference_tifs"]
-GCLOUD_BUCKET_PREDS = bucket_names["bucket_preds"]
-GCLOUD_BUCKET_PREDS_MERGED = bucket_names["bucket_preds_merged"]
-
+GCLOUD_PROJECT_ID = _gcloud.get("project_id", "")
+GCLOUD_LOCATION = _gcloud.get("location", "")
 DOCKER_TAG = f"{GCLOUD_LOCATION}-docker.pkg.dev/{GCLOUD_PROJECT_ID}/{PROJECT}/{PROJECT}"
+
+
+def _gen_path(k, default):
+    return f"data/{_data_paths.get(k, default)}"
+
+
+class DataPaths:
+    RAW_LABELS = _gen_path("raw_labels", "raw_labels")
+    PROCESSED_LABELS = _gen_path("processed_labels", "processed_labels")
+    FEATURES = _gen_path("features", "features")
+    COMPRESSED_FEATURES = _gen_path("compressed_features", "compressed_features.tar.gz")
+    MODELS = _gen_path("models", "models")
+    METRICS = _gen_path("metrics", "metrics.yaml")
+    DATASETS = _gen_path("datasets", "datasets.txt")
+    MISSING = _gen_path("missing", "missing.txt")
+    DUPLICATES = _gen_path("duplicates", "duplicates.txt")
+    UNEXPORTED = _gen_path("unexported", "unexported.txt")
+
+
+class BucketNames:
+    LABELED_TIFS = _gcloud.get("bucket_labeled_tifs", f"{PROJECT}-labeled-tifs")
+    INFERENCE_TIFS = _gcloud.get("bucket_inference_tifs", f"{PROJECT}-inference-tifs")
+    PREDS = _gcloud.get("bucket_preds", f"{PROJECT}-preds")
+    PREDS_MERGED = _gcloud.get("bucket_preds_merged", f"{PROJECT}-preds-merged")
 
 
 # -------------- Helper functions ---------------------------------------------
 def get_model_names_as_str() -> str:
-    return " ".join([p.stem for p in Path(FULL_PATHS["models"]).glob("*.pt")])
+    return " ".join(
+        [p.stem for p in Path(PROJECT_ROOT / DataPaths.MODELS).glob("*.pt")]
+    )
 
 
 def deploy_env_variables() -> str:
     prefix = "OPENMAPFLOW"
     deploy_env_dict = {
         "PROJECT": PROJECT,
-        "MODELS_DIR": RELATIVE_PATHS["models"],
+        "MODELS_DIR": DataPaths.MODELS,
         "LIBRARY_DIR": LIBRARY_DIR,
         "GCLOUD_PROJECT_ID": GCLOUD_PROJECT_ID,
         "GCLOUD_LOCATION": GCLOUD_LOCATION,
-        "GCLOUD_BUCKET_LABELED_TIFS": GCLOUD_BUCKET_LABELED_TIFS,
-        "GCLOUD_BUCKET_INFERENCE_TIFS": GCLOUD_BUCKET_INFERENCE_TIFS,
-        "GCLOUD_BUCKET_PREDS": GCLOUD_BUCKET_PREDS,
-        "GCLOUD_BUCKET_PREDS_MERGED": GCLOUD_BUCKET_PREDS_MERGED,
+        "GCLOUD_BUCKET_LABELED_TIFS": BucketNames.LABELED_TIFS,
+        "GCLOUD_BUCKET_INFERENCE_TIFS": BucketNames.INFERENCE_TIFS,
+        "GCLOUD_BUCKET_PREDS": BucketNames.PREDS,
+        "GCLOUD_BUCKET_PREDS_MERGED": BucketNames.PREDS_MERGED,
         "DOCKER_TAG": DOCKER_TAG,
     }
     env_variables = " ".join([f"{prefix}_{k}={v}" for k, v in deploy_env_dict.items()])
