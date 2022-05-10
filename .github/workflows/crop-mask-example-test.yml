@@ -1,13 +1,13 @@
-name: Test
+name: Crop-mask-example Test
 
 on:
   push:
     branches: [ main ]
     tags:
       - '*'
-    paths:
-    - 'crop-mask-example/data/**'
-    - 'crop-mask-example/datasets.py'
+    # paths:
+    # - 'crop-mask-example/data/**'
+    # - 'crop-mask-example/datasets.py'
   pull_request:
     branches: [ main ]
 

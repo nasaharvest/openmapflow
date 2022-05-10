@@ -1,8 +1,10 @@
-name: Deploy
+name: Crop-mask-example Deploy
 
 on:
   push:
     branches: [ main ]
+  paths:
+    - 'crop-mask-example/data/models.dvc'
 
 jobs:
   deploy: 
