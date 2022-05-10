@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import List
 
+import ee
 import pandas as pd
 
 
@@ -11,10 +12,7 @@ def try_txt_read(file_path: Path) -> List[str]:
         return []
 
 
-def colab_gee_gcloud_login(project_id: str):
-    import google
-    import ee
-
+def colab_gee_gcloud_login(project_id: str, google):
     print("Logging into Google Cloud")
     google.colab.auth.authenticate_user()
     print("Logging into Earth Engine")

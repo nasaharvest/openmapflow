@@ -92,20 +92,20 @@ def create_github_actions(LIBRARY_DIR, PROJECT_ROOT, PROJECT, dp, force):
         )
 
 
-dvc_instructions = f"""#########################################################################################
-DVC Setup Instructions
-#########################################################################################
+long_line = "-------------------------------------------------------------------------"
+
+dvc_instructions = f"""{long_line}\nDVC Setup Instructions\n{long_line}
 dvc (https://dvc.org/) is used to manage data. To setup run:
 dvc init # Initializes dvc (use --subdir if in subdirectory)
 dvc add <DVC_FILES>
-dvc remote add -d gdrive gdrive://<last part of gdrive folder url> # https://dvc.org/doc/user-guide/setup-google-drive-remote
+# https://dvc.org/doc/user-guide/setup-google-drive-remote
+dvc remote add -d gdrive gdrive://<last part of gdrive folder url>
 dvc push # Push files to remote storage
 """
 
-nb_home = "https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks"
-ready_to_go_message = f"""#########################################################################################
-Interfacing with OpenMapFlow
-#########################################################################################
+colab_url = "https://colab.research.google.com"
+nb_home = f"{colab_url}/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks"
+using_openampflow = f"""{long_line}\nUsing OpenMapFlow\n{long_line}
 After dvc is setup, push your changes to Github and you'll be able to run Colab notebooks:
 1) Adding new data\n{nb_home}/new_data.ipynb
 2) Training a model\n{nb_home}/train.ipynb
@@ -174,4 +174,4 @@ if __name__ == "__main__":
     print(dvc_instructions.replace("<DVC_FILES>", " ".join(dvc_files)))
 
     print("7/7 Ready to go!")
-    print(ready_to_go_message)
+    print(using_openampflow)
