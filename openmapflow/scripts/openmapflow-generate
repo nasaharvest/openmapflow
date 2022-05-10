@@ -1,1 +1,1 @@
-python3 openmapflow/generate.py $@
+python3 $(openmapflow-dir)/generate.py $@
