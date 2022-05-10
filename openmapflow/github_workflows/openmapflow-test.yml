@@ -1,0 +1,36 @@
+name: <PROJECT> test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  paths: <PATHS>
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clone repo
+      uses: actions/checkout@v2
+    - name: Set up python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install dependencies
+      run: python setup.py install
+    - name: dvc pull data
+      env:
+        # https://dvc.org/doc/user-guide/setup-google-drive-remote#authorization
+        GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+      run: |
+        <CD>
+        dvc pull $(openmapflow-datapath PROCESSED_LABELS) -f
+        dvc pull $(openmapflow-datapath COMPRESSED_FEATURES) -f
+        tar -xvzf $(openmapflow-datapath COMPRESSED_FEATURES) -C data/
+
+    - name: Integration test - Data integrity
+      run: |
+        <CD>
+        cp $(openmapflow-dir)/test_datasets.py .
+        python -m unittest test_datasets.py
