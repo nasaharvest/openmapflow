@@ -38,5 +38,5 @@ jobs:
     - name: Integration test - Data integrity
       run: |
         cd crop-mask-example
-        cp $(openmapflow-dir)/template/test_datasets.py .
+        cp $(openmapflow-dir)/test_datasets.py .
         python -m unittest test_datasets.py
