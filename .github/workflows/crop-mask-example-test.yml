@@ -10,7 +10,6 @@ jobs:
   test:
     name: test
     runs-on: ubuntu-latest
-    defaults:
     steps:
     - name: Clone repo
       uses: actions/checkout@v2
