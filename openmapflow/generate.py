@@ -92,15 +92,20 @@ def create_github_actions(LIBRARY_DIR, PROJECT_ROOT, PROJECT, dp, force):
         )
 
 
-long_line = "-------------------------------------------------------------------------"
+long_line = "########################################################################"
 
 dvc_instructions = f"""{long_line}\nDVC Setup Instructions\n{long_line}
 dvc (https://dvc.org/) is used to manage data. To setup run:
-dvc init # Initializes dvc (use --subdir if in subdirectory)
-dvc add <DVC_FILES>
-# https://dvc.org/doc/user-guide/setup-google-drive-remote
-dvc remote add -d gdrive gdrive://<last part of gdrive folder url>
-dvc push # Push files to remote storage
+    # Initializes dvc (use --subdir if in subdirectory)
+    dvc init 
+    
+    dvc add <DVC_FILES>
+    
+    # https://dvc.org/doc/user-guide/setup-google-drive-remote
+    dvc remote add -d gdrive gdrive://<last part of gdrive folder url>
+    
+    # Push files to remote storage
+    dvc push 
 """
 
 colab_url = "https://colab.research.google.com"
