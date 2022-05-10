@@ -3,12 +3,13 @@ import shutil
 import tarfile
 
 from pathlib import Path
-from openmapflow.constants import CONFIG_FILE
+from openmapflow.constants import CONFIG_FILE, LIBRARY_DIR
 
 
 def allow_write(p, force=False):
     if force or not Path(p).exists():
         return True
+    p = Path(*Path(p).parts[-4:])
     overwrite = input(f"{str(p)} already exists. Overwrite? (y/[n]): ")
     return overwrite.lower() == "y"
 
@@ -91,37 +92,29 @@ def create_github_actions(LIBRARY_DIR, PROJECT_ROOT, PROJECT, dp, force):
         )
 
 
-def dvc_instructions(dp):
-    dvc_files = " ".join(
-        [
-            dp.RAW_LABELS,
-            dp.PROCESSED_LABELS,
-            dp.FEATURES,
-            dp.COMPRESSED_FEATURES,
-            dp.MODELS,
-        ]
-    )
-    print(
-        f"""
-    #########################################################################################
-    DVC Setup Instructions
-    #########################################################################################
-    dvc (https://dvc.org/) is used to manage data. To setup run:
+dvc_instructions = f"""#########################################################################################
+DVC Setup Instructions
+#########################################################################################
+dvc (https://dvc.org/) is used to manage data. To setup run:
+dvc init # Initializes dvc (use --subdir if in subdirectory)
+dvc add <DVC_FILES>
+dvc remote add -d gdrive gdrive://<last part of gdrive folder url> # https://dvc.org/doc/user-guide/setup-google-drive-remote
+dvc push # Push files to remote storage
+"""
 
-    # Initializes dvc (use --subdir if in subdirectory)
-    dvc init
+nb_home = "https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks"
+ready_to_go_message = f"""#########################################################################################
+Interfacing with OpenMapFlow
+#########################################################################################
+After dvc is setup, push your changes to Github and you'll be able to run Colab notebooks:
+1) Adding new data\n{nb_home}/new_data.ipynb
+2) Training a model\n{nb_home}/train.ipynb
+3) Creating a map\n{nb_home}/create_map.ipynb
 
-    # Tells dvc to track directories
-    dvc add {dvc_files}
-
-    # Connect remmote (we suggest gdrive): https://dvc.org/doc/user-guide/setup-google-drive-remote
-    dvc remote add -d gdrive gdrive://<last part of google drive folder url>
-
-    # Push files to remote storage
-    dvc push
-    """
-    )
-
+Notebooks can also be run locally:
+cp -r $(openmapflow-dir)/notebooks .
+jupyter notebook
+"""
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate OpenMapFlow project.")
@@ -135,7 +128,7 @@ if __name__ == "__main__":
         "--gcloud_project_id",
         type=str,
         help="Google Cloud Project ID",
-        default="",
+        default="~",
     )
     parser.add_argument(
         "--gcloud_location",
@@ -152,28 +145,33 @@ if __name__ == "__main__":
     parser.add_argument("--force", action="store_true", help="Force overwrite")
     args = parser.parse_args()
 
-    print("1/6 Parsing arguments")
+    print("1/7 Parsing arguments")
     openmapflow_str = openmapflow_config_from_args(args)
 
-    print(f"2/6 Writing {CONFIG_FILE}")
+    print(f"2/7 Writing {CONFIG_FILE}")
     openmapflow_config_write(openmapflow_str, force=args.force)
 
     # Can only import when openmapflow.yaml is available
-    from openmapflow.config import (
-        LIBRARY_DIR,
-        PROJECT_ROOT,
-        PROJECT,
-        DataPaths,
-    )  # noqa E402
+    from openmapflow.config import PROJECT_ROOT, PROJECT, DataPaths as dp  # noqa E402
 
-    print("3/6 Copying datasets.py file")
+    print("3/7 Copying datasets.py file")
     copy_datasets_py_file(LIBRARY_DIR, PROJECT_ROOT, args.force)
 
-    print("4/6 Creating data directories")
-    create_data_dirs(dp=DataPaths, force=args.force)
+    print("4/7 Creating data directories")
+    create_data_dirs(dp=dp, force=args.force)
 
-    print("5/6 Creating Github Actions")
-    create_github_actions(LIBRARY_DIR, PROJECT_ROOT, PROJECT, DataPaths, args.force)
+    print("5/7 Creating Github Actions")
+    create_github_actions(LIBRARY_DIR, PROJECT_ROOT, PROJECT, dp, args.force)
 
-    print("6/6 Printing dvc instructions")
-    dvc_instructions(dp=DataPaths)
+    print("6/7 Printing dvc instructions")
+    dvc_files = [
+        dp.RAW_LABELS,
+        dp.PROCESSED_LABELS,
+        dp.FEATURES,
+        dp.COMPRESSED_FEATURES,
+        dp.MODELS,
+    ]
+    print(dvc_instructions.replace("<DVC_FILES>", " ".join(dvc_files)))
+
+    print("7/7 Ready to go!")
+    print(ready_to_go_message)
