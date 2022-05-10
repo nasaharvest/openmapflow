@@ -40,6 +40,7 @@ setup(
         "cropharvest>=0.3.0",
         "dvc[gdrive]>=2.10.1",
         "earthengine-api",
+        "pandas==1.3.5",
         "pyyaml>=6.0",
     ],
     python_requires=">=3.6",
