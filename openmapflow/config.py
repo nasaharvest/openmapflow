@@ -1,54 +1,65 @@
+import collections.abc
 import yaml
 from pathlib import Path
 
 from .constants import CONFIG_FILE, LIBRARY_DIR
 
-possible_roots = [Path.cwd(), Path.cwd().parent]
-try:
-    PROJECT_ROOT = next(r for r in possible_roots if (r / CONFIG_FILE).exists())
-except StopIteration:
-    raise FileExistsError(
-        f"Could not find {CONFIG_FILE} in {[str(p) for p in possible_roots]} "
-        + f"please cd to a directory with {CONFIG_FILE} or create a new one."
-    )
 
-with (PROJECT_ROOT / CONFIG_FILE).open() as f:
-    CONFIG_YML = yaml.safe_load(f)
+def update(d, u):
+    for k, v in u.items():
+        if isinstance(v, collections.abc.Mapping):
+            d[k] = update(d.get(k, {}), v)
+        else:
+            d[k] = v
+    return d
 
-_data_paths = CONFIG_YML.get("data_paths", {})
-_gcloud = CONFIG_YML.get("gcloud", {})
 
-PROJECT = CONFIG_YML["project"]
-GCLOUD_PROJECT_ID = _gcloud.get("project_id", "")
-GCLOUD_LOCATION = _gcloud.get("location", "")
+def load_custom_config(path: Path) -> dict:
+    if path.exists():
+        with path.open() as f:
+            return yaml.safe_load(f)
+    print(f"{path.name} not found in: {path.parent}\n")
+    print(f"Using folder as project name: {path.parent.name}")
+    return {"project": path.parent.name}
+
+
+def load_default_config(project_name: str) -> dict:
+    with (LIBRARY_DIR / "templates/openmapflow-default.yaml").open() as f:
+        content = f.read().replace("<PROJECT>", project_name)
+        return yaml.safe_load(content)
+
+
+cwd = Path.cwd()
+PROJECT_ROOT = cwd.parent if (cwd.parent / CONFIG_FILE).exists() else cwd
+CUSTOM_CONFIG = load_custom_config(PROJECT_ROOT / CONFIG_FILE)
+PROJECT = CUSTOM_CONFIG["project"]
+DEFAULT_CONFIG = load_default_config(PROJECT)
+CONFIG_YML = update(DEFAULT_CONFIG, CUSTOM_CONFIG)
+GCLOUD_PROJECT_ID = CONFIG_YML["gcloud"]["project_id"]
+GCLOUD_LOCATION = CONFIG_YML["gcloud"]["location"]
 DOCKER_TAG = f"{GCLOUD_LOCATION}-docker.pkg.dev/{GCLOUD_PROJECT_ID}/{PROJECT}/{PROJECT}"
 
 
-def _gen_path(k, default):
-    return f"data/{_data_paths.get(k, default)}"
-
-
 class DataPaths:
-    RAW_LABELS = _gen_path("raw_labels", "raw_labels")
-    PROCESSED_LABELS = _gen_path("processed_labels", "processed_labels")
-    FEATURES = _gen_path("features", "features")
-    COMPRESSED_FEATURES = _gen_path("compressed_features", "compressed_features.tar.gz")
-    MODELS = _gen_path("models", "models")
-    METRICS = _gen_path("metrics", "metrics.yaml")
-    DATASETS = _gen_path("datasets", "datasets.txt")
-    MISSING = _gen_path("missing", "missing.txt")
-    DUPLICATES = _gen_path("duplicates", "duplicates.txt")
-    UNEXPORTED = _gen_path("unexported", "unexported.txt")
+    RAW_LABELS = "data/" + CONFIG_YML["data_paths"]["raw_labels"]
+    PROCESSED_LABELS = "data/" + CONFIG_YML["data_paths"]["processed_labels"]
+    FEATURES = "data/" + CONFIG_YML["data_paths"]["features"]
+    COMPRESSED_FEATURES = "data/" + CONFIG_YML["data_paths"]["compressed_features"]
+    MODELS = "data/" + CONFIG_YML["data_paths"]["models"]
+    METRICS = "data/" + CONFIG_YML["data_paths"]["metrics"]
+    DATASETS = "data/" + CONFIG_YML["data_paths"]["datasets"]
+    MISSING = "data/" + CONFIG_YML["data_paths"]["missing"]
+    DUPLICATES = "data/" + CONFIG_YML["data_paths"]["duplicates"]
+    UNEXPORTED = "data/" + CONFIG_YML["data_paths"]["unexported"]
 
 
 class BucketNames:
-    LABELED_TIFS = _gcloud.get("bucket_labeled_tifs", f"{PROJECT}-labeled-tifs")
-    INFERENCE_TIFS = _gcloud.get("bucket_inference_tifs", f"{PROJECT}-inference-tifs")
-    PREDS = _gcloud.get("bucket_preds", f"{PROJECT}-preds")
-    PREDS_MERGED = _gcloud.get("bucket_preds_merged", f"{PROJECT}-preds-merged")
+    LABELED_TIFS = CONFIG_YML["gcloud"]["bucket_labeled_tifs"]
+    INFERENCE_TIFS = CONFIG_YML["gcloud"]["bucket_inference_tifs"]
+    PREDS = CONFIG_YML["gcloud"]["bucket_preds"]
+    PREDS_MERGED = CONFIG_YML["gcloud"]["bucket_preds_merged"]
 
 
-# -------------- Helper functions ---------------------------------------------
 def get_model_names_as_str() -> str:
     return " ".join(
         [p.stem for p in Path(PROJECT_ROOT / DataPaths.MODELS).glob("*.pt")]
