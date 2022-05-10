@@ -38,7 +38,7 @@ def copy_datasets_py_file(LIBRARY_DIR, PROJECT_ROOT, force: bool):
 
 
 def create_data_dirs(dp, force):
-    for p in [dp.FEATURES, dp.RAW_LABELS, dp.PROCESSED_LABELS, dp.FEATURES, dp.MODELS]:
+    for p in [dp.FEATURES, dp.RAW_LABELS, dp.PROCESSED_LABELS, dp.MODELS]:
         if allow_write(p, force):
             Path(p).mkdir(parents=True, exist_ok=True)
 
@@ -109,7 +109,7 @@ def dvc_instructions(dp):
     dvc add {dvc_files}
 
     # Connect remmote (we suggest gdrive): https://dvc.org/doc/user-guide/setup-google-drive-remote
-    dvc remote add -d gdrive <your google drive folder>
+    dvc remote add -d gdrive gdrive://<last part of google drive folder url>
 
     # Push files to remote storage
     dvc push
