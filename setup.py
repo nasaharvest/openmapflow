@@ -28,7 +28,6 @@ setup(
             "Dockerfile",
             "notebooks/*.ipynb",
             "trigger_inference_function/*",
-            "template/*",
         ]
     },
     scripts=[
