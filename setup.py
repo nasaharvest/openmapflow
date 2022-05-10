@@ -24,9 +24,19 @@ setup(
     packages=["openmapflow"]
     + [f"openmapflow.{f}" for f in find_packages("openmapflow")],
     package_data={
-        "": ["Dockerfile", "notebooks/*.ipynb", "trigger_inference_function/*"]
+        "": [
+            "Dockerfile",
+            "notebooks/*.ipynb",
+            "trigger_inference_function/*",
+            "template/*",
+        ]
     },
-    scripts=["openmapflow/scripts/openmapflow-deploy"],
+    scripts=[
+        "openmapflow/scripts/openmapflow-deploy",
+        "openmapflow/scripts/openmapflow-dir",
+        "openmapflow/scripts/openmapflow-datapath",
+        "openmapflow/scripts/openmapflow-generate",
+    ],
     install_requires=[
         "cropharvest>=0.3.0",
         "dvc[gdrive]>=2.10.1",

@@ -1,0 +1,1 @@
+python3 -c "from openmapflow.config import DataPaths; print(DataPaths.$1)"
