@@ -1,4 +1,4 @@
-name: Crop-mask-example Deploy
+name: crop-mask-example deploy
 
 on:
   push:

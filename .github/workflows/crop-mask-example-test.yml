@@ -1,4 +1,4 @@
-name: Crop-mask-example Test
+name: crop-mask-example test
 
 on:
   push:
