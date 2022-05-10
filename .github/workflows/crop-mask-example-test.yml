@@ -8,7 +8,6 @@ on:
     paths:
     - 'crop-mask-example/data/**'
     - 'crop-mask-example/datasets.py'
-    - 'crop-mask-example/integration_test_data.py'
   pull_request:
     branches: [ main ]
 
@@ -17,8 +16,6 @@ jobs:
     name: test
     runs-on: ubuntu-latest
     defaults:
-      run:
-        working-directory: crop-mask-example
     steps:
     - name: Clone repo
       uses: actions/checkout@v2
@@ -27,14 +24,19 @@ jobs:
       with:
         python-version: 3.7
     - name: Install dependencies
-      run: pip install -e ..
+      run: python setup.py install
     - name: dvc pull data
       env:
         # https://dvc.org/doc/user-guide/setup-google-drive-remote#authorization
         GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
       run: |
-        dvc pull data/processed_labels -f
-        dvc pull data/compressed_features.tar.gz -f
-        tar -xvzf data/compressed_features.tar.gz -C data/
+        cd crop-mask-example
+        dvc pull $(openmapflow-datapath PROCESSED_LABELS) -f
+        dvc pull $(openmapflow-datapath COMPRESSED_FEATURES) -f
+        tar -xvzf $(openmapflow-datapath COMPRESSED_FEATURES) -C data/
+
     - name: Integration test - Data integrity
-      run: python -m unittest integration_test_data.py
+      run: |
+        cd crop-mask-example
+        cp $(openmapflow-dir)/template/test_datasets.py .
+        python -m unittest test_datasets.py
