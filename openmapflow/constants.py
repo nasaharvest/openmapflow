@@ -1,3 +1,5 @@
+CONFIG_FILE = "openmapflow.yaml"
+
 # -------------- Dataframe column names ---------------------------------------
 SOURCE = "source"
 CLASS_PROB = "class_probability"
