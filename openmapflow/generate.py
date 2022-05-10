@@ -9,7 +9,7 @@ from openmapflow.constants import CONFIG_FILE
 def allow_write(p, force=False):
     if force or not Path(p).exists():
         return True
-    overwrite = input(f"{str(p)} already exists. Overwrite? (y/n): ")
+    overwrite = input(f"{str(p)} already exists. Overwrite? (y/[n]): ")
     return overwrite.lower() == "y"
 
 
@@ -45,6 +45,50 @@ def create_data_dirs(dp, force):
     if allow_write(dp.COMPRESSED_FEATURES):
         with tarfile.open(dp.COMPRESSED_FEATURES, "w:gz") as tar:
             tar.add(dp.FEATURES, arcname=Path(dp.FEATURES).name)
+
+
+def fill_in_action(src_yml_path, dest_yml_path, sub_paths, sub_cd, sub_project):
+    with src_yml_path.open("r") as f:
+        content = f.read()
+    content = content.replace("<PATHS>", sub_paths)
+    content = content.replace("<CD>", sub_cd)
+    content = content.replace("<PROJECT>", sub_project)
+    with dest_yml_path.open("w") as f:
+        f.write(content)
+
+
+def create_github_actions(LIBRARY_DIR, PROJECT_ROOT, PROJECT, dp, force):
+    possible_git_roots = [PROJECT_ROOT, PROJECT_ROOT.parent]
+    try:
+        git_root = next(r for r in possible_git_roots if (r / ".git").exists())
+    except StopIteration:
+        raise FileExistsError(
+            f"Could not find .git in {str(PROJECT_ROOT)} or its parent"
+        )
+
+    src_deploy_yml_path = LIBRARY_DIR / "github_workflows/openmapflow-deploy.yml"
+    src_test_yml_path = LIBRARY_DIR / "github_workflows/openmapflow-test.yml"
+    dest_deploy_yml_path = git_root / f".github/workflows/{PROJECT}-deploy.yml"
+    dest_test_yml_path = git_root / f".github/workflows/{PROJECT}-test.yml"
+    is_subdir = git_root != PROJECT_ROOT
+
+    if allow_write(dest_deploy_yml_path, force):
+        fill_in_action(
+            src_yml_path=src_deploy_yml_path,
+            dest_yml_path=dest_deploy_yml_path,
+            sub_paths=f"{f'{PROJECT}/' if is_subdir else ''}{dp.MODELS}.dvc",
+            sub_cd=f"cd {PROJECT}" if is_subdir else "",
+            sub_project=PROJECT,
+        )
+
+    if allow_write(dest_test_yml_path, force):
+        fill_in_action(
+            src_yml_path=src_test_yml_path,
+            dest_yml_path=dest_test_yml_path,
+            sub_paths=f"{f'{PROJECT}/' if is_subdir else ''}data/**",
+            sub_cd=f"cd {PROJECT}" if is_subdir else "",
+            sub_project=PROJECT,
+        )
 
 
 def dvc_instructions(dp):
@@ -102,20 +146,28 @@ if __name__ == "__main__":
     parser.add_argument("--force", action="store_true", help="Force overwrite")
     args = parser.parse_args()
 
-    print("1/5 Parsing arguments")
+    print("1/6 Parsing arguments")
     openmapflow_str = openmapflow_config_from_args(args)
 
-    print(f"2/5 Writing {CONFIG_FILE}")
+    print(f"2/6 Writing {CONFIG_FILE}")
     openmapflow_config_write(openmapflow_str, force=args.force)
 
     # Can only import when openmapflow.yaml is available
-    from openmapflow.config import LIBRARY_DIR, PROJECT_ROOT, DataPaths  # noqa E402
+    from openmapflow.config import (
+        LIBRARY_DIR,
+        PROJECT_ROOT,
+        PROJECT,
+        DataPaths,
+    )  # noqa E402
 
-    print("3/5 Copying datasets.py file")
+    print("3/6 Copying datasets.py file")
     copy_datasets_py_file(LIBRARY_DIR, PROJECT_ROOT, args.force)
 
-    print("4/5 Creating data directories")
+    print("4/6 Creating data directories")
     create_data_dirs(dp=DataPaths, force=args.force)
 
-    print("5/5 Printing dvc instructions")
+    print("5/6 Creating Github Actions")
+    create_github_actions(LIBRARY_DIR, PROJECT_ROOT, PROJECT, DataPaths, args.force)
+
+    print("6/6 Printing dvc instructions")
     dvc_instructions(dp=DataPaths)
