@@ -1,4 +1,7 @@
+from pathlib import Path
+
 CONFIG_FILE = "openmapflow.yaml"
+LIBRARY_DIR = Path(__file__).parent
 
 # -------------- Dataframe column names ---------------------------------------
 SOURCE = "source"

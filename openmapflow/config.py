@@ -1,7 +1,7 @@
 import yaml
 from pathlib import Path
 
-from .constants import CONFIG_FILE
+from .constants import CONFIG_FILE, LIBRARY_DIR
 
 possible_roots = [Path.cwd(), Path.cwd().parent]
 try:
@@ -19,7 +19,6 @@ _data_paths = CONFIG_YML.get("data_paths", {})
 _gcloud = CONFIG_YML.get("gcloud", {})
 
 PROJECT = CONFIG_YML["project"]
-LIBRARY_DIR = Path(__file__).parent
 GCLOUD_PROJECT_ID = _gcloud.get("project_id", "")
 GCLOUD_LOCATION = _gcloud.get("location", "")
 DOCKER_TAG = f"{GCLOUD_LOCATION}-docker.pkg.dev/{GCLOUD_PROJECT_ID}/{PROJECT}/{PROJECT}"
