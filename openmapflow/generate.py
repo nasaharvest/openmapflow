@@ -66,8 +66,8 @@ def create_github_actions(LIBRARY_DIR, PROJECT_ROOT, PROJECT, dp, force):
             f"Could not find .git in {str(PROJECT_ROOT)} or its parent"
         )
 
-    src_deploy_yml_path = LIBRARY_DIR / "github_workflows/openmapflow-deploy.yml"
-    src_test_yml_path = LIBRARY_DIR / "github_workflows/openmapflow-test.yml"
+    src_deploy_yml_path = LIBRARY_DIR / "templates/openmapflow-github-deploy.yml"
+    src_test_yml_path = LIBRARY_DIR / "templates/openmapflow-github-test.yml"
     dest_deploy_yml_path = git_root / f".github/workflows/{PROJECT}-deploy.yml"
     dest_test_yml_path = git_root / f".github/workflows/{PROJECT}-test.yml"
     is_subdir = git_root != PROJECT_ROOT
@@ -93,7 +93,13 @@ def create_github_actions(LIBRARY_DIR, PROJECT_ROOT, PROJECT, dp, force):
 
 def dvc_instructions(dp):
     dvc_files = " ".join(
-        [dp.RAW_LABELS, dp.PROCESSED_LABELS, dp.COMPRESSED_FEATURES, dp.MODELS]
+        [
+            dp.RAW_LABELS,
+            dp.PROCESSED_LABELS,
+            dp.FEATURES,
+            dp.COMPRESSED_FEATURES,
+            dp.MODELS,
+        ]
     )
     print(
         f"""
