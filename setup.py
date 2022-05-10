@@ -28,6 +28,7 @@ setup(
             "Dockerfile",
             "notebooks/*.ipynb",
             "trigger_inference_function/*",
+            "github_workflows/*",
         ]
     },
     scripts=[
