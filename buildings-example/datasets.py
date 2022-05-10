@@ -3,25 +3,22 @@ File for storing references to datasets.
 """
 from typing import List
 from openmapflow.labeled_dataset import LabeledDataset
-
-# from openmapflow.processor import Processor
+from openmapflow.processor import Processor
 
 datasets: List[LabeledDataset] = [
-    # --------------------------------------------------------------------------
-    # Example LabeledDataset (remove once you have your own)
-    # --------------------------------------------------------------------------
-    # LabeledDataset(
-    #     dataset="example_dataset",
-    #     country="Togo",
-    #     processors=(
-    #         Processor(
-    #             filename="Togo_2019.csv",
-    #             longitude_col="longitude",
-    #             latitude_col="latitude",
-    #             class_prob=lambda df: df["crop"],
-    #             start_year=2019,
-    #             x_y_from_centroid=False,
-    #         ),
-    #     ),
-    # ),
+    LabeledDataset(
+        dataset="Uganda_buildings_2020",
+        country="Uganda",
+        processors=(
+            Processor(
+                filename="177_buildings_confidence_0.9.csv",
+                latitude_col="latitude",
+                longitude_col="longitude",
+                class_prob=1.0,
+                start_year=2020,
+                x_y_from_centroid=False,
+                train_val_test=(0.8, 0.1, 0.1),
+            ),
+        ),
+    ),
 ]
