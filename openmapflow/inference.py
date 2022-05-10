@@ -8,7 +8,7 @@ import ee
 import os
 import re
 
-from .config import GCLOUD_BUCKET_INFERENCE_TIFS, GCLOUD_BUCKET_PREDS, GCLOUD_PROJECT_ID
+from .config import GCLOUD_PROJECT_ID, BucketNames as bn
 
 
 #######################################################
@@ -52,12 +52,8 @@ def get_status(model_name_version):
     print(model_name_version)
     print("-----------------------------------------------------------------------")
     ee_task_amount = get_ee_task_amount(prefix=model_name_version.replace("/", "-"))
-    tifs_amount = get_gcs_file_amount(
-        GCLOUD_BUCKET_INFERENCE_TIFS, prefix=model_name_version
-    )
-    predictions_amount = get_gcs_file_amount(
-        GCLOUD_BUCKET_PREDS, prefix=model_name_version
-    )
+    tifs_amount = get_gcs_file_amount(bn.INFERENCE_TIFS, prefix=model_name_version)
+    predictions_amount = get_gcs_file_amount(bn.PREDS, prefix=model_name_version)
     print(f"Earth Engine tasks: {ee_task_amount}")
     print(f"Data available: {tifs_amount}")
     print(f"Predictions: {predictions_amount}")
@@ -70,10 +66,10 @@ def get_status(model_name_version):
 def find_missing_predictions(model_name_version, verbose=False):
     print("Addressing missing files")
     tif_files, tif_amount = get_gcs_file_dict_and_amount(
-        GCLOUD_BUCKET_INFERENCE_TIFS, prefix=model_name_version
+        bn.INFERENCE_TIFS, prefix=model_name_version
     )
     pred_files, pred_amount = get_gcs_file_dict_and_amount(
-        GCLOUD_BUCKET_PREDS, prefix=model_name_version
+        bn.PREDS, prefix=model_name_version
     )
     missing = {}
     for full_k in tqdm(tif_files.keys(), desc="Missing files"):
@@ -106,9 +102,7 @@ def find_missing_predictions(model_name_version, verbose=False):
 
 
 def make_new_predictions(missing):
-    bucket = storage.Client(project=GCLOUD_PROJECT_ID).bucket(
-        GCLOUD_BUCKET_INFERENCE_TIFS
-    )
+    bucket = storage.Client(project=GCLOUD_PROJECT_ID).bucket(bn.INFERENCE_TIFS)
     for batch, files in tqdm(missing.items(), desc="Going through batches"):
         for file in tqdm(files, desc="Renaming files", leave=False):
             blob_name = f"{batch}/{file}.tif"
