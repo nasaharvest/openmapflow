@@ -1,0 +1,21 @@
+version: 0.0.1
+project: <PROJECT>
+description: ~
+data_paths:
+  raw_labels: raw_labels
+  processed_labels: processed_labels
+  features: features
+  compressed_features: compressed_features.tar.gz
+  models: models
+  metrics: metrics.yaml
+  datasets: datasets.txt
+  missing: missing.txt
+  duplicates: duplicates.txt
+  unexported: unexported.txt
+gcloud:
+  project_id: ~
+  location: us-central1
+  bucket_labeled_tifs: crop-mask-tifs2
+  bucket_inference_tifs: <PROJECT>-inference-tifs
+  bucket_preds: <PROJECT>-preds
+  bucket_preds_merged: <PROJECT>-preds-merged
