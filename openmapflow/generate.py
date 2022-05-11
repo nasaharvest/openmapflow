@@ -56,12 +56,11 @@ def create_data_dirs(dp, overwrite):
             tar.add(dp.FEATURES, arcname=Path(dp.FEATURES).name)
 
 
-def fill_in_action(src_yml_path, dest_yml_path, sub_paths, sub_cd, sub_project):
+def fill_in_action(src_yml_path, dest_yml_path, sub_paths, sub_cd):
     with src_yml_path.open("r") as f:
         content = f.read()
     content = content.replace("<PATHS>", sub_paths)
     content = content.replace("<CD>", sub_cd)
-    content = content.replace("<PROJECT>", sub_project)
     with dest_yml_path.open("w") as f:
         f.write(content)
 
@@ -87,7 +86,6 @@ def create_github_actions(LIBRARY_DIR, PROJECT_ROOT, PROJECT, dp, overwrite):
             dest_yml_path=dest_deploy_yml_path,
             sub_paths=f"{f'{PROJECT}/' if is_subdir else ''}{dp.MODELS}.dvc",
             sub_cd=f"cd {PROJECT}" if is_subdir else "",
-            sub_project=PROJECT,
         )
 
     if allow_write(dest_test_yml_path, overwrite):
@@ -96,7 +94,6 @@ def create_github_actions(LIBRARY_DIR, PROJECT_ROOT, PROJECT, dp, overwrite):
             dest_yml_path=dest_test_yml_path,
             sub_paths=f"{f'{PROJECT}/' if is_subdir else ''}data/**",
             sub_cd=f"cd {PROJECT}" if is_subdir else "",
-            sub_project=PROJECT,
         )
 
 
