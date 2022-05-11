@@ -46,7 +46,7 @@ openmapflow cp notebooks .
 
 | Crop mask                     | [WIP] Buildings               | [WIP] Crop Type       |
 | ------------                  | ----------------              | --------------        |
-| [![tb1]][ta1] [![db1]][da1]   | [![tb1]][ta1] [![db1]][da1]   | --------------        |
+| [![tb1]][ta1] [![db1]][da1]   | [![tb2]][ta2] [![db2]][da2]   | --------------        |
 | ![Crop mask][img1]            | ![Buildings][img1]            | ![Crop Type][img1]    |
 
 
