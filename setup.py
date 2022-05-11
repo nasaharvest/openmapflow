@@ -31,13 +31,7 @@ setup(
             "templates/*",
         ]
     },
-    scripts=[
-        "openmapflow/scripts/openmapflow-create-features",
-        "openmapflow/scripts/openmapflow-deploy",
-        "openmapflow/scripts/openmapflow-dir",
-        "openmapflow/scripts/openmapflow-datapath",
-        "openmapflow/scripts/openmapflow-generate",
-    ],
+    scripts=["openmapflow/scripts/openmapflow"],
     install_requires=[
         "cropharvest>=0.3.0",
         "dvc[gdrive]>=2.10.1",

@@ -1,0 +1,33 @@
+librarydir() {
+    python3 -c "from openmapflow.constants import LIBRARY_DIR; print(LIBRARY_DIR)"
+}
+
+
+case $1 in
+    "create-features")
+        python3 -c "from datasets import datasets; from openmapflow.labeled_dataset import create_all_features; create_all_features(datasets)"
+        ;;
+    "datapath")
+        python3 -c "from openmapflow.config import DataPaths; print(DataPaths.get($2))"
+        ;;
+    "deploy")
+        sh deploy.sh
+        ;;
+    "generate")
+        python3 $(librarydir)/generate.py $2
+        ;;
+    "dir")
+        librarydir
+        ;;
+    *)
+        echo "--------------------"
+        echo "openmapflow 🌍 CLI" 
+        echo "--------------------"
+        echo "openmapflow create-features - creates features for all datasets in datasets.py"
+        echo "openmapflow datapath <DATAPATH> - outputs a relative path to the data directory"
+        echo "openmapflow deploy - deploys Google Cloud Architecture for project"
+        echo "openmapflow generate - generates an openmapflow project"
+        echo "openmapflow dir - outputs openmapflow library directory"
+        echo "openmapflow help - outputs this message"
+        ;;
+    esac

@@ -1,1 +1,0 @@
-python3 -c "from openmapflow.constants import LIBRARY_DIR; print(LIBRARY_DIR)"
