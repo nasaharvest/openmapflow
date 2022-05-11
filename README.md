@@ -29,7 +29,7 @@ Rapid map creation with machine learning and earth observation data.
 pip install openmapflow
 openmapflow generate
 ```
-This will generate all the following workflow: 
+Generates the following workflow: 
 Adding data ➞ Training a model ➞ Creating a map
 
 [cb]: https://colab.research.google.com/assets/colab-badge.svg
