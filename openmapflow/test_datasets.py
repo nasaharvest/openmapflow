@@ -11,17 +11,12 @@ import pandas as pd
 from cropharvest.utils import memoized
 from dateutil.relativedelta import relativedelta
 
-os.chdir(os.path.dirname(os.path.realpath(__file__)))
-sys.path.append("..")
-
-from datasets import datasets  # noqa: E402
-
-from openmapflow.all_features import load_all_features_as_df  # noqa: E402
+from openmapflow.all_features import load_all_features_as_df
 from openmapflow.config import PROJECT_ROOT
-from openmapflow.config import DataPaths as dp  # noqa: E402
-from openmapflow.constants import END  # noqa: E402
+from openmapflow.config import DataPaths as dp
 from openmapflow.constants import (
     ALREADY_EXISTS,
+    END,
     FEATURE_FILENAME,
     FEATURE_PATH,
     LAT,
@@ -29,9 +24,13 @@ from openmapflow.constants import (
     START,
     SUBSET,
 )
-from openmapflow.data_instance import DataInstance  # noqa: E402
-from openmapflow.labeled_dataset import duplicates_data  # noqa: E402
-from openmapflow.labeled_dataset import get_label_timesteps, unexported
+from openmapflow.data_instance import DataInstance
+from openmapflow.labeled_dataset import duplicates_data, get_label_timesteps, unexported
+
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
+sys.path.append("..")
+
+from datasets import datasets  # noqa: E402
 
 
 @memoized
