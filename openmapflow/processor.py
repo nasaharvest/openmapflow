@@ -11,8 +11,17 @@ from cropharvest.utils import set_seed
 from dateutil.relativedelta import relativedelta
 from pyproj import Transformer
 
-from .constants import (CLASS_PROB, END, LABEL_DUR, LABELER_NAMES, LAT, LON,
-                        SOURCE, START, SUBSET)
+from .constants import (
+    CLASS_PROB,
+    END,
+    LABEL_DUR,
+    LABELER_NAMES,
+    LAT,
+    LON,
+    SOURCE,
+    START,
+    SUBSET,
+)
 
 # https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2
 min_date = date(2015, 7, 1)

@@ -18,11 +18,24 @@ from tqdm import tqdm
 
 from openmapflow.config import PROJECT_ROOT, BucketNames
 from openmapflow.config import DataPaths as dp
-from openmapflow.constants import (ALREADY_EXISTS, CLASS_PROB, COUNTRY,
-                                   DATASET, END, FEATURE_FILENAME,
-                                   FEATURE_PATH, LABEL_DUR, LABELER_NAMES, LAT,
-                                   LON, NUM_LABELERS, SOURCE, START, SUBSET,
-                                   TIF_PATHS)
+from openmapflow.constants import (
+    ALREADY_EXISTS,
+    CLASS_PROB,
+    COUNTRY,
+    DATASET,
+    END,
+    FEATURE_FILENAME,
+    FEATURE_PATH,
+    LABEL_DUR,
+    LABELER_NAMES,
+    LAT,
+    LON,
+    NUM_LABELERS,
+    SOURCE,
+    START,
+    SUBSET,
+    TIF_PATHS,
+)
 from openmapflow.data_instance import DataInstance
 from openmapflow.processor import Processor
 from openmapflow.utils import try_txt_read
