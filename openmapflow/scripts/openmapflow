@@ -2,8 +2,15 @@ librarydir() {
     python3 -c "from openmapflow.constants import LIBRARY_DIR; print(LIBRARY_DIR)"
 }
 
+version() {
+    python3 -c "from openmapflow.constants import VERSION; print(VERSION)"
+}
+
 
 case $1 in
+    "cp")
+        cp -r $(librarydir)/$2 $3
+        ;;
     "create-features")
         python3 -c "from datasets import datasets; from openmapflow.labeled_dataset import create_all_features; create_all_features(datasets)"
         ;;
@@ -13,21 +20,33 @@ case $1 in
     "deploy")
         sh deploy.sh
         ;;
+    "dir")
+        librarydir
+        ;;
     "generate")
         python3 $(librarydir)/generate.py $2
         ;;
-    "dir")
-        librarydir
+    "ls")
+        ls $2 $(librarydir)
+        ;;
+    "version")
+        version
+        ;;
+    "--version")
+        version
         ;;
     *)
         echo "--------------------"
         echo "openmapflow 🌍 CLI" 
         echo "--------------------"
+        echo "openmapflow cp <source> <destination> - copy a file or directory from the library"
         echo "openmapflow create-features - creates features for all datasets in datasets.py"
         echo "openmapflow datapath <DATAPATH> - outputs a relative path to the data directory"
         echo "openmapflow deploy - deploys Google Cloud Architecture for project"
         echo "openmapflow generate - generates an openmapflow project"
         echo "openmapflow dir - outputs openmapflow library directory"
         echo "openmapflow help - outputs this message"
+        echo "openmapflow ls - lists files in openmapflow library directory"
+        echo "openmapflow version - package version"
         ;;
     esac

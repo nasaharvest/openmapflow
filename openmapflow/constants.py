@@ -2,6 +2,7 @@ from pathlib import Path
 
 CONFIG_FILE = "openmapflow.yaml"
 LIBRARY_DIR = Path(__file__).parent
+VERSION = "0.0.1"
 
 # -------------- Dataframe column names ---------------------------------------
 SOURCE = "source"
