@@ -97,15 +97,12 @@ long_line = "###################################################################
 dvc_instructions = f"""{long_line}\nDVC Setup Instructions\n{long_line}
 dvc (https://dvc.org/) is used to manage data. To setup run:
     # Initializes dvc (use --subdir if in subdirectory)
-    dvc init 
-    
-    dvc add <DVC_FILES>
-    
+    dvc init\n
+    dvc add <DVC_FILES>\n
     # https://dvc.org/doc/user-guide/setup-google-drive-remote
-    dvc remote add -d gdrive gdrive://<last part of gdrive folder url>
-    
+    dvc remote add -d gdrive gdrive://<last part of gdrive folder url>\n
     # Push files to remote storage
-    dvc push 
+    dvc push
 """
 
 colab_url = "https://colab.research.google.com"
