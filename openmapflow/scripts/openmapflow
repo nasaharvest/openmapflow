@@ -1,11 +1,5 @@
-librarydir() {
-    python3 -c "from openmapflow.constants import LIBRARY_DIR; print(LIBRARY_DIR)"
-}
-
-version() {
-    python3 -c "from openmapflow.constants import VERSION; print(VERSION)"
-}
-
+librarydir() { python3 -c "from openmapflow.constants import LIBRARY_DIR; print(LIBRARY_DIR)" }
+version() { python3 -c "from openmapflow.constants import VERSION; print(VERSION)" }
 
 case $1 in
     "cp")
@@ -43,8 +37,8 @@ case $1 in
         echo "openmapflow create-features - creates features for all datasets in datasets.py"
         echo "openmapflow datapath <DATAPATH> - outputs a relative path to the data directory"
         echo "openmapflow deploy - deploys Google Cloud Architecture for project"
-        echo "openmapflow generate - generates an openmapflow project"
         echo "openmapflow dir - outputs openmapflow library directory"
+        echo "openmapflow generate - generates an openmapflow project"
         echo "openmapflow help - outputs this message"
         echo "openmapflow ls - lists files in openmapflow library directory"
         echo "openmapflow version - package version"
