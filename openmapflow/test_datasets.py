@@ -30,7 +30,7 @@ from openmapflow.labeled_dataset import (  # noqa: E402
     duplicates_data,
     get_label_timesteps,
 )
-from openmapflow.all_features import AllFeatures  # noqa: E402
+from openmapflow.all_features import load_all_features_as_df  # noqa: E402
 
 from datasets import datasets  # noqa: E402
 
@@ -39,11 +39,6 @@ from datasets import datasets  # noqa: E402
 def load_feature(p):
     with Path(p).open("rb") as f:
         return pickle.load(f)
-
-
-@memoized
-def load_features():
-    return AllFeatures().df
 
 
 class IntegrationTestLabeledData(TestCase):
@@ -67,7 +62,7 @@ class IntegrationTestLabeledData(TestCase):
         for _, labels in self.load_labels().items():
             feature_name_list += labels[FEATURE_FILENAME].tolist()
 
-        features_df = load_features()
+        features_df = load_all_features_as_df()
         features_df_stems = features_df.filename.apply(lambda p: p.stem)
         features_with_no_label = features_df[~features_df_stems.isin(feature_name_list)]
         amount = len(features_with_no_label)
@@ -140,7 +135,7 @@ class IntegrationTestLabeledData(TestCase):
         # If this test is failing you can temporarily set remove_duplicates to True
         # and rerun labeled_dataset.create_all_features()
         add_to_duplicates_file = False
-        features_df = load_features()
+        features_df = load_all_features_as_df()
         cols_to_check = ["instance_lon", "instance_lat", "source_file"]
         duplicates = features_df[features_df.duplicated(subset=cols_to_check)]
         num_dupes = len(duplicates)
@@ -153,7 +148,7 @@ class IntegrationTestLabeledData(TestCase):
         self.assertTrue(num_dupes == 0, f"Found {num_dupes} duplicates")
 
     def test_features_for_emptiness(self):
-        features_df = load_features()
+        features_df = load_all_features_as_df()
         is_empty = features_df["labelled_array"].isnull()
         num_empty_features = len(features_df[is_empty])
         self.assertTrue(
@@ -162,7 +157,7 @@ class IntegrationTestLabeledData(TestCase):
         )
 
     def test_all_features_have_18_bands(self):
-        features_df = load_features()
+        features_df = load_all_features_as_df()
         is_empty = features_df["labelled_array"].isnull()
         band_amount = (
             features_df[~is_empty]["labelled_array"]
@@ -172,7 +167,7 @@ class IntegrationTestLabeledData(TestCase):
         self.assertEqual(band_amount.tolist(), [18], "Found {band_amount} bands")
 
     def test_all_features_start_with_january_first(self):
-        features_df = load_features()
+        features_df = load_all_features_as_df()
         starts_with_jan_first = features_df.filename.str.contains("_01_01")
         self.assertTrue(
             starts_with_jan_first.all(), "Not all features start with January 1st"
