@@ -11,7 +11,7 @@ from cropharvest.utils import set_seed
 from dateutil.relativedelta import relativedelta
 from pyproj import Transformer
 
-from .constants import (
+from openmapflow.constants import (
     CLASS_PROB,
     END,
     LABEL_DUR,
@@ -70,7 +70,7 @@ class Processor:
     @staticmethod
     def train_val_test_split(
         df: pd.DataFrame, train_val_test: Tuple[float, float, float]
-    ):
+    ) -> pd.DataFrame:
         _, val, test = train_val_test
         random_float = np.random.rand(len(df))
 
