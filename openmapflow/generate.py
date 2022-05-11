@@ -19,14 +19,14 @@ def create_openmapflow_config(overwrite: bool):
         return
     cwd = Path.cwd()
     project_name = input(f"  Project name [{cwd.stem}]: ") or cwd.stem
-    description = input(f"  Description: ")
-    gcloud_project_id = input(f"  GCloud project ID: ")
+    description = input("  Description: ")
+    gcloud_project_id = input("  GCloud project ID: ")
     gcloud_location = input("  GCloud location [us-central1]: ") or "us-central1"
     gcloud_bucket_labeled_tifs = (
         input("  GCloud bucket labeled tifs [crop-mask-tifs2]: ") or "crop-mask-tifs2"
     )
     openmapflow_str = (
-        f"version: 0.0.1"
+        "version: 0.0.1"
         + f"\nproject: {project_name}"
         + f"\ndescription: {description}"
         + "\ngcloud:"
