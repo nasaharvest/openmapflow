@@ -8,8 +8,8 @@ import ee
 from google.cloud import storage
 from tqdm.notebook import tqdm
 
-from .config import GCLOUD_PROJECT_ID
-from .config import BucketNames as bn
+from openmapflow.config import GCLOUD_PROJECT_ID
+from openmapflow.config import BucketNames as bn
 
 
 #######################################################

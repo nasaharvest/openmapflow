@@ -18,7 +18,7 @@ from cropharvest.countries import BBox
 from dateutil.relativedelta import relativedelta
 from tqdm import tqdm
 
-from .constants import CLASS_PROB, END, FEATURE_PATH, LAT, LON, MONTHS, START
+from openmapflow.constants import CLASS_PROB, END, FEATURE_PATH, LAT, LON, MONTHS, START
 
 
 class PyTorchDataset(Dataset):
