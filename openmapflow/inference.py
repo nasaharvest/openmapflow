@@ -1,14 +1,15 @@
-from collections import defaultdict
-from google.cloud import storage
-from glob import glob
-from pathlib import Path
-from tqdm.notebook import tqdm
-
-import ee
 import os
 import re
+from collections import defaultdict
+from glob import glob
+from pathlib import Path
 
-from .config import GCLOUD_PROJECT_ID, BucketNames as bn
+import ee
+from google.cloud import storage
+from tqdm.notebook import tqdm
+
+from .config import GCLOUD_PROJECT_ID
+from .config import BucketNames as bn
 
 
 #######################################################

@@ -1,42 +1,31 @@
-from cropharvest.countries import BBox
-from cropharvest.eo import EarthEngineExporter
-from cropharvest.eo.eo import get_cloud_tif_list
-from cropharvest.engineer import Engineer
-from cropharvest.utils import memoized
-from datetime import datetime
-from dataclasses import dataclass
-from google.cloud import storage
-from pathlib import Path
-from typing import Dict, List, Tuple
-from tqdm import tqdm
-import pandas as pd
 import pickle
-import numpy as np
 import re
 import tempfile
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Tuple
 
-from openmapflow.processor import Processor
+import numpy as np
+import pandas as pd
+from cropharvest.countries import BBox
+from cropharvest.engineer import Engineer
+from cropharvest.eo import EarthEngineExporter
+from cropharvest.eo.eo import get_cloud_tif_list
+from cropharvest.utils import memoized
+from google.cloud import storage
+from tqdm import tqdm
+
+from openmapflow.config import PROJECT_ROOT, BucketNames
+from openmapflow.config import DataPaths as dp
+from openmapflow.constants import (ALREADY_EXISTS, CLASS_PROB, COUNTRY,
+                                   DATASET, END, FEATURE_FILENAME,
+                                   FEATURE_PATH, LABEL_DUR, LABELER_NAMES, LAT,
+                                   LON, NUM_LABELERS, SOURCE, START, SUBSET,
+                                   TIF_PATHS)
 from openmapflow.data_instance import DataInstance
+from openmapflow.processor import Processor
 from openmapflow.utils import try_txt_read
-from openmapflow.constants import (
-    ALREADY_EXISTS,
-    COUNTRY,
-    CLASS_PROB,
-    FEATURE_FILENAME,
-    FEATURE_PATH,
-    LAT,
-    LON,
-    START,
-    END,
-    SOURCE,
-    NUM_LABELERS,
-    LABELER_NAMES,
-    LABEL_DUR,
-    SUBSET,
-    DATASET,
-    TIF_PATHS,
-)
-from openmapflow.config import PROJECT_ROOT, BucketNames, DataPaths as dp
 
 temp_dir = tempfile.gettempdir()
 

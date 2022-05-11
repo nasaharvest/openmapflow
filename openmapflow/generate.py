@@ -1,13 +1,13 @@
 import argparse
 import shutil
 import tarfile
-
 from pathlib import Path
+
 from openmapflow.constants import (
     CONFIG_FILE,
+    TEMPLATE_DATASETS,
     TEMPLATE_DEPLOY_YML,
     TEMPLATE_TEST_YML,
-    TEMPLATE_DATASETS,
 )
 
 
@@ -135,7 +135,8 @@ if __name__ == "__main__":
     create_openmapflow_config(args.overwrite)
 
     # Can only import when openmapflow.yaml is available
-    from openmapflow.config import PROJECT_ROOT, PROJECT, DataPaths as dp  # noqa E402
+    from openmapflow.config import PROJECT, PROJECT_ROOT
+    from openmapflow.config import DataPaths as dp  # noqa E402
 
     print(f"2/{n} Copying datasets.py file")
     copy_datasets_py_file(PROJECT_ROOT, args.overwrite)

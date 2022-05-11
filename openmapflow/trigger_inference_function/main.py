@@ -1,8 +1,8 @@
+import logging
+import os
+import time
 from pathlib import Path
 
-import logging
-import time
-import os
 import requests
 
 logging.basicConfig(level=logging.INFO)

@@ -1,38 +1,30 @@
-from cropharvest.utils import memoized
-from datetime import date
-from dateutil.relativedelta import relativedelta
-from pathlib import Path
-from unittest import TestCase
-import numpy as np
-import pandas as pd
-import pickle
 import os
+import pickle
 import sys
 import unittest
+from datetime import date
+from pathlib import Path
+from unittest import TestCase
+
+import numpy as np
+import pandas as pd
+from cropharvest.utils import memoized
+from dateutil.relativedelta import relativedelta
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append("..")
 
-from openmapflow.constants import (  # noqa: E402
-    ALREADY_EXISTS,
-    FEATURE_FILENAME,
-    LAT,
-    LON,
-    FEATURE_PATH,
-    START,
-    END,
-    SUBSET,
-)
-from openmapflow.config import PROJECT_ROOT, DataPaths as dp  # noqa: E402
-from openmapflow.data_instance import DataInstance  # noqa: E402
-from openmapflow.labeled_dataset import (  # noqa: E402
-    unexported,
-    duplicates_data,
-    get_label_timesteps,
-)
-from openmapflow.all_features import load_all_features_as_df  # noqa: E402
-
 from datasets import datasets  # noqa: E402
+
+from openmapflow.all_features import load_all_features_as_df  # noqa: E402
+from openmapflow.config import PROJECT_ROOT
+from openmapflow.config import DataPaths as dp  # noqa: E402
+from openmapflow.constants import (ALREADY_EXISTS, END,  # noqa: E402
+                                   FEATURE_FILENAME, FEATURE_PATH, LAT, LON,
+                                   START, SUBSET)
+from openmapflow.data_instance import DataInstance  # noqa: E402
+from openmapflow.labeled_dataset import duplicates_data  # noqa: E402
+from openmapflow.labeled_dataset import get_label_timesteps, unexported
 
 
 @memoized

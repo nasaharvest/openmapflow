@@ -1,6 +1,8 @@
 import collections.abc
-import yaml
 from pathlib import Path
+
+import yaml
+
 from openmapflow.constants import CONFIG_FILE, DEFAULT_CONFIG_PATH, LIBRARY_DIR
 
 

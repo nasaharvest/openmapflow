@@ -29,6 +29,8 @@ jobs:
           ${{ runner.os }}-
     - name: Install dependencies
       run: pip install -r requirements.txt
+    - name: isort
+      run: python -m isort openmapflow
     - name: black
       run: python -m black --check --diff .
     - name: flake8
