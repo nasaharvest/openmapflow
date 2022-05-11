@@ -52,6 +52,17 @@ class DataPaths:
     DUPLICATES = "data/" + CONFIG_YML["data_paths"]["duplicates"]
     UNEXPORTED = "data/" + CONFIG_YML["data_paths"]["unexported"]
 
+    @classmethod
+    def get(cls, key: str = "") -> str:
+        if key in cls.__dict__:
+            return cls.__dict__[key]
+        dp_list = [
+            f"{k}: {v}"
+            for k, v in vars(cls).items()
+            if not k.startswith("__") and k == "get"
+        ]
+        return "\n".join(dp_list)
+
 
 class BucketNames:
     LABELED_TIFS = CONFIG_YML["gcloud"]["bucket_labeled_tifs"]
