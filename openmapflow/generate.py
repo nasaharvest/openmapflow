@@ -122,7 +122,7 @@ After dvc is setup, push your changes to Github and you'll be able to run Colab 
 3) Creating a map\n{nb_home}/create_map.ipynb
 
 Notebooks can also be run locally:
-cp -r $(openmapflow-dir)/notebooks .
+openmapflow copy notebooks .
 jupyter notebook
 """
 

@@ -24,7 +24,7 @@ def load_custom_config(path: Path) -> dict:
 
 
 def load_default_config(project_name: str) -> dict:
-    with (LIBRARY_DIR / "templates/openmapflow-default.yaml").open() as f:
+    with (LIBRARY_DIR / "templates/openmapflow default.yaml").open() as f:
         content = f.read().replace("<PROJECT>", project_name)
         return yaml.safe_load(content)
 
