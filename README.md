@@ -1,7 +1,7 @@
 # OpenMapFlow 🌍
 
-[![CI Status](https://github.com/nasaharvest/openmapflow/actions/workflows/ci.yml/badge.svg)](https://github.com/nasaharvest/openmapflow/actions/workflows/ci.yml)
-[![Docker Status](https://github.com/nasaharvest/openmapflow/actions/workflows/docker.yml/badge.svg)](https://github.com/nasaharvest/openmapflow/actions/workflows/docker.yml)
+[![CI Status](https://github.com/nasaharvest/openmapflow/actions/workflows/ci.yaml/badge.svg)](https://github.com/nasaharvest/openmapflow/actions/workflows/ci.yaml)
+[![Docker Status](https://github.com/nasaharvest/openmapflow/actions/workflows/docker.yaml/badge.svg)](https://github.com/nasaharvest/openmapflow/actions/workflows/docker.yaml)
 
 Rapid map creation with machine learning and earth observation data.
 
@@ -9,15 +9,15 @@ Rapid map creation with machine learning and earth observation data.
 
 [img1]: https://storage.googleapis.com/harvest-public-assets/openmapflow/crop-mask-example-map.png
 
-[ta1]: https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-test.yml
-[tb1]: https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-test.yml/badge.svg
-[da1]: https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-deploy.yml
-[db1]: https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-deploy.yml/badge.svg
+[ta1]: https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-test.yaml
+[tb1]: https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-test.yaml/badge.svg
+[da1]: https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-deploy.yaml
+[db1]: https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-deploy.yaml/badge.svg
 
-[ta2]: https://github.com/nasaharvest/openmapflow/actions/workflows/buildings-example-test.yml
-[tb2]: https://github.com/nasaharvest/openmapflow/actions/workflows/buildings-example-test.yml/badge.svg
-[da2]: https://github.com/nasaharvest/openmapflow/actions/workflows/buildings-example-deploy.yml
-[db2]: https://github.com/nasaharvest/openmapflow/actions/workflows/buildings-example-deploy.yml/badge.svg
+[ta2]: https://github.com/nasaharvest/openmapflow/actions/workflows/buildings-example-test.yaml
+[tb2]: https://github.com/nasaharvest/openmapflow/actions/workflows/buildings-example-test.yaml/badge.svg
+[da2]: https://github.com/nasaharvest/openmapflow/actions/workflows/buildings-example-deploy.yaml
+[db2]: https://github.com/nasaharvest/openmapflow/actions/workflows/buildings-example-deploy.yaml/badge.svg
 
 
 | Crop mask                     | [WIP] Buildings               | [WIP] Crop Type       |
