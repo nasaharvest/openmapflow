@@ -37,3 +37,5 @@ jobs:
       run: python -m flake8 .
     - name: mypy
       run: python -m mypy .
+    - name: unittest
+      run: python -m unittest discover -s tests
