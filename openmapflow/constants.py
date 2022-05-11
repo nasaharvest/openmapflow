@@ -2,6 +2,12 @@ from pathlib import Path
 
 CONFIG_FILE = "openmapflow.yaml"
 LIBRARY_DIR = Path(__file__).parent
+TEMPLATES_DIR = LIBRARY_DIR / "templates"
+DEFAULT_CONFIG_PATH = TEMPLATES_DIR / "openmapflow-default.yaml"
+
+TEMPLATE_DATASETS = TEMPLATES_DIR / "example_datasets.py"
+TEMPLATE_DEPLOY_YML = TEMPLATES_DIR / "openmapflow-github-deploy.yaml"
+TEMPLATE_TEST_YML = TEMPLATES_DIR / "openmapflow-github-test.yaml"
 VERSION = "0.0.1"
 
 # -------------- Dataframe column names ---------------------------------------
