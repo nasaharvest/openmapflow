@@ -3,7 +3,12 @@ import shutil
 import tarfile
 
 from pathlib import Path
-from openmapflow.constants import CONFIG_FILE, LIBRARY_DIR
+from openmapflow.constants import (
+    CONFIG_FILE,
+    TEMPLATE_DEPLOY_YML,
+    TEMPLATE_TEST_YML,
+    TEMPLATE_DATASETS,
+)
 
 
 def allow_write(p, overwrite=False):
@@ -39,11 +44,9 @@ def create_openmapflow_config(overwrite: bool):
         f.write(openmapflow_str)
 
 
-def copy_datasets_py_file(LIBRARY_DIR, PROJECT_ROOT, overwrite: bool):
+def copy_datasets_py_file(PROJECT_ROOT, overwrite: bool):
     if allow_write("datasets.py", overwrite):
-        shutil.copy(
-            str(LIBRARY_DIR / "example_datasets.py"), str(PROJECT_ROOT / "datasets.py")
-        )
+        shutil.copy(str(TEMPLATE_DATASETS), str(PROJECT_ROOT / "datasets.py"))
 
 
 def create_data_dirs(dp, overwrite):
@@ -65,7 +68,7 @@ def fill_in_action(src_yml_path, dest_yml_path, sub_paths, sub_cd):
         f.write(content)
 
 
-def create_github_actions(LIBRARY_DIR, PROJECT_ROOT, PROJECT, dp, overwrite):
+def create_github_actions(PROJECT_ROOT, PROJECT, dp, overwrite):
     possible_git_roots = [PROJECT_ROOT, PROJECT_ROOT.parent]
     try:
         git_root = next(r for r in possible_git_roots if (r / ".git").exists())
@@ -74,15 +77,13 @@ def create_github_actions(LIBRARY_DIR, PROJECT_ROOT, PROJECT, dp, overwrite):
             f"Could not find .git in {str(PROJECT_ROOT)} or its parent"
         )
 
-    src_deploy_yml_path = LIBRARY_DIR / "templates/openmapflow-github-deploy.yml"
-    src_test_yml_path = LIBRARY_DIR / "templates/openmapflow-github-test.yml"
-    dest_deploy_yml_path = git_root / f".github/workflows/{PROJECT}-deploy.yml"
-    dest_test_yml_path = git_root / f".github/workflows/{PROJECT}-test.yml"
+    dest_deploy_yml_path = git_root / f".github/workflows/{PROJECT}-deploy.yaml"
+    dest_test_yml_path = git_root / f".github/workflows/{PROJECT}-test.yaml"
     is_subdir = git_root != PROJECT_ROOT
 
     if allow_write(dest_deploy_yml_path, overwrite):
         fill_in_action(
-            src_yml_path=src_deploy_yml_path,
+            src_yml_path=TEMPLATE_DEPLOY_YML,
             dest_yml_path=dest_deploy_yml_path,
             sub_paths=f"{f'{PROJECT}/' if is_subdir else ''}{dp.MODELS}.dvc",
             sub_cd=f"cd {PROJECT}" if is_subdir else "",
@@ -90,7 +91,7 @@ def create_github_actions(LIBRARY_DIR, PROJECT_ROOT, PROJECT, dp, overwrite):
 
     if allow_write(dest_test_yml_path, overwrite):
         fill_in_action(
-            src_yml_path=src_test_yml_path,
+            src_yml_path=TEMPLATE_TEST_YML,
             dest_yml_path=dest_test_yml_path,
             sub_paths=f"{f'{PROJECT}/' if is_subdir else ''}data/**",
             sub_cd=f"cd {PROJECT}" if is_subdir else "",
@@ -137,13 +138,13 @@ if __name__ == "__main__":
     from openmapflow.config import PROJECT_ROOT, PROJECT, DataPaths as dp  # noqa E402
 
     print(f"2/{n} Copying datasets.py file")
-    copy_datasets_py_file(LIBRARY_DIR, PROJECT_ROOT, args.overwrite)
+    copy_datasets_py_file(PROJECT_ROOT, args.overwrite)
 
     print(f"3/{n} Creating data directories")
     create_data_dirs(dp=dp, overwrite=args.overwrite)
 
     print(f"4/{n} Creating Github Actions")
-    create_github_actions(LIBRARY_DIR, PROJECT_ROOT, PROJECT, dp, args.overwrite)
+    create_github_actions(PROJECT_ROOT, PROJECT, dp, args.overwrite)
 
     print(f"5/{n} Printing dvc instructions")
     dvc_files = [

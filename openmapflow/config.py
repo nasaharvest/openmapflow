@@ -1,8 +1,7 @@
 import collections.abc
 import yaml
 from pathlib import Path
-
-from .constants import CONFIG_FILE, LIBRARY_DIR
+from openmapflow.constants import CONFIG_FILE, DEFAULT_CONFIG_PATH, LIBRARY_DIR
 
 
 def update(d, u):
@@ -24,7 +23,7 @@ def load_custom_config(path: Path) -> dict:
 
 
 def load_default_config(project_name: str) -> dict:
-    with (LIBRARY_DIR / "templates/openmapflow default.yaml").open() as f:
+    with DEFAULT_CONFIG_PATH.open() as f:
         content = f.read().replace("<PROJECT>", project_name)
         return yaml.safe_load(content)
 
