@@ -1,15 +1,20 @@
-librarydir() { python3 -c "from openmapflow.constants import LIBRARY_DIR; print(LIBRARY_DIR)" }
-version() { python3 -c "from openmapflow.constants import VERSION; print(VERSION)" }
+#!/bin/bash
+librarydir() { python3 -c "from openmapflow.constants import LIBRARY_DIR; print(LIBRARY_DIR)"; }
+version() { python3 -c "from openmapflow.constants import VERSION; print(VERSION)"; }
+datasets() { python3 -c "from openmapflow.config import DataPaths; print(DataPaths.DATASETS)"; }
 
 case $1 in
     "cp")
-        cp -r $(librarydir)/$2 $3
+        cp -r "$(librarydir)"/$2 $3
         ;;
     "create-features")
-        python3 -c "from datasets import datasets; from openmapflow.labeled_dataset import create_all_features; create_all_features(datasets)"
+        python3 -c "from datasets import datasets; from openmapflow.features import create_features; create_features(datasets)"
         ;;
     "datapath")
         python3 -c "from openmapflow.config import DataPaths; print(DataPaths.get($2))"
+        ;;
+    "datasets")
+        cat "$(datasets)"
         ;;
     "deploy")
         sh deploy.sh
@@ -18,10 +23,10 @@ case $1 in
         librarydir
         ;;
     "generate")
-        python3 $(librarydir)/generate.py $2
+        python3 "$(librarydir)"/generate.py "$2"
         ;;
     "ls")
-        ls $2 $(librarydir)
+        ls "$2" "$(librarydir)"
         ;;
     "version")
         version
@@ -36,6 +41,7 @@ case $1 in
         echo "openmapflow cp <source> <destination> - copy a file or directory from the library"
         echo "openmapflow create-features - creates features for all datasets in datasets.py"
         echo "openmapflow datapath <DATAPATH> - outputs a relative path to the data directory"
+        echo "openmapflow datasets - outputs a list of all datasets"
         echo "openmapflow deploy - deploys Google Cloud Architecture for project"
         echo "openmapflow dir - outputs openmapflow library directory"
         echo "openmapflow generate - generates an openmapflow project"

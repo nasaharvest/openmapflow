@@ -11,7 +11,7 @@ import pandas as pd
 from cropharvest.utils import memoized
 from dateutil.relativedelta import relativedelta
 
-from openmapflow.all_features import load_all_features_as_df
+from openmapflow.features import load_all_features_as_df
 from openmapflow.config import PROJECT_ROOT
 from openmapflow.config import DataPaths as dp
 from openmapflow.constants import (
