@@ -77,10 +77,14 @@ def bbox_from_path(p: Path):
     """
     Generate bbox from path
     """
-    decimals_in_p = re.findall(r"=-?\d*\.?\d*", p.stem)
+    decimals_in_p = re.findall(r"=-?\d*\.?\d*", p.name)
     coords = [float(d[1:]) for d in decimals_in_p[0:4]]
     bbox = BBox(
-        min_lat=coords[0], min_lon=coords[1], max_lat=coords[2], max_lon=coords[3]
+        min_lat=coords[0],
+        min_lon=coords[1],
+        max_lat=coords[2],
+        max_lon=coords[3],
+        name=str(p),
     )
     return bbox
 
