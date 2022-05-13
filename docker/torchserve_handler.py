@@ -2,7 +2,9 @@ import sys
 import tempfile
 import time
 import os
+import re
 
+from datetime import datetime
 from pathlib import Path
 from google.cloud import storage  # type: ignore
 from ts.torch_handler.base_handler import BaseHandler
@@ -14,6 +16,13 @@ temp_dir = tempfile.gettempdir()
 
 dest_bucket_name = os.environ.get("DEST_BUCKET")
 print(f"HANDLER: Dest bucket: {dest_bucket_name}")
+
+
+def start_date_from_str(p) -> datetime:
+    dates = re.findall(r"\d{4}-\d{2}-\d{2}", str(p))
+    if len(dates) < 2:
+        raise ValueError(f"{p} should have start and end date")
+    return datetime.strptime(dates[0], "%Y-%m-%d")
 
 
 class ModelHandler(BaseHandler):
@@ -76,7 +85,7 @@ class ModelHandler(BaseHandler):
         local_dest_path = Path(tempfile.gettempdir() + f"/pred_{uri_as_path.stem}.nc")
 
         print("HANDLER: Starting inference")
-        start_date = self.inference_module.start_date_from_str(uri)
+        start_date = start_date_from_str(uri)
         print(f"HANDLER: Start date: {start_date}")
         self.inference_module.run(
             local_path=local_path, start_date=start_date, dest_path=local_dest_path
