@@ -19,11 +19,16 @@ Rapid map creation with machine learning and earth observation data.
 [da2]: https://github.com/nasaharvest/openmapflow/actions/workflows/buildings-example-deploy.yaml
 [db2]: https://github.com/nasaharvest/openmapflow/actions/workflows/buildings-example-deploy.yaml/badge.svg
 
+[ta3]: https://github.com/nasaharvest/openmapflow/actions/workflows/maize-example-test.yaml
+[tb3]: https://github.com/nasaharvest/openmapflow/actions/workflows/maize-example-test.yaml/badge.svg
+[da3]: https://github.com/nasaharvest/openmapflow/actions/workflows/maize-example-deploy.yaml
+[db3]: https://github.com/nasaharvest/openmapflow/actions/workflows/maize-example-deploy.yaml/badge.svg
 
-| Crop mask                     | [WIP] Buildings               | [WIP] Crop Type       |
-| ------------                  | ----------------              | --------------        |
-| [![tb1]][ta1] [![db1]][da1]   | [![tb2]][ta2] [![db2]][da2]   | --------------        |
-| ![Crop mask][img1]            | ![Buildings][img1]            | ![Crop Type][img1]    |
+
+| Crop mask                     | [WIP] Buildings               | [WIP] Crop Type              |
+| ------------                  | ----------------              | --------------               |
+| [![tb1]][ta1] [![db1]][da1]   | [![tb2]][ta2] [![db2]][da2]   | [![tb3]][ta3] [![db3]][da3]  |
+| ![Crop mask][img1]            | ![Buildings][img1]            | ![Crop Type][img1]           |
 ## How it works
 ```bash
 pip install openmapflow
