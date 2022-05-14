@@ -5,7 +5,7 @@ datasets() { python3 -c "from openmapflow.config import DataPaths; print(DataPat
 
 case $1 in
     "cp")
-        cp -r "$(librarydir)"/$2 $3
+        cp -r "$(librarydir)"/"$2" "$3"
         ;;
     "create-features")
         python3 -c "from datasets import datasets; from openmapflow.features import create_features; create_features(datasets)"
@@ -23,7 +23,7 @@ case $1 in
         librarydir
         ;;
     "generate")
-        python3 "$(librarydir)"/generate.py "$2"
+        python3 "$(librarydir)"/generate.py
         ;;
     "ls")
         ls "$2" "$(librarydir)"
