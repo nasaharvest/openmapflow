@@ -106,7 +106,7 @@ def create_new_bbox_widget(get_bbox, coord_widgets):
     def change_visibility(event):
         try:
             i = event["new"]["index"]
-        except:
+        except Exception:
             return
         if i == 0:
             square_widget.layout.display = "block"
@@ -205,8 +205,8 @@ class InferenceWidget:
             return map_key
 
         try:
-            new_version = int(re.search("_v\d*", map_key).group().replace("_v", ""))
-        except:
+            new_version = int(re.search(r"_v\d*", map_key).group().replace("_v", ""))
+        except Exception:
             new_version = 1
         return f"{map_key}_v{new_version}"
 
@@ -228,8 +228,8 @@ class InferenceWidget:
         return f"""
           <div style='padding-left:1em'>
           <h3>Estimates</h3>
-          <b>Area:</b> {self.bbox.get_area_km2():,.1f} km² <br> 
-          <b>Time:</b> TBD <br> 
+          <b>Area:</b> {self.bbox.get_area_km2():,.1f} km² <br>
+          <b>Time:</b> TBD <br>
           <b>Cost:</b> TBD
           <div/>
         """
@@ -320,7 +320,7 @@ class InferenceWidget:
     def change_new_vs_available(self, event):
         try:
             i = event["new"]["index"]
-        except:
+        except Exception:
             return
         if i == 0:
             self.available_bbox_widget.layout.display = "block"
