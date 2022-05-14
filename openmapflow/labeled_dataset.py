@@ -73,28 +73,28 @@ def distance_point_from_center(lat_idx: int, lon_idx: int, tif) -> int:
     return x_dist + y_dist
 
 
-def bbox_from_path(p: Path):
+def bbox_from_str(s: str):
     """
     Generate bbox from path
     """
-    decimals_in_p = re.findall(r"=-?\d*\.?\d*", p.name)
+    decimals_in_p = re.findall(r"=-?\d*\.?\d*", Path(s).name)
     coords = [float(d[1:]) for d in decimals_in_p[0:4]]
     bbox = BBox(
         min_lat=coords[0],
         min_lon=coords[1],
         max_lat=coords[2],
         max_lon=coords[3],
-        name=str(p),
+        name=s,
     )
     return bbox
 
 
 @memoized
 def generate_bbox_from_paths() -> Dict[Path, BBox]:
-    cloud_tif_paths = [Path(p) for p in get_cloud_tif_list(BucketNames.LABELED_TIFS)]
+    cloud_tif_uris = [uri for uri in get_cloud_tif_list(BucketNames.LABELED_TIFS)]
     return {
-        p: bbox_from_path(p)
-        for p in tqdm(cloud_tif_paths, desc="Generating BBoxes from paths")
+        Path(uri): bbox_from_str(uri)
+        for uri in tqdm(cloud_tif_uris, desc="Generating BBoxes from paths")
     }
 
 
