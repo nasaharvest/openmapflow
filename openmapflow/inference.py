@@ -10,7 +10,7 @@ from tqdm.notebook import tqdm
 
 from openmapflow.config import GCLOUD_PROJECT_ID, BucketNames
 from openmapflow.config import BucketNames as bn
-from openmapflow.labeled_dataset import bbox_from_path
+from openmapflow.labeled_dataset import bbox_from_str
 
 
 #######################################################
@@ -32,7 +32,7 @@ def get_available_bboxes(buckets_to_check=[BucketNames.INFERENCE_TIFS]):
             p = match.group()
             if p not in previous_matches:
                 previous_matches.append(p)
-                available_bboxes.append(bbox_from_path(Path(f"gs://{bucket_name}/{p}")))
+                available_bboxes.append(bbox_from_str(Path(f"gs://{bucket_name}/{p}")))
     return available_bboxes
 
 

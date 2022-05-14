@@ -22,3 +22,11 @@ def colab_gee_gcloud_login(project_id: str, google):
     ]
     CREDENTIALS, _ = google.auth.default(default_scopes=SCOPES)
     ee.Initialize(CREDENTIALS, project=project_id)
+
+
+def confirmation(message, default="y"):
+    print(message)
+    if default == "y":
+        return input("Confirm [y]/n: ").lower() != "n"
+    else:
+        return input("Confirm y/[n]: ").lower() == "y"
