@@ -60,7 +60,7 @@ class DataPaths:
         dp_list = [
             f"{k}: {v}"
             for k, v in vars(cls).items()
-            if not k.startswith("__") and k == "get"
+            if not k.startswith("__") and k != "get"
         ]
         return "\n".join(dp_list)
 

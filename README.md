@@ -25,10 +25,10 @@ Rapid map creation with machine learning and earth observation data.
 [db3]: https://github.com/nasaharvest/openmapflow/actions/workflows/maize-example-deploy.yaml/badge.svg
 
 
-| Crop mask                     | [WIP] Buildings               | [WIP] Crop Type              |
-| ------------                  | ----------------              | --------------               |
-| [![tb1]][ta1] [![db1]][da1]   | [![tb2]][ta2] [![db2]][da2]   | [![tb3]][ta3] [![db3]][da3]  |
-| ![Crop mask][img1]            | ![Buildings][img1]            | ![Crop Type][img1]           |
+| Cropland                      | [WIP] Buildings               | [WIP] Maize                   |
+| ------------                  | ----------------              | --------------                |
+| [![tb1]][ta1] [![db1]][da1]   | [![tb2]][ta2] [![db2]][da2]   | [![tb3]][ta3] [![db3]][da3]   |
+| ![Crop mask][img1]            | ![Buildings][img1]            | ![Crop Type][img1]            |
 ## How it works
 ```bash
 pip install openmapflow
