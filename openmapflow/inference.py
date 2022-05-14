@@ -8,13 +8,34 @@ import ee
 from google.cloud import storage
 from tqdm.notebook import tqdm
 
-from openmapflow.config import GCLOUD_PROJECT_ID
+from openmapflow.config import GCLOUD_PROJECT_ID, BucketNames
 from openmapflow.config import BucketNames as bn
+from openmapflow.labeled_dataset import bbox_from_path
 
 
 #######################################################
 # Status functions
 #######################################################
+bbox_regex = r".*min_lat=?\d*\.?\d*_min_lon=?\d*\.?\d*_max_lat=?\d*\.?\d*_max_lon=?\d*\.?\d*_dates=\d{4}-\d{2}-\d{2}_\d{4}-\d{2}-\d{2}.*?\/"
+
+
+def get_available_bboxes(buckets_to_check=[BucketNames.INFERENCE_TIFS]):
+    client = storage.Client()
+    previous_matches = []
+    available_bboxes = []
+    for bucket_name in buckets_to_check:
+        blobs = client.list_blobs(bucket_or_name=bucket_name)
+        for blob in blobs:
+            match = re.search(bbox_regex, blob.name)
+            if not match:
+                continue
+            p = match.group()
+            if p not in previous_matches:
+                previous_matches.append(p)
+                available_bboxes.append(bbox_from_path(Path(f"gs://{bucket_name}/{p}")))
+    return available_bboxes
+
+
 def get_ee_task_amount(prefix=None):
     amount = 0
     task_list = ee.data.getTaskList()
