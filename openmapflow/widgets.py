@@ -1,245 +1,372 @@
+from dataclasses import dataclass
 import re
 from datetime import date, datetime
-from google.cloud import storage
-from pathlib import Path
+from cropharvest.eo import EarthEngineExporter
 from cropharvest.countries import BBox
+
 from ipyleaflet import Map, basemaps, basemap_to_tiles, Rectangle
 from ipywidgets import (
     Box,
     DatePicker,
     Dropdown,
     FloatText,
-    FloatSlider,
-    GridspecLayout,
+    HTML,
     Layout,
     RadioButtons,
     Select,
     ToggleButtons,
+    VBox,
 )
-from openmapflow.config import BucketNames
-from openmapflow.labeled_dataset import bbox_from_path
+
+import pyproj
+import shapely.ops as ops
+from shapely.geometry.polygon import Polygon
+from functools import partial
+
+bbox_keys = ["min_lat", "min_lon", "max_lat", "max_lon"]
+
+
+@dataclass
+class InferenceBBox(BBox):
+    def __post_init__(self):
+        super().__post_init__()
+        self.area = self.get_area_km2()
+        self.center = self.get_centre(in_radians=False)
+
+    @classmethod
+    def from_bbox(cls, bbox: BBox):
+        return cls(bbox.min_lat, bbox.max_lat, bbox.min_lon, bbox.max_lon, bbox.name)
+
+    def get_area_km2(self) -> float:
+        polygon = Polygon(
+            [
+                [self.min_lon, self.min_lat],
+                [self.min_lon, self.max_lat],
+                [self.max_lon, self.max_lat],
+                [self.max_lon, self.min_lat],
+            ]
+        )
+        polygon = ops.transform(
+            partial(
+                pyproj.transform,
+                pyproj.Proj("EPSG:4326"),
+                pyproj.Proj(
+                    proj="aea", lat_1=polygon.bounds[1], lat_2=polygon.bounds[3]
+                ),
+            ),
+            polygon,
+        )
+        return polygon.area * 1e-6  # Convert from m2 to km2
+
+    def get_leaflet_rectangle(self):
+        return Rectangle(
+            bounds=((self.min_lat, self.min_lon), (self.max_lat, self.max_lon))
+        )
+
+    def get_time_estimate(with_earth_engine=True):
+        # Earth Engine Export
+        # margin 0.01 -> 1 min
+        # margin 0.02 -> 3 mins
+        # margin 0.03 -> 9 mins
+        # margin 0.05 -> 10 mins
+
+        # Inference
+        # Start: 10:02:15
+        # Done: 10:02:44
+        pass
+
+
+def create_coords_widget(bbox, margin, update_bbox):
+    coord_widgets = {}
+    for k in bbox_keys + ["lat", "lon", "margin"]:
+        if k == "lat":
+            value = bbox.center[0]
+        elif k == "lon":
+            value = bbox.center[1]
+        elif k == "margin":
+            value = margin
+        else:
+            value = getattr(bbox, k)
+        coord_widgets[k] = FloatText(value=round(value, 3), description=k, step=0.01)
+        coord_widgets[k].observe(update_bbox)
+    return coord_widgets
+
+
+def create_new_bbox_widget(get_bbox, coord_widgets):
+    square_widget = VBox(
+        [coord_widgets["lat"], coord_widgets["lon"], coord_widgets["margin"]]
+    )
+    lon_coords = Box([coord_widgets["min_lon"], coord_widgets["max_lon"]])
+    all_coords = [coord_widgets["max_lat"], lon_coords, coord_widgets["min_lat"]]
+    rectangle_widget = Box([VBox(all_coords, layout=Layout(align_items="center"))])
+    cached_display = rectangle_widget.layout.display
+    rectangle_widget.layout.display = "none"
+    toggle = ToggleButtons(options=["Square bbox", "Rectangle bbox"])
+
+    def change_visibility(event):
+        try:
+            i = event["new"]["index"]
+        except:
+            return
+        if i == 0:
+            square_widget.layout.display = "block"
+            rectangle_widget.layout.display = "none"
+            bbox = get_bbox()
+            coord_widgets["lat"].value = round(bbox.center[0], 3)
+            coord_widgets["lon"].value = round(bbox.center[1], 3)
+        elif i == 1:
+            square_widget.layout.display = "none"
+            rectangle_widget.layout.display = cached_display
+            bbox = get_bbox()
+            for k in bbox_keys:
+                coord_widgets[k].value = round(getattr(bbox, k), 3)
+
+    toggle.observe(change_visibility)
+    return VBox([toggle, square_widget, rectangle_widget])
+
+
+def create_available_bbox_widget(available_bboxes, update_event):
+    options = [bbox.name for bbox in available_bboxes]
+    select = Select(options=options, description="On Google Cloud")
+    select.observe(update_event)
+    return select
 
 
 class InferenceWidget:
     def __init__(
         self,
         available_models,
+        available_bboxes=[],
         lat: float = 7.72,
         lon: float = 1.18,
         margin: float = 0.02,
+        start_date=date(2020, 2, 1),
+        end_date=date(2021, 2, 1),
+        verbose=False,
     ):
-        self.bbox = BBox(
+        self.verbose = verbose
+        self.bbox = InferenceBBox(
             min_lat=lat - margin,
             max_lat=lat + margin,
             min_lon=lon - margin,
             max_lon=lon + margin,
         )
+        self.available_bboxes = available_bboxes
 
-        self.margin = margin
-
-        self.existing_bboxes = self.get_available_bboxes()
-
-        self.map = Map(
-            layers=(basemap_to_tiles(basemaps.Esri.WorldStreetMap),),
-            center=self.bbox.get_centre(in_radians=False),
-            zoom=11,
+        # -----------------------------------------------------------------------
+        # Initialize all widgets
+        # -----------------------------------------------------------------------
+        layers = (
+            basemap_to_tiles(basemaps.Esri.WorldStreetMap),
+            self.bbox.get_leaflet_rectangle(),
         )
-        self.map.add_layer(self.get_rectangle())
+        self.map = Map(layers=layers, center=self.bbox.center, zoom=11)
+        self.coord_widgets = create_coords_widget(self.bbox, margin, self.update_bbox)
+        self.new_bbox_widget = create_new_bbox_widget(
+            lambda: self.bbox, self.coord_widgets
+        )
+        self.available_bbox_widget = create_available_bbox_widget(
+            available_bboxes, self.update_bbox
+        )
 
+        # Simple custom widgets
         self.model_picker = Dropdown(
             options=available_models, description="Model to use"
         )
+        self.start_widget = DatePicker(description="Start date", value=start_date)
+        self.end_widget = DatePicker(description="End date", value=end_date)
+        for widget in [self.model_picker, self.start_widget, self.end_widget]:
+            widget.observe(self.update_map_key)
 
-        self.start_date = date(2020, 2, 1)
-        self.end_date = date(2021, 2, 1)
-
-    @staticmethod
-    def get_available_bboxes():
-        client = storage.Client()
-        blobs = client.list_blobs(bucket_or_name=BucketNames.INFERENCE_TIFS)
-        previous_matches = []
-        available_bboxes = []
-        long_regex = r".*min_lat=?\d*\.?\d*_min_lon=?\d*\.?\d*_max_lat=?\d*\.?\d*_max_lon=?\d*\.?\d*_dates=\d{4}-\d{2}-\d{2}_\d{4}-\d{2}-\d{2}.*?\/"
-        blobs = client.list_blobs(bucket_or_name=BucketNames.INFERENCE_TIFS)
-        for blob in blobs:
-            match = re.search(long_regex, blob.name)
-            if not match:
-                continue
-            p = match.group()
-            if p not in previous_matches:
-                previous_matches.append(p)
-                available_bboxes.append(bbox_from_path(Path(p)))
-        return available_bboxes
-
-    def get_date_range(self):
-        if self.gcs_path:
-            pass
-        else:
-            return self.start_select
-
-    def get_rectangle(self):
-        return Rectangle(
-            bounds=(
-                (self.bbox.min_lat, self.bbox.min_lon),
-                (self.bbox.max_lat, self.bbox.max_lon),
-            )
+        self.check_key_widget = RadioButtons(
+            options=["Check existing progress", "Create new map"],
+            layout=Layout(display="none"),
         )
+        self.check_key_widget.observe(self.update_map_key)
+        self.map_key_HTML = HTML(self.get_map_key_HTML())
+        self.estimates_HTML = HTML(self.get_estimates_HTML())
+        self.warning_HTML = HTML("", style={"color": "red"})
 
-    def update_event(self, event):
+    def are_tifs_in_right_spot(self, map_key):
+        return any(map_key in b.name for b in self.available_bboxes)
+
+    def get_map_key(self):
+        version = EarthEngineExporter.make_identifier(
+            self.bbox, str(self.start_widget.value), str(self.end_widget.value)
+        )
+        map_key = f"{self.model_picker.value}/{version}"
+        if self.are_tifs_in_right_spot(map_key):
+            self.check_key_widget.layout.display = "block"
+        else:
+            self.check_key_widget.layout.display = "none"
+            self.check_key_widget.value = "Check existing progress"
+
+        if self.check_key_widget.value == "Check existing progress":
+            return map_key
+
+        try:
+            new_version = int(re.search("_v\d*", map_key).group().replace("_v", ""))
+        except:
+            new_version = 1
+        return f"{map_key}_v{new_version}"
+
+    def get_map_key_HTML(self):
+        return f"<b>Map key:</b> {self.get_map_key()}"
+
+    def get_config_as_dict(self):
+        map_key = self.get_map_key()
+        return {
+            "bbox": self.bbox,
+            "start_date": self.start_widget.value,
+            "end_date": self.end_widget.value,
+            "tifs_in_gcloud": self.bbox.name,
+            "tifs_in_right_spot": self.are_tifs_in_right_spot(map_key),
+            "map_key": map_key,
+        }
+
+    def get_estimates_HTML(self) -> str:
+        return f"""
+          <div style='padding-left:1em'>
+          <h3>Estimates</h3>
+          <b>Area:</b> {self.bbox.get_area_km2():,.1f} km² <br> 
+          <b>Time:</b> TBD <br> 
+          <b>Cost:</b> TBD
+          <div/>
+        """
+
+    def get_warning_HTML(self, description):
+        return f"<p style='color:red'>{description}</p>"
+
+    def update_map_key(self, event):
+        if event["name"] != "value":
+            return
+        start_date = self.start_widget.value
+        end_date = self.end_widget.value
+        model_name = self.model_picker.value
+        if str(start_date.year) not in model_name:
+            self.warning_HTML.value = self.get_warning_HTML(
+                f"Start year: {start_date.year} not in model name: {model_name}."
+            )
+        elif start_date.month != end_date.month:
+            self.warning_HTML.value = self.get_warning_HTML(
+                f"Start month {start_date.month} and end month {end_date.month} should be the same."
+            )
+        elif start_date.year + 1 != end_date.year:
+            self.warning_HTML.value = self.get_warning_HTML(
+                f"Start year {start_date.year} should be one less than end year {end_date.year}"
+            )
+        else:
+            self.warning_HTML.value = ""
+            self.map_key_HTML.value = self.get_map_key_HTML()
+
+    def update_bbox(self, event):
         if event["name"] != "value":
             return
         key = event["owner"].description
         value = event["new"]
-        self.gcs_path = ""
-        if key == "Start date":
-            self.start_date = value
-        elif key == "End date":
-            self.end_date = value
-        elif key == "lat":
-            self.bbox = BBox(
-                min_lat=value - self.margin,
-                max_lat=value + self.margin,
+        if key == "lat":
+            self.bbox = InferenceBBox(
+                min_lat=value - self.coord_widgets["margin"].value,
+                max_lat=value + self.coord_widgets["margin"].value,
                 min_lon=self.bbox.min_lon,
                 max_lon=self.bbox.max_lon,
             )
         elif key == "lon":
-            self.bbox = BBox(
+            self.bbox = InferenceBBox(
                 min_lat=self.bbox.min_lat,
                 max_lat=self.bbox.max_lat,
-                min_lon=value - self.margin,
-                max_lon=value + self.margin,
+                min_lon=value - self.coord_widgets["margin"].value,
+                max_lon=value + self.coord_widgets["margin"].value,
             )
         elif key == "margin":
-            lat, lon = self.bbox.get_centre(in_radians=False)
-            self.bbox = BBox(
+            lat, lon = self.bbox.center
+            self.bbox = InferenceBBox(
                 min_lat=lat - value,
                 max_lat=lat + value,
                 min_lon=lon - value,
                 max_lon=lon + value,
             )
-            self.margin = value
-        elif key in ["min_lat", "min_lon", "max_lat", "max_lon"]:
-            setattr(self.bbox, key, value)
-        else:
-            for bbox in self.existing_bboxes:
-                if bbox.name == value:
-                    self.bbox = bbox
-                    date_re = re.findall(r"\d{4}-\d{2}-\d{2}", value)
-                    try:
-                        self.start_date, self.end_date = [
-                            datetime.strptime(d, "%Y-%m-%d").date() for d in date_re[:2]
-                        ]
-                    except:
-                        print(
-                            f"Could not parse dates from {value}, found {date_re}. Select a different bbox."
-                        )
-                    break
-
-        self.map.substitute_layer(self.map.layers[-1], self.get_rectangle())
-        self.map.center = self.bbox.get_centre(in_radians=False)
-
-    def square_select(self):
-        lat, lon = self.bbox.get_centre(in_radians=False)
-        lat_input = FloatText(value=lat, description="lat")
-        lon_input = FloatText(value=lon, description="lon")
-        slider = FloatSlider(
-            value=self.margin,
-            min=0.01,
-            max=3,
-            step=0.01,
-            description="margin",
-            readout_format=".2f",
-        )
-        lat_input.observe(self.update_event)
-        lon_input.observe(self.update_event)
-        slider.observe(self.update_event)
-        layout = Layout(flex_flow="column")
-        return Box([Box([lat_input, lon_input]), slider], layout=layout)
-
-    def rectangle_select(self):
-        inputs = {}
-        for k in ["min_lat", "max_lat", "min_lon", "max_lon"]:
-            inputs[k] = FloatText(value=getattr(self.bbox, k), description=k)
-            inputs[k].observe(self.update_event)
-        grid = GridspecLayout(3, 3)
-        for i in range(3):
-            for j in range(3):
-                grid[i, j] = FloatText(value=0.0)
-                grid[i, j].layout.visibility = "hidden"
-        grid[0, 1] = inputs["max_lat"]
-        grid[1, 0] = inputs["min_lon"]
-        grid[1, 2] = inputs["max_lon"]
-        grid[2, 1] = inputs["min_lat"]
-        return Box([grid])
-
-    def existing_bbox_select(self):
-        select = Select(options=[bbox.name for bbox in self.existing_bboxes])
-        select.observe(self.update_event)
-        return select
-
-    def bbox_select(self):
-        square_select = self.square_select()
-        rectangle_select = self.rectangle_select()
-        cached_display = rectangle_select.layout.display
-        radio_buttons = RadioButtons(
-            description="Bbox for map", options=["Square", "Rectangle"]
-        )
-
-        def change_visibility(event):
+        elif key in bbox_keys:
+            kwargs = {k: v for k, v in self.bbox.__dict__.items() if k in bbox_keys}
+            kwargs[key] = value
             try:
-                i = event["new"]["index"]
-            except:
-                return
-            rectangle_select.layout.display = cached_display if i == 1 else "none"
-            square_select.layout.display = "block" if i == 0 else "none"
+                self.bbox = InferenceBBox(**kwargs)
+                self.warning_HTML.value = ""
+            except ValueError as e:
+                self.warning_HTML.value = self.get_warning_HTML(str(e))
 
-        rectangle_select.layout.display = "none"
+        elif key == "On Google Cloud":
+            try:
+                bbox = next(b for b in self.available_bboxes if b.name == value)
+                self.bbox = InferenceBBox.from_bbox(bbox)
+                ds = re.findall(r"\d{4}-\d{2}-\d{2}", value)
+                self.start_widget.value = datetime.strptime(ds[0], "%Y-%m-%d").date()
+                self.end_widget.value = datetime.strptime(ds[1], "%Y-%m-%d").date()
+                self.warning_HTML.value = ""
+            except Exception as e:
+                self.warning_HTML.value = self.get_warning_HTML(str(e))
 
-        radio_buttons.observe(change_visibility)
-        return Box(
-            [radio_buttons, square_select, rectangle_select],
-            layout=Layout(flex_flow="column"),
+        if self.verbose:
+            print(f"Updated bbox from key: {key}")
+            print(self.bbox)
+
+        self.map_key_HTML.value = self.get_map_key_HTML()
+        self.estimates_HTML.value = self.get_estimates_HTML()
+        self.map.center = self.bbox.center
+        self.map.substitute_layer(
+            self.map.layers[-1], self.bbox.get_leaflet_rectangle()
         )
 
-    def new_data_select(self):
-        start_select = DatePicker(description="Start date", value=self.start_date)
-        end_select = DatePicker(description="End date", value=self.end_date)
-        start_select.observe(self.update_event)
-        end_select.observe(self.update_event)
-        return Box([start_select, end_select, self.bbox_select()])
+    def change_new_vs_available(self, event):
+        try:
+            i = event["new"]["index"]
+        except:
+            return
+        if i == 0:
+            self.available_bbox_widget.layout.display = "block"
+            self.new_bbox_widget.layout.display = "none"
+            self.start_widget.disabled = True
+            self.end_widget.disabled = True
+            self.update_bbox(
+                {
+                    "name": "value",
+                    "owner": self.available_bbox_widget,
+                    "new": self.available_bboxes[0].name,
+                }
+            )
+        elif i == 1:
+            self.available_bbox_widget.layout.display = "none"
+            self.new_bbox_widget.layout.display = "block"
+            self.start_widget.disabled = False
+            self.end_widget.disabled = False
 
     def ui(self):
-        existing_data_available = len(self.existing_bboxes) > 0
-        new_data_select = self.new_data_select()
-
-        children = [self.model_picker]
-        if existing_data_available:
-            toggle = ToggleButtons(
-                options=["Available data", "New data"], description="Data to use"
+        config_title = HTML("<h3>Select model and specify region of interest</h3>")
+        dates = VBox([self.start_widget, self.end_widget])
+        if len(self.available_bboxes) == 0:
+            configuration = VBox([config_title, Box([self.model_picker, dates])])
+            return VBox(
+                [
+                    Box([configuration, self.estimates_HTML]),
+                    self.new_bbox_widget,
+                    self.map_key_HTML,
+                    self.warning_HTML,
+                    self.map,
+                ]
             )
-            existing_data_select = self.existing_bbox_select()
-            children += [toggle, existing_data_select, new_data_select]
-
-            def change_visibility(event):
-                try:
-                    i = event["new"]["index"]
-                except:
-                    return
-                existing_data_select.layout.display = "block" if i == 0 else "none"
-                new_data_select.layout.display = "block" if i == 1 else "none"
-                if i == 0:
-                    self.update_event(
-                        {
-                            "name": "value",
-                            "owner": existing_data_select,
-                            "new": self.existing_bboxes[0].name,
-                        }
-                    )
-
-            change_visibility({"new": {"index": 0}})
-            toggle.observe(change_visibility)
-
-        else:
-            children += [new_data_select]
-
-        return Box(children + [self.map], layout=Layout(flex_flow="column"))
+        toggle = ToggleButtons(options=["Available regions", "New regions"])
+        toggle.observe(self.change_new_vs_available)
+        model_and_toggle = VBox([self.model_picker, toggle])
+        configuration = VBox([config_title, Box([model_and_toggle, dates])])
+        self.change_new_vs_available({"new": {"index": 0}})
+        return VBox(
+            [
+                Box([configuration, self.estimates_HTML]),
+                self.available_bbox_widget,
+                self.new_bbox_widget,
+                self.map_key_HTML,
+                self.check_key_widget,
+                self.warning_HTML,
+                self.map,
+            ]
+        )
