@@ -1,4 +1,5 @@
 import argparse
+import os
 import shutil
 import tarfile
 from pathlib import Path
@@ -68,19 +69,19 @@ def fill_in_action(src_yml_path, dest_yml_path, sub_paths, sub_cd):
         f.write(content)
 
 
-def create_github_actions(PROJECT_ROOT, PROJECT, dp, overwrite):
+def get_git_root(PROJECT_ROOT):
     possible_git_roots = [PROJECT_ROOT, PROJECT_ROOT.parent]
     try:
-        git_root = next(r for r in possible_git_roots if (r / ".git").exists())
+        return next(r for r in possible_git_roots if (r / ".git").exists())
     except StopIteration:
         raise FileExistsError(
             f"Could not find .git in {str(PROJECT_ROOT)} or its parent"
         )
 
+
+def create_github_actions(git_root, is_subdir, PROJECT, dp, overwrite):
     dest_deploy_yml_path = git_root / f".github/workflows/{PROJECT}-deploy.yaml"
     dest_test_yml_path = git_root / f".github/workflows/{PROJECT}-test.yaml"
-    is_subdir = git_root != PROJECT_ROOT
-
     if allow_write(dest_deploy_yml_path, overwrite):
         fill_in_action(
             src_yml_path=TEMPLATE_DEPLOY_YML,
@@ -98,31 +99,41 @@ def create_github_actions(PROJECT_ROOT, PROJECT, dp, overwrite):
         )
 
 
-long_line = "########################################################################"
+def print_and_run(cmd):
+    print(f"{cmd}")
+    os.system(cmd)
 
-dvc_instructions = f"""{long_line}\nDVC Setup Instructions\n{long_line}
-dvc (https://dvc.org/) is used to manage data. To setup run:
-    # Initializes dvc (use --subdir if in subdirectory)
-    dvc init\n
-    dvc add <DVC_FILES>\n
-    # https://dvc.org/doc/user-guide/setup-google-drive-remote
-    dvc remote add -d gdrive gdrive://<last part of gdrive folder url>\n
-    # Push files to remote storage
-    dvc push
-"""
 
-colab_url = "https://colab.research.google.com"
-nb_home = f"{colab_url}/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks"
-using_openampflow = f"""{long_line}\nUsing OpenMapFlow\n{long_line}
-After dvc is setup, push your changes to Github and you'll be able to run Colab notebooks:
-1) Adding new data\n{nb_home}/new_data.ipynb
-2) Training a model\n{nb_home}/train.ipynb
-3) Creating a map\n{nb_home}/create_map.ipynb
+def setup_dvc(PROJECT_ROOT, is_subdir, dp):
+    if (PROJECT_ROOT / ".dvc").exists():
+        print(f"  {PROJECT_ROOT}/.dvc already exists. Skipping.")
+        return
 
-Notebooks can also be run locally:
-openmapflow copy notebooks .
-jupyter notebook
-"""
+    if is_subdir:
+        print_and_run("dvc init --subdir")
+    else:
+        print_and_run("dvc init")
+
+    dvc_files = [dp.RAW_LABELS, dp.PROCESSED_LABELS, dp.COMPRESSED_FEATURES, dp.MODELS]
+    print_and_run("dvc add " + " ".join([dvc_files]))
+
+    with open("data/.gitignore", "a") as f:
+        f.write("/features")
+
+    print("dvc stores data in remote storage (s3, gcs, gdrive, etc)")
+    print("https://dvc.org/doc/command-reference/remote/add#supported-storage-types")
+    option = input("a) Setup gdrive / b) Exit and setup own remote [a]/b: ")
+    if option.lower() == "b":
+        return
+
+    print("We'll follow: https://dvc.org/doc/user-guide/setup-google-drive-remote")
+    gdrive_url = input("Last part of gdrive folder url: ")
+    if gdrive_url:
+        print_and_run(f"dvc remote add -d gdrive gdrive://{gdrive_url}")
+        print_and_run("dvc push")
+    else:
+        print("You must enter a valid gdrive url")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate OpenMapFlow project.")
@@ -145,17 +156,27 @@ if __name__ == "__main__":
     create_data_dirs(dp=dp, overwrite=args.overwrite)
 
     print(f"4/{n} Creating Github Actions")
-    create_github_actions(PROJECT_ROOT, PROJECT, dp, args.overwrite)
+    git_root = get_git_root(PROJECT_ROOT)
+    is_subdir = git_root != PROJECT_ROOT
+    create_github_actions(git_root, is_subdir, PROJECT, dp, args.overwrite)
 
-    print(f"5/{n} Printing dvc instructions")
-    dvc_files = [
-        dp.RAW_LABELS,
-        dp.PROCESSED_LABELS,
-        dp.FEATURES,
-        dp.COMPRESSED_FEATURES,
-        dp.MODELS,
-    ]
-    print(dvc_instructions.replace("<DVC_FILES>", " ".join(dvc_files)))
+    print(f"5/{n} Setting up dvc (data version control)")
+    setup_dvc(PROJECT_ROOT, is_subdir, dp)
 
-    print(f"6/{n} Ready to go!")
-    print(using_openampflow)
+    print(f"6/{n} Ready to go! 🎉")
+    colab_url = "https://colab.research.google.com"
+    nb_home = (
+        f"{colab_url}/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks"
+    )
+    print(
+        f"""
+Push your changes to Github and you'll be able to run Colab notebooks:
+1) Adding new data\n{nb_home}/new_data.ipynb
+2) Training a model\n{nb_home}/train.ipynb
+3) Creating a map\n{nb_home}/create_map.ipynb
+
+Notebooks can also be run locally:
+openmapflow copy notebooks .
+jupyter notebook
+"""
+    )

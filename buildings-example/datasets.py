@@ -3,6 +3,7 @@ File for storing references to datasets.
 """
 from typing import List
 
+from openmapflow.features import create_features
 from openmapflow.labeled_dataset import LabeledDataset
 from openmapflow.raw_labels import RawLabels
 
@@ -22,4 +23,22 @@ datasets: List[LabeledDataset] = [
             ),
         ),
     ),
+    LabeledDataset(
+        dataset="geowiki_landcover_2017",
+        country="global",
+        raw_labels=(
+            RawLabels(
+                filename="loc_all_2.txt",
+                longitude_col="loc_cent_X",
+                latitude_col="loc_cent_Y",
+                class_prob=0.0,
+                start_year=2017,
+                x_y_from_centroid=False,
+                filter_df=lambda df: df[(df.sumcrop / 100) > 0.5],
+            ),
+        ),
+    ),
 ]
+
+if __name__ == "__main__":
+    create_features(datasets)
