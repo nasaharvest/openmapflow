@@ -235,6 +235,20 @@ def get_label_timesteps(labels):
 
 @dataclass
 class LabeledDataset:
+    """
+    A labeled dataset represents a DataFrame where each row consists of:
+    - A coordinate
+    - A binary label for that coordinate (y)
+    - A path to earth observation data for that coordinate (X)
+    Together labels (y) and the associated earth observation data (X) can be used
+    to train and evaluate a macine learning model a model.
+
+    Args:
+        dataset (str): The name of the dataset.
+        country (str): The country of the dataset (can be 'global' if points are in multiple countries)
+        raw_labels (Tuple[RawLabels, ...]): A list of raw labels used to create the dataset.
+    """
+
     dataset: str = ""
     country: str = ""
     raw_labels: Tuple[RawLabels, ...] = ()
@@ -269,22 +283,22 @@ class LabeledDataset:
                     f"\u2714 {subset} amount: {labels_in_subset},"
                     + f"positive class: {positive_class_percentage:.1%}\n"
                 )
-
         return text
 
-    def process_labels(self):
+    def create_processed_labels(self):
+        """
+        Creates a single processed labels file from a list of raw labels.
+        """
         df = pd.DataFrame({})
         already_processed = []
         if self.labels_path.exists():
             df = pd.read_csv(self.labels_path)
             already_processed = df[SOURCE].unique()
 
-        # Go through raw_labels and create new standard labels if necessary
-        new_labels = [
-            p.process(self.raw_dir)
-            for p in self.raw_labels
-            if p.filename not in str(already_processed)
-        ]
+        new_labels: List[pd.DataFrame] = []
+        for p in self.raw_labels:
+            if p.filename not in str(already_processed):
+                new_labels.append(p.process(self.raw_dir))
 
         if len(new_labels) == 0:
             return df
@@ -305,7 +319,6 @@ class LabeledDataset:
         )
         df[COUNTRY] = self.country
         df[DATASET] = self.dataset
-
         df[FEATURE_FILENAME] = (
             "lat="
             + df[LAT].round(8).astype(str)
@@ -327,7 +340,7 @@ class LabeledDataset:
         fail_if_missing_features: bool = False,
     ) -> pd.DataFrame:
         if allow_processing:
-            labels = self.process_labels()
+            labels = self.create_processed_labels()
             self._cached_labels_csv = labels
         elif self._cached_labels_csv is not None:
             labels = self._cached_labels_csv
@@ -358,11 +371,10 @@ class LabeledDataset:
 
     def create_features(self, disable_gee_export: bool = False) -> str:
         """
-        Features are the (X, y) pairs that are used to train the model.
+        Features are the (X, y) pairs that are used to train and evaluate a machine learning model.
         In this case,
-        - X is the satellite data for a lat lon coordinate over a 12 month time series
+        - X is the earth observation data for a lat lon coordinate over a 24 month time series
         - y is the binary class label for that coordinate
-
         To create the features:
         1. Obtain the labels
         2. Check if the features already exist

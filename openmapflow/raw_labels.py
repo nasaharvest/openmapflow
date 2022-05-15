@@ -174,7 +174,7 @@ def _set_label_metadata(df, label_duration: Optional[str], labeler_name: Optiona
 @dataclass
 class RawLabels:
     """
-    Represents a raw labels file (csv, shapefile, geojson) and how it should be standardized
+    Represents a raw labels file (csv, shapefile, geojson) and how it should be processed
 
     Args:
         filename (str): name of the raw file to be processed
