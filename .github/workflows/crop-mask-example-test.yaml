@@ -6,7 +6,7 @@ name: test
 on:
   push:
     branches: [ main ]
-    #paths: crop-mask-example/data/**
+    paths: crop-mask-example/data/**
   pull_request:
     branches: [ main ]
     paths: crop-mask-example/data/**

@@ -6,7 +6,7 @@ name: test
 on:
   push:
     branches: [ main ]
-    #paths: buildings-example/data/**
+    paths: buildings-example/data/**
   pull_request:
     branches: [ main ]
     paths: buildings-example/data/**
