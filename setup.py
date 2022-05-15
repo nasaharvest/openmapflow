@@ -35,6 +35,7 @@ setup(
     install_requires=[
         "cropharvest>=0.3.0",
         "dvc[gdrive]>=2.10.1",
+        "google-cloud-storage>=2.3.0",
         "earthengine-api",
         "pandas==1.3.5",
         "pyyaml>=6.0",
