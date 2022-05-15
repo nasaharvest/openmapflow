@@ -259,7 +259,7 @@ class LabeledDataset:
         self.labels_path = PROJECT_ROOT / dp.PROCESSED_LABELS / (self.dataset + ".csv")
         self._cached_labels_csv = None
 
-    def summary(self, df=None):
+    def summary(self, df=None, unexported_check=True):
         if df is None:
             df = self.load_labels(
                 allow_processing=False, fail_if_missing_features=False
@@ -269,6 +269,7 @@ class LabeledDataset:
         text += f"(Timesteps: {','.join([str(int(t)) for t in timesteps])})\n"
         text += "----------------------------------------------------------------------------\n"
         train_val_test_counts = df[SUBSET].value_counts()
+        newly_unexported = []
         for subset, labels_in_subset in train_val_test_counts.items():
             features_in_subset = df[df[SUBSET] == subset][ALREADY_EXISTS].sum()
             if labels_in_subset != features_in_subset:
@@ -276,6 +277,13 @@ class LabeledDataset:
                     f"\u2716 {subset}: {labels_in_subset} labels, "
                     + f"but {features_in_subset} features\n"
                 )
+                if not unexported_check:
+                    continue
+                labels_with_no_feature = df[
+                    (df[SUBSET] == subset) & ~df[ALREADY_EXISTS]
+                ]
+                newly_unexported += labels_with_no_feature[FEATURE_FILENAME].tolist()
+
             else:
                 positive_class_percentage = (
                     df[df[SUBSET] == subset][CLASS_PROB] > 0.5
@@ -284,6 +292,17 @@ class LabeledDataset:
                     f"\u2714 {subset} amount: {labels_in_subset}, "
                     + f"positive class: {positive_class_percentage:.1%}\n"
                 )
+        if not unexported_check or len(newly_unexported) == 0:
+            return text
+
+        add_to_file = input(
+            f"Found {len(newly_unexported)} missing features. "
+            + "These may have failed on EarthEngine. Add to unexported list? (y/[n]): "
+        )
+        if add_to_file.lower() == "y":
+            with (PROJECT_ROOT / dp.UNEXPORTED).open("w") as f:
+                f.write("\n".join(unexported + newly_unexported))
+
         return text
 
     def create_processed_labels(self):

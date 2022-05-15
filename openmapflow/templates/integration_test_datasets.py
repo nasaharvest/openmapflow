@@ -10,9 +10,6 @@ import numpy as np
 import pandas as pd
 from cropharvest.utils import memoized
 from dateutil.relativedelta import relativedelta
-
-from openmapflow.config import PROJECT_ROOT
-from openmapflow.config import DataPaths as dp
 from openmapflow.constants import (
     ALREADY_EXISTS,
     END,
@@ -25,7 +22,7 @@ from openmapflow.constants import (
 )
 from openmapflow.data_instance import DataInstance
 from openmapflow.features import load_all_features_as_df
-from openmapflow.labeled_dataset import duplicates_data, get_label_timesteps, unexported
+from openmapflow.labeled_dataset import get_label_timesteps
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append("..")
@@ -50,7 +47,7 @@ class IntegrationTestLabeledData(TestCase):
             try:
                 datasets_dict[d.dataset] = d.load_labels()
                 if is_print:
-                    print(d.summary(datasets_dict[d.dataset]))
+                    print(d.summary(datasets_dict[d.dataset], unexported_check=False))
             except FileNotFoundError:
                 continue
         return datasets_dict
@@ -89,14 +86,7 @@ class IntegrationTestLabeledData(TestCase):
         )
 
     def test_label_feature_subset_amounts(self):
-        # If this test is failing and there are no activate exports,
-        # temporarily set the add_to_unexported_file to True
-        # to update the unexported list
-        add_to_unexported_file = False
-
         all_subsets_correct_size = True
-
-        newly_unexported = []
         for _, labels in self.load_labels(is_print=True).items():
             if not labels[ALREADY_EXISTS].all():
                 labels[ALREADY_EXISTS] = np.vectorize(lambda p: Path(p).exists())(
@@ -109,20 +99,6 @@ class IntegrationTestLabeledData(TestCase):
                 ].sum()
                 if labels_in_subset != features_in_subset:
                     all_subsets_correct_size = False
-                    if add_to_unexported_file:
-                        labels_with_no_feature = labels[
-                            (labels[SUBSET] == subset) & ~labels[ALREADY_EXISTS]
-                        ]
-                        assert len(labels_with_no_feature) == (
-                            labels_in_subset - features_in_subset
-                        )
-                        newly_unexported += labels_with_no_feature[
-                            FEATURE_FILENAME
-                        ].tolist()
-
-        if add_to_unexported_file and not all_subsets_correct_size:
-            with (PROJECT_ROOT / dp.UNEXPORTED).open("w") as f:
-                f.write("\n".join(unexported + newly_unexported))
 
         self.assertTrue(
             all_subsets_correct_size,
@@ -130,19 +106,10 @@ class IntegrationTestLabeledData(TestCase):
         )
 
     def test_features_for_duplicates(self):
-        # If this test is failing you can temporarily set remove_duplicates to True
-        # and rerun labeled_dataset.create_all_features()
-        add_to_duplicates_file = False
         features_df = load_all_features_as_df()
         cols_to_check = ["instance_lon", "instance_lat", "source_file"]
         duplicates = features_df[features_df.duplicated(subset=cols_to_check)]
         num_dupes = len(duplicates)
-        if add_to_duplicates_file and num_dupes > 0:
-            feature_filenames = duplicates.filename.apply(
-                lambda p: Path(p).stem
-            ).tolist()
-            with (PROJECT_ROOT / dp.DUPLICATES).open("w") as f:
-                f.write("\n".join(duplicates_data + feature_filenames))
         self.assertTrue(num_dupes == 0, f"Found {num_dupes} duplicates")
 
     def test_features_for_emptiness(self):
