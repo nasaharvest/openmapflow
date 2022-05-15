@@ -243,12 +243,12 @@ class RawLabels:
         if self.filter_df:
             df = self.filter_df(df)
         df = _set_lat_lon(
-            df,
-            self.latitude_col,
-            self.longitude_col,
-            self.sample_from_polygon,
-            self.x_y_from_centroid,
-            self.transform_crs_from,
+            df=df,
+            latitude_col=self.latitude_col,
+            longitude_col=self.longitude_col,
+            sample_from_polygon=self.sample_from_polygon,
+            x_y_from_centroid=self.x_y_from_centroid,
+            transform_crs_from=self.transform_crs_from,
         )
         df = _set_class_prob(df, self.class_prob)
         df = _set_start_end_dates(df, self.start_year, self.start_date_col)
