@@ -11,7 +11,6 @@ import pandas as pd
 from cropharvest.utils import memoized
 from dateutil.relativedelta import relativedelta
 
-from openmapflow.features import load_all_features_as_df
 from openmapflow.config import PROJECT_ROOT
 from openmapflow.config import DataPaths as dp
 from openmapflow.constants import (
@@ -25,6 +24,7 @@ from openmapflow.constants import (
     SUBSET,
 )
 from openmapflow.data_instance import DataInstance
+from openmapflow.features import load_all_features_as_df
 from openmapflow.labeled_dataset import duplicates_data, get_label_timesteps, unexported
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))

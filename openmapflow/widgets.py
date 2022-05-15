@@ -1,27 +1,26 @@
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
 from datetime import date, datetime
-from cropharvest.eo import EarthEngineExporter
-from cropharvest.countries import BBox
+from functools import partial
 
-from ipyleaflet import Map, basemaps, basemap_to_tiles, Rectangle
+import pyproj
+import shapely.ops as ops
+from cropharvest.countries import BBox
+from cropharvest.eo import EarthEngineExporter
+from ipyleaflet import Map, Rectangle, basemap_to_tiles, basemaps
 from ipywidgets import (
+    HTML,
     Box,
     DatePicker,
     Dropdown,
     FloatText,
-    HTML,
     Layout,
     RadioButtons,
     Select,
     ToggleButtons,
     VBox,
 )
-
-import pyproj
-import shapely.ops as ops
 from shapely.geometry.polygon import Polygon
-from functools import partial
 
 bbox_keys = ["min_lat", "min_lon", "max_lat", "max_lon"]
 

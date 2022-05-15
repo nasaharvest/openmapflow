@@ -246,7 +246,7 @@ class LabeledDataset:
 
     Args:
         dataset (str): The name of the dataset.
-        country (str): The country of the dataset (can be 'global' if points are in multiple countries)
+        country (str): The country of the dataset (can be 'global' for global datasets).
         raw_labels (Tuple[RawLabels, ...]): A list of raw labels used to create the dataset.
     """
 

@@ -30,7 +30,7 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements.txt
     - name: isort
-      run: python -m isort openmapflow
+      run: python -m  isort . --check --diff
     - name: black
       run: python -m black --check --diff .
     - name: flake8

@@ -8,10 +8,10 @@ import ee
 from google.cloud import storage
 from tqdm.notebook import tqdm
 
-from openmapflow.config import GCLOUD_PROJECT_ID, BucketNames
+from openmapflow.config import GCLOUD_PROJECT_ID
+from openmapflow.config import BucketNames
 from openmapflow.config import BucketNames as bn
 from openmapflow.labeled_dataset import bbox_from_str
-
 
 #######################################################
 # Status functions

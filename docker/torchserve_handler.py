@@ -1,16 +1,15 @@
+import os
+import re
 import sys
 import tempfile
 import time
-import os
-import re
-
 from datetime import datetime
 from pathlib import Path
-from google.cloud import storage  # type: ignore
-from ts.torch_handler.base_handler import BaseHandler
 from typing import Tuple
 
 from cropharvest.inference import Inference
+from google.cloud import storage  # type: ignore
+from ts.torch_handler.base_handler import BaseHandler
 
 temp_dir = tempfile.gettempdir()
 
