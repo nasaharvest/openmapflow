@@ -75,7 +75,7 @@ def distance_point_from_center(lat_idx: int, lon_idx: int, tif) -> int:
 
 def bbox_from_str(s: str):
     """
-    Generate bbox from path
+    Generate bbox from str
     """
     decimals_in_p = re.findall(r"=-?\d*\.?\d*", Path(s).name)
     coords = [float(d[1:]) for d in decimals_in_p[0:4]]
@@ -108,11 +108,12 @@ def get_tif_paths(path_to_bbox, lat, lon, start_date, end_date, pbar):
 
 
 def match_labels_to_tifs(labels: pd.DataFrame) -> pd.Series:
+    # Add a bounday to get additional tifs
     bbox_for_labels = BBox(
-        min_lon=labels[LON].min(),
-        min_lat=labels[LAT].min(),
-        max_lon=labels[LON].max(),
-        max_lat=labels[LAT].max(),
+        min_lon=labels[LON].min() - 1.0,
+        min_lat=labels[LAT].min() - 1.0,
+        max_lon=labels[LON].max() + 1.0,
+        max_lat=labels[LAT].max() + 1.0,
     )
     # Get all tif paths and bboxes
     path_to_bbox = {
@@ -280,7 +281,7 @@ class LabeledDataset:
                     df[df[SUBSET] == subset][CLASS_PROB] > 0.5
                 ).sum() / labels_in_subset
                 text += (
-                    f"\u2714 {subset} amount: {labels_in_subset},"
+                    f"\u2714 {subset} amount: {labels_in_subset}, "
                     + f"positive class: {positive_class_percentage:.1%}\n"
                 )
         return text
