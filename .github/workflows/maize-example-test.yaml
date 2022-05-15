@@ -6,7 +6,7 @@ name: test
 on:
   push:
     branches: [ main ]
-    paths: maize-example/data/**
+    #paths: maize-example/data/**
   pull_request:
     branches: [ main ]
     paths: maize-example/data/**
