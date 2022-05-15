@@ -3,6 +3,7 @@ File for storing references to datasets.
 """
 from typing import List
 
+from openmapflow.features import create_features
 from openmapflow.labeled_dataset import LabeledDataset
 from openmapflow.raw_labels import RawLabels
 
@@ -43,10 +44,13 @@ datasets: List[LabeledDataset] = [
                 latitude_col="Latitude",
                 longitude_col="Longitude",
                 class_prob=lambda df: df["Crop1"] == "Maize",
-                plant_date_col="Planting Date",
+                start_date_col="Planting Date",
                 x_y_from_centroid=False,
             )
             for i in [0, 1, 2]
         ),
     ),
 ]
+
+if __name__ == "__main__":
+    create_features(datasets)
