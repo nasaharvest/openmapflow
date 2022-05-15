@@ -3,14 +3,14 @@ File for storing references to datasets.
 """
 from typing import List
 from openmapflow.labeled_dataset import LabeledDataset
-from openmapflow.processor import Processor
+from openmapflow.raw_labels import RawLabels
 
 datasets: List[LabeledDataset] = [
     LabeledDataset(
         dataset="Uganda_buildings_2020",
         country="Uganda",
-        processors=(
-            Processor(
+        raw_labels=(
+            RawLabels(
                 filename="177_buildings_confidence_0.9.csv",
                 latitude_col="latitude",
                 longitude_col="longitude",

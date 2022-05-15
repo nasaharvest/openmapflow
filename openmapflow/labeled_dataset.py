@@ -37,7 +37,7 @@ from openmapflow.constants import (
     TIF_PATHS,
 )
 from openmapflow.data_instance import DataInstance
-from openmapflow.processor import Processor
+from openmapflow.raw_labels import RawLabels
 from openmapflow.utils import try_txt_read
 
 temp_dir = tempfile.gettempdir()
@@ -237,9 +237,7 @@ def get_label_timesteps(labels):
 class LabeledDataset:
     dataset: str = ""
     country: str = ""
-
-    # Process parameters
-    processors: Tuple[Processor, ...] = ()
+    raw_labels: Tuple[RawLabels, ...] = ()
 
     def __post_init__(self):
         self.raw_dir = PROJECT_ROOT / dp.RAW_LABELS / self.dataset
@@ -281,10 +279,10 @@ class LabeledDataset:
             df = pd.read_csv(self.labels_path)
             already_processed = df[SOURCE].unique()
 
-        # Go through processors and create new labels if necessary
+        # Go through raw_labels and create new standard labels if necessary
         new_labels = [
             p.process(self.raw_dir)
-            for p in self.processors
+            for p in self.raw_labels
             if p.filename not in str(already_processed)
         ]
 
