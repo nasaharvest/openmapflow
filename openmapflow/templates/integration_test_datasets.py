@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 from cropharvest.utils import memoized
 from dateutil.relativedelta import relativedelta
+
 from openmapflow.constants import (
     ALREADY_EXISTS,
     END,
