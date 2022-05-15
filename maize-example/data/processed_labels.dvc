@@ -1,5 +1,5 @@
 outs:
-- md5: d751713988987e9331980363e24189ce.dir
-  size: 0
-  nfiles: 0
+- md5: 19a8902193e06920bec6edbcbba00de2.dir
+  size: 405414
+  nfiles: 2
   path: processed_labels
