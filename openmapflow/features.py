@@ -55,9 +55,15 @@ def check_features_df_duplicates(df: pd.DataFrame) -> str:
     duplicates = df[df.duplicated(subset=cols_to_check)]
     num_dupes = len(duplicates)
     if num_dupes > 0:
-        return f"\u2716 Found {num_dupes} duplicates"
-    else:
-        return "\u2714 No duplicates found"
+        remove_ignore_dupes = input(f"Found {num_dupes} duplicates, remove? [y]/n: ")
+        if remove_ignore_dupes.lower() == "n":
+            return f"\u2716 Found {num_dupes} duplicates"
+
+        duplicates_data = try_txt_read(PROJECT_ROOT / dp.DUPLICATES)
+        feature_filenames = duplicates.filename.apply(lambda p: Path(p).stem).tolist()
+        with (PROJECT_ROOT / dp.DUPLICATES).open("w") as f:
+            f.write("\n".join(duplicates_data + feature_filenames))
+    return "\u2714 No duplicates found"
 
 
 def create_features(datasets: List[LabeledDataset]):
