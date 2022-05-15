@@ -22,7 +22,10 @@ jobs:
       with:
         python-version: 3.8
     - name: Install dependencies
-      run: python setup.py install
+      run: | 
+        which python
+        which python3
+        python setup.py install
     - name: dvc pull data
       env:
         # https://dvc.org/doc/user-guide/setup-google-drive-remote#authorization
@@ -37,4 +40,5 @@ jobs:
       run: |
         cd maize-example
         openmapflow cp templates/integration_test_datasets.py .
+        which python
         python -m unittest integration_test_datasets.py
