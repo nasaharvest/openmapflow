@@ -6,7 +6,7 @@ name: deploy
 on:
   push:
     branches: [ main ]
-    #paths: 'maize-example/data/models.dvc'
+    paths: 'maize-example/data/models.dvc'
 
 jobs:
   deploy: 
