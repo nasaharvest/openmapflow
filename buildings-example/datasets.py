@@ -34,6 +34,7 @@ datasets: List[LabeledDataset] = [
                 class_prob=0.0,
                 start_year=2017,
                 x_y_from_centroid=False,
+                train_val_test=(0.9, 0.05, 0.05),
                 filter_df=lambda df: df[(df.sumcrop / 100) > 0.5],
             ),
         ),
