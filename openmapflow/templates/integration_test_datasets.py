@@ -1,5 +1,4 @@
 import os
-import pickle
 import sys
 import unittest
 from datetime import date
@@ -8,7 +7,6 @@ from unittest import TestCase
 
 import numpy as np
 import pandas as pd
-from cropharvest.utils import memoized
 from dateutil.relativedelta import relativedelta
 
 from openmapflow.constants import (
@@ -22,19 +20,13 @@ from openmapflow.constants import (
     SUBSET,
 )
 from openmapflow.data_instance import DataInstance
-from openmapflow.features import load_all_features_as_df
+from openmapflow.features import load_all_features_as_df, load_feature
 from openmapflow.labeled_dataset import get_label_timesteps
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append("..")
 
 from datasets import datasets  # noqa: E402
-
-
-@memoized
-def load_feature(p):
-    with Path(p).open("rb") as f:
-        return pickle.load(f)
 
 
 class IntegrationTestLabeledData(TestCase):

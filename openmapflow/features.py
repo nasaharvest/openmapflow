@@ -1,15 +1,44 @@
+from __future__ import annotations
+
 import pickle
 import tarfile
 from pathlib import Path
-from typing import List
-
+from typing import List, TYPE_CHECKING
+import numpy as np
 import pandas as pd
 from cropharvest.utils import memoized
 
-from openmapflow.config import PROJECT_ROOT
-from openmapflow.config import DataPaths as dp
-from openmapflow.labeled_dataset import LabeledDataset
+from openmapflow.config import PROJECT_ROOT, DataPaths as dp
+from openmapflow.data_instance import DataInstance
 from openmapflow.utils import try_txt_read
+
+if TYPE_CHECKING:
+    from openmapflow.labeled_dataset import LabeledDataset
+
+
+def create_feature(
+    feature_path: str,
+    tif_values: np.ndarray,
+    tif_lat: float,
+    tif_lon: float,
+    tif_file: str,
+):
+    instance = DataInstance(
+        labelled_array=tif_values,
+        instance_lat=tif_lat,
+        instance_lon=tif_lon,
+        source_file=tif_file,
+    )
+    save_path = Path(feature_path)
+    save_path.parent.mkdir(exist_ok=True)
+    with save_path.open("wb") as f:
+        pickle.dump(instance, f)
+
+
+@memoized
+def load_feature(p) -> DataInstance:
+    with Path(p).open("rb") as f:
+        return pickle.load(f)
 
 
 @memoized

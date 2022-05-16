@@ -1,4 +1,3 @@
-import pickle
 import re
 import tempfile
 from dataclasses import dataclass
@@ -36,7 +35,7 @@ from openmapflow.constants import (
     SUBSET,
     TIF_PATHS,
 )
-from openmapflow.data_instance import DataInstance
+from openmapflow.features import create_feature
 from openmapflow.raw_labels import RawLabels
 from openmapflow.utils import try_txt_read
 
@@ -217,16 +216,7 @@ def create_pickled_labeled_dataset(labels: pd.DataFrame):
                 f.write("\n" + label[FEATURE_FILENAME])
             continue
 
-        instance = DataInstance(
-            labelled_array=labelled_array,
-            instance_lat=tif_lat,
-            instance_lon=tif_lon,
-            source_file=tif_file,
-        )
-        save_path = Path(label[FEATURE_PATH])
-        save_path.parent.mkdir(exist_ok=True)
-        with save_path.open("wb") as f:
-            pickle.dump(instance, f)
+        create_feature(label[FEATURE_PATH], labelled_array, tif_lon, tif_lat, tif_file)
 
 
 def get_label_timesteps(labels):
