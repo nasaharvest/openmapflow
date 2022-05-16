@@ -27,11 +27,12 @@ setup(
         "": [
             "Dockerfile",
             "notebooks/*.ipynb",
+            "scripts/*",
             "trigger_inference_function/*",
             "templates/*",
         ]
     },
-    scripts=["openmapflow/scripts/openmapflow", "openmapflow/scripts/deploy.sh"],
+    scripts=["openmapflow/scripts/openmapflow"],
     install_requires=[
         "cropharvest>=0.3.0",
         "dvc[gdrive]>=2.10.1",

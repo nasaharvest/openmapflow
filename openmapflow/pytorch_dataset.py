@@ -98,8 +98,8 @@ def _upsample_df(df: pd.DataFrame, upsample_ratio: float) -> pd.DataFrame:
         n=upsampled_amount, replace=True, random_state=42
     )
     print(
-        f"Upsampling: {minority_label} from {original_size} to {new_size} "
-        + f"using ratio upsampling ratio: {upsample_ratio}"
+        f"Upsampling: {minority_label} class from {original_size} to {new_size} "
+        + f"using upsampling ratio: {upsample_ratio}"
     )
     return df.append(upsampled_points, ignore_index=True)
 
