@@ -1,5 +1,3 @@
-import pickle
-
 import numpy as np
 import pandas as pd
 
@@ -10,8 +8,6 @@ try:
 except ImportError:
     print("PyTorch must be installed to use the PyTorch dataset.")
 
-
-from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union, cast
 
 from cropharvest.countries import BBox
@@ -19,20 +15,21 @@ from dateutil.relativedelta import relativedelta
 from tqdm import tqdm
 
 from openmapflow.constants import CLASS_PROB, END, FEATURE_PATH, LAT, LON, MONTHS, START
+from openmapflow.features import load_feature
 
 IS_POSITIVE_CLASS = "is_positive_class"
 IS_LOCAL = "is_local"
 
 
-def _is_local(df: pd.DataFrame, target_bbox: BBox) -> Union[bool, pd.Series]:
-    if target_bbox:
-        return (
-            (df[LAT] >= target_bbox.min_lat)
-            & (df[LAT] <= target_bbox.max_lat)
-            & (df[LON] >= target_bbox.min_lon)
-            & (df[LON] <= target_bbox.max_lon)
-        )
-    return True
+def _is_local(df: pd.DataFrame, bbox: Optional[BBox]) -> Union[bool, pd.Series]:
+    if bbox is None:
+        return True
+    return (
+        (df[LAT] >= bbox.min_lat)
+        & (df[LAT] <= bbox.max_lat)
+        & (df[LON] >= bbox.min_lon)
+        & (df[LON] <= bbox.max_lon)
+    )
 
 
 def _compute_num_timesteps(
@@ -58,7 +55,9 @@ def _compute_num_timesteps(
     return [int(t) for t in timesteps]
 
 
-def _df_stats(df: pd.DataFrame, subset: str) -> Dict[str, Union[float, int]]:
+def _df_stats(
+    df: pd.DataFrame, subset: str, upsample_ratio
+) -> Dict[str, Union[float, int]]:
     dataset_info: Dict[str, Union[float, int]] = {}
     if df[IS_LOCAL].any():
         dataset_info[f"local_{subset}_original_size"] = len(df[df[IS_LOCAL]])
@@ -76,7 +75,7 @@ def _df_stats(df: pd.DataFrame, subset: str) -> Dict[str, Union[float, int]]:
     return dataset_info
 
 
-def _upsample_df(df: pd.DataFrame, upsample_minority_ratio: float) -> pd.DataFrame:
+def _upsample_df(df: pd.DataFrame, upsample_ratio: float) -> pd.DataFrame:
     positive = df[IS_LOCAL] & df[IS_POSITIVE_CLASS]
     negative = df[IS_LOCAL] & ~df[IS_POSITIVE_CLASS]
     if len(df[positive]) > len(df[negative]):
@@ -89,18 +88,18 @@ def _upsample_df(df: pd.DataFrame, upsample_minority_ratio: float) -> pd.DataFra
         majority = negative
 
     original_size = len(df[minority])
-    additional_size = len(df[majority]) * (upsample_minority_ratio) - len(df[minority])
-    upsampled_size = original_size + additional_size
-    if additional_size < 0:
+    upsampled_amount = round(len(df[majority]) * upsample_ratio) - len(df[minority])
+    new_size = original_size + upsampled_amount
+    if upsampled_amount < 0:
         print("Warning: upsample_minority_ratio is too high")
         return df
 
     upsampled_points = df[minority].sample(
-        n=additional_size, replace=True, random_state=42
+        n=upsampled_amount, replace=True, random_state=42
     )
     print(
-        f"Upsampling: {minority_label} from {original_size} to {upsampled_size} "
-        + f"using ratio upsampling ratio: {upsample_minority_ratio}"
+        f"Upsampling: {minority_label} from {original_size} to {new_size} "
+        + f"using ratio upsampling ratio: {upsample_ratio}"
     )
     return df.append(upsampled_points, ignore_index=True)
 
@@ -146,11 +145,40 @@ class PyTorchDataset(Dataset):
         probability_threshold: float = 0.5,
     ) -> None:
 
-        assert subset in ["training", "validation", "testing"]
-        self.start_month_index = MONTHS.index(start_month)
-        self.input_months = input_months
+        for col in [CLASS_PROB, END, FEATURE_PATH, LAT, LON, START]:
+            if col not in df.columns:
+                raise ValueError(f"{col} is not a column in the dataframe")
 
-        df = df.copy()  # To avoid indexing errors
+        if subset not in ["training", "validation", "testing"]:
+            raise ValueError(
+                f"{subset} must be in ['training', 'validation', 'testing']"
+            )
+
+        if start_month not in MONTHS:
+            raise ValueError(
+                f"{start_month} is not a valid start month. Should be one of {MONTHS}"
+            )
+
+        if input_months < 1:
+            raise ValueError(
+                f"{input_months} is not a valid input months. Should be > 0"
+            )
+
+        if upsample_minority_ratio is not None and upsample_minority_ratio <= 0.0:
+            raise ValueError(
+                f"{upsample_minority_ratio} is not a valid upsample_minority_ratio. Should be > 0"
+            )
+
+        if probability_threshold < 0 or probability_threshold > 1:
+            raise ValueError(
+                f"{probability_threshold} is not a valid probability threshold."
+                + "Should be between 0 and 1"
+            )
+
+        self.input_months = input_months
+        self.start_month_index = MONTHS.index(start_month)
+        self.end_month_index = self.start_month_index + input_months
+
         if up_to_year is not None:
             df = df[pd.to_datetime(df[START]).dt.year <= up_to_year]
         df[IS_POSITIVE_CLASS] = df[CLASS_PROB] >= probability_threshold
@@ -161,7 +189,7 @@ class PyTorchDataset(Dataset):
             start_col=df[START],
             end_col=df[END],
         )
-        self.dataset_info = _df_stats(df, subset)
+        self.dataset_info = _df_stats(df, subset, upsample_minority_ratio)
         if upsample_minority_ratio:
             df = _upsample_df(df, upsample_minority_ratio)
         self.df = df
@@ -173,63 +201,51 @@ class PyTorchDataset(Dataset):
         # Cache dataset if necessary
         self.x: Optional[Tensor] = None
         self.y: Optional[Tensor] = None
-        self.weights: Optional[Tensor] = None
+        self.is_local: Optional[Tensor] = None
         self.cache = False
         if cache:
-            self.x, self.y, self.weights = self.to_array()
-            self.cache = cache
+            self.x, self.y, self.is_local = self.to_array()
+            self.cache = True
 
     def __len__(self) -> int:
         return len(self.df)
 
     def to_array(self) -> Tuple[Tensor, Tensor, Tensor]:
-        if self.x is not None:
-            assert self.y is not None
-            assert self.weights is not None
-            return self.x, self.y, self.weights
-        else:
-            x_list: List[Tensor] = []
-            y_list: List[Tensor] = []
-            weight_list: List[Tensor] = []
-            print("Loading data into memory")
-            for i in tqdm(range(len(self)), desc="Caching files"):
-                x, y, weight = self[i]
-                x_list.append(x)
-                y_list.append(y)
-                weight_list.append(weight)
+        if self.x is not None and self.y is not None and self.is_local is not None:
+            return self.x, self.y, self.is_local
+        x_list: List[Tensor] = []
+        y_list: List[Tensor] = []
+        is_local_list: List[Tensor] = []
+        print("Loading data into memory")
+        for i in tqdm(range(len(self)), desc="Caching files"):
+            x, y, is_local = self[i]
+            x_list.append(x)
+            y_list.append(y)
+            is_local_list.append(is_local)
+        return torch.stack(x_list), torch.stack(y_list), torch.stack(is_local_list)
 
-            return torch.stack(x_list), torch.stack(y_list), torch.stack(weight_list)
+    def _pad_if_necessary(self, x: np.ndarray) -> np.ndarray:
+        padding_necessary = x.shape[0] < self.input_months
+        if padding_necessary:
+            return np.concatenate(
+                [x, np.full((self.input_months - x.shape[0], x.shape[1]), np.nan)]
+            )
+        return x
 
     def __getitem__(self, index: int) -> Tuple[Tensor, Tensor, Tensor]:
-
-        if (self.cache) & (self.x is not None):
-            # if we upsample, the caching might not have happened yet
+        if self.cache:
             return (
                 cast(Tensor, self.x)[index],
                 cast(Tensor, self.y)[index],
-                cast(Tensor, self.weights)[index],
+                cast(Tensor, self.is_local)[index],
             )
 
-        row = self.df.iloc[index]
-
-        # first, we load up the target file
-        with Path(row[FEATURE_PATH]).open("rb") as f:
-            target_datainstance = pickle.load(f)
-
-        x = target_datainstance.labelled_array
-        x = x[
-            self.start_month_index : self.start_month_index  # noqa: E203
-            + self.input_months
-        ]
-
-        # If x is a partial time series, pad it to full length
-        if x.shape[0] < self.input_months:
-            x = np.concatenate(
-                [x, np.full((self.input_months - x.shape[0], x.shape[1]), np.nan)]
-            )
-
+        label_row = self.df.iloc[index]
+        x = load_feature(label_row[FEATURE_PATH]).labelled_array
+        x = x[self.start_month_index : self.end_month_index]  # noqa E203
+        x = self._pad_if_necessary(x)
         return (
             torch.from_numpy(x).float(),
-            torch.tensor(int(row[IS_POSITIVE_CLASS])).float(),
-            torch.tensor(int(row[IS_LOCAL])).float(),
+            torch.tensor(int(label_row[IS_POSITIVE_CLASS])).float(),
+            torch.tensor(int(label_row[IS_LOCAL])).float(),
         )
