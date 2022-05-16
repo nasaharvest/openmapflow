@@ -3,12 +3,14 @@ from __future__ import annotations
 import pickle
 import tarfile
 from pathlib import Path
-from typing import List, TYPE_CHECKING
+from typing import TYPE_CHECKING, List
+
 import numpy as np
 import pandas as pd
 from cropharvest.utils import memoized
 
-from openmapflow.config import PROJECT_ROOT, DataPaths as dp
+from openmapflow.config import PROJECT_ROOT
+from openmapflow.config import DataPaths as dp
 from openmapflow.data_instance import DataInstance
 from openmapflow.utils import try_txt_read
 

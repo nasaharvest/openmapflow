@@ -1,18 +1,19 @@
+import tempfile
 from unittest import TestCase
 
 import numpy as np
 import pandas as pd
-import tempfile
 
 from openmapflow.constants import CLASS_PROB, END, FEATURE_PATH, LAT, LON, START
-from openmapflow.pytorch_dataset import PyTorchDataset, _upsample_df
 from openmapflow.features import create_feature
+from openmapflow.pytorch_dataset import PyTorchDataset, _upsample_df
 
 tempdir = tempfile.gettempdir()
 
 
 class TestPyTorchDataset(TestCase):
 
+    tif_values: np.ndarray
     df: pd.DataFrame
 
     @classmethod
