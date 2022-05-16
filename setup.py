@@ -32,7 +32,7 @@ setup(
             "templates/*",
         ]
     },
-    scripts=["openmapflow/scripts/openmapflow"],
+    scripts=["openmapflow/scripts/openmapflow", "openmapflow/scripts/deploy.sh"],
     install_requires=[
         "cropharvest>=0.3.0",
         "dvc[gdrive]>=2.10.1",

@@ -1,29 +1,41 @@
 #!/bin/bash
+set -e
 librarydir() { python3 -c "from openmapflow.constants import LIBRARY_DIR; print(LIBRARY_DIR)"; }
 version() { python3 -c "from openmapflow.constants import VERSION; print(VERSION)"; }
 datasets() { python3 -c "from openmapflow.config import DataPaths; print(DataPaths.DATASETS)"; }
+check_openmapflow_yaml() {
+    if [ ! -f "openmapflow.yaml" ]; then
+        echo "No openmapflow.yaml file found. Please create one by running: openmapflow generate"
+        return 1
+    fi
+}
+
 
 case $1 in
     "cp")
         cp -r "$(librarydir)"/"$2" "$3"
         ;;
     "create-features")
+        check_openmapflow_yaml
         python3 -c "from datasets import datasets; from openmapflow.features import create_features; create_features(datasets)"
         ;;
     "datapath")
+        check_openmapflow_yaml
         python3 -c "from openmapflow.config import DataPaths; print(DataPaths.get('$2'))"
         ;;
     "datasets")
+        check_openmapflow_yaml
         cat "$(datasets)"
         ;;
     "deploy")
+        check_openmapflow_yaml
         source deploy.sh
         ;;
     "dir")
         librarydir
         ;;
     "generate")
-        python3 "$(librarydir)"/generate.py
+        python3 "$(librarydir)/generate.py"
         ;;
     "ls")
         ls "$2" "$(librarydir)"
