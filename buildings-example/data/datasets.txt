@@ -9,7 +9,9 @@ Uganda_buildings_2020 (Timesteps: 24)
 
 geowiki_landcover_2017 (Timesteps: 24)
 ----------------------------------------------------------------------------
-✔ training amount: 13993, positive class: 0.0%
+✔ training amount: 12582, positive class: 0.0%
+✔ validation amount: 743, positive class: 0.0%
+✔ testing amount: 668, positive class: 0.0%
 
 
 All data:
