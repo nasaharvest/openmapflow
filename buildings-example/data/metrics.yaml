@@ -1,0 +1,10 @@
+Uganda_buildings_2020_February:
+  local_testing_original_size: 1516
+  local_testing_positive_class_percentage: 0.5594
+  params: https://wandb.ai/izvonkov/buildings-example/runs/3uhmd55w
+  test_metrics:
+    accuracy: 0.9881
+    f1: 0.9893
+    precision: 0.9976
+    recall: 0.9811
+    roc_auc: 0.9998
