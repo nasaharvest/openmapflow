@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List
 
 import ee
+import numpy as np
 import pandas as pd
 
 
@@ -30,3 +31,12 @@ def confirmation(message, default="y"):
         return input("Confirm [y]/n: ").lower() != "n"
     else:
         return input("Confirm y/[n]: ").lower() == "y"
+
+
+def to_date(d):
+    if type(d) == np.datetime64:
+        return d.astype("M8[D]").astype("O")
+    elif type(d) == str:
+        return pd.to_datetime(d).date()
+    else:
+        return d.date()

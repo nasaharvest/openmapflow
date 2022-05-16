@@ -1,33 +1,12 @@
-import os
-import sys
-from datetime import date
 from unittest import TestCase
 
-import numpy as np
 import pandas as pd
 
 from openmapflow.constants import CLASS_PROB, SUBSET
-from openmapflow.raw_labels import (
-    RawLabels,
-    _set_class_prob,
-    _to_date,
-    _train_val_test_split,
-)
-
-os.chdir(os.path.dirname(os.path.realpath(__file__)))
-sys.path.append("..")
+from openmapflow.raw_labels import RawLabels, _set_class_prob, _train_val_test_split
 
 
 class TestRawLabels(TestCase):
-    def test_to_date(self):
-        np_date = np.datetime64("2020-01-01")
-        str_date = "2020-01-01"
-        df_date = pd.to_datetime("2020-01-01")
-        obj_date = date(2020, 1, 1)
-        self.assertEqual(_to_date(np_date), obj_date)
-        self.assertEqual(_to_date(str_date), obj_date)
-        self.assertEqual(_to_date(df_date), obj_date)
-
     def test_train_val_test_split(self):
         df = pd.DataFrame({"col": list(range(100))})
 
