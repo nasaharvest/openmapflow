@@ -17,7 +17,7 @@ from openmapflow.labeled_dataset import bbox_from_str
 # Status functions
 #######################################################
 bbox_regex = (
-    r".*min_lat=?\d*\.?\d*_min_lon=?\d*\.?\d*_max_lat=?\d*\.?\d*_max_lon=?\d*\.?\d*_"
+    r".*min_lat=-?\d*\.?\d*_min_lon=-?\d*\.?\d*_max_lat=-?\d*\.?\d*_max_lon=-?\d*\.?\d*_"
     + r"dates=\d{4}-\d{2}-\d{2}_\d{4}-\d{2}-\d{2}.*?\/"
 )
 
@@ -35,7 +35,7 @@ def get_available_bboxes(buckets_to_check=[BucketNames.INFERENCE_TIFS]):
             p = match.group()
             if p not in previous_matches:
                 previous_matches.append(p)
-                available_bboxes.append(bbox_from_str(Path(f"gs://{bucket_name}/{p}")))
+                available_bboxes.append(bbox_from_str(f"gs://{bucket_name}/{p}"))
     return available_bboxes
 
 
