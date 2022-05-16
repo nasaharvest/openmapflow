@@ -22,6 +22,7 @@ from openmapflow.constants import (
     START,
     SUBSET,
 )
+from openmapflow.utils import to_date
 
 # https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2
 min_date = date(2015, 7, 1)
@@ -29,15 +30,6 @@ min_date = date(2015, 7, 1)
 # Maximum date is 3 months back due to limitation of ERA5
 # https://www.ecmwf.int/en/forecasts/datasets/reanalysis-datasets/era5
 max_date = date.today().replace(day=1) + relativedelta(months=-3)
-
-
-def _to_date(d):
-    if type(d) == np.datetime64:
-        return d.astype("M8[D]").astype("O")
-    elif type(d) == str:
-        return pd.to_datetime(d).date()
-    else:
-        return d.date()
 
 
 def _train_val_test_split(
@@ -109,7 +101,7 @@ def _set_start_end_dates(
         df[START] = date(start_year, 1, 1)
         df[END] = date(start_year + 1, 12, 31)
     elif start_date_col:
-        df[START] = np.vectorize(_to_date)(df[start_date_col])
+        df[START] = np.vectorize(to_date)(df[start_date_col])
         df[START] = np.vectorize(lambda d: d.replace(month=1, day=1))(df[START])
         df[END] = np.vectorize(lambda d: d.replace(year=d.year + 1, month=12, day=31))(
             df[START]

@@ -175,6 +175,8 @@ class PyTorchDataset(Dataset):
                 + "Should be between 0 and 1"
             )
 
+        df = df.copy()
+
         self.input_months = input_months
         self.start_month_index = MONTHS.index(start_month)
         self.end_month_index = self.start_month_index + input_months
