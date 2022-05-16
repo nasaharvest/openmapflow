@@ -1,0 +1,10 @@
+Kenya_maize_2019_February:
+  local_testing_original_size: 461
+  local_testing_positive_class_percentage: 0.1063
+  params: https://wandb.ai/izvonkov/maize-example/runs/1618a6nf
+  test_metrics:
+    accuracy: 0.9089
+    f1: 0.6379
+    precision: 0.5522
+    recall: 0.7551
+    roc_auc: 0.953
