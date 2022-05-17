@@ -71,13 +71,6 @@ gcloud run deploy "$OPENMAPFLOW_PROJECT" --image "$OPENMAPFLOW_DOCKER_TAG":lates
         --max-instances 1000 \
         --port 8080
 
-gcloud run services add-iam-policy-binding \
-        --platform=managed \
-        --region="$OPENMAPFLOW_GCLOUD_LOCATION" \
-        --member=allUsers \
-        --role=roles/run.invoker \
-        "$OPENMAPFLOW_PROJECT"-management-api
-
 echo "Deploying model list server on port 8081"
 gcloud run deploy "$OPENMAPFLOW_PROJECT"-management-api --image "$OPENMAPFLOW_DOCKER_TAG":latest \
         --memory=4Gi \
@@ -86,12 +79,6 @@ gcloud run deploy "$OPENMAPFLOW_PROJECT"-management-api --image "$OPENMAPFLOW_DO
         --allow-unauthenticated \
         --port 8081
 
-gcloud run services add-iam-policy-binding \
-        --platform=managed \
-        --region="$OPENMAPFLOW_GCLOUD_LOCATION" \
-        --member=allUsers \
-        --role=roles/run.invoker \
-        "$OPENMAPFLOW_PROJECT"
 
 
 echo "7. Deploy inference trigger as a Google Cloud Function"
