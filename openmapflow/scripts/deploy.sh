@@ -71,7 +71,8 @@ gcloud run deploy "$OPENMAPFLOW_PROJECT" --image "$OPENMAPFLOW_DOCKER_TAG":lates
         --max-instances 1000 \
         --port 8080
 
-gcloud beta run services add-iam-policy-binding \
+gcloud run services add-iam-policy-binding \
+        --platform=managed \
         --region="$OPENMAPFLOW_GCLOUD_LOCATION" \
         --member=allUsers \
         --role=roles/run.invoker \
@@ -85,7 +86,8 @@ gcloud run deploy "$OPENMAPFLOW_PROJECT"-management-api --image "$OPENMAPFLOW_DO
         --allow-unauthenticated \
         --port 8081
 
-gcloud beta run services add-iam-policy-binding \
+gcloud run services add-iam-policy-binding \
+        --platform=managed \
         --region="$OPENMAPFLOW_GCLOUD_LOCATION" \
         --member=allUsers \
         --role=roles/run.invoker \
@@ -95,9 +97,9 @@ gcloud beta run services add-iam-policy-binding \
 echo "7. Deploy inference trigger as a Google Cloud Function"
 export OPENMAPFLOW_URL=$(gcloud run services list --platform managed --filter $OPENMAPFLOW_PROJECT --limit 1 --format='get(URL)')
 
-gcloud functions deploy trigger-$OPENMAPFLOW_PROJECT \
-    --source=$OPENMAPFLOW_LIBRARY_DIR/trigger_inference_function \
-    --trigger-bucket=$OPENMAPFLOW_GCLOUD_BUCKET_INFERENCE_TIFS \
+gcloud functions deploy trigger-"$OPENMAPFLOW_PROJECT" \
+    --source="$OPENMAPFLOW_LIBRARY_DIR"/trigger_inference_function \
+    --trigger-bucket="$OPENMAPFLOW_GCLOUD_BUCKET_INFERENCE_TIFS" \
     --allow-unauthenticated \
     --runtime=python39 \
     --entry-point=trigger \
