@@ -15,9 +15,9 @@ env | grep OPENMAPFLOW
 
 
 echo "2/7 Ensuring latest models are available for deployment"
-dvc pull $OPENMAPFLOW_MODELS_DIR.dvc -f
+dvc pull "$OPENMAPFLOW_MODELS_DIR".dvc -f
 
-export OPENMAPFLOW_MODELS=$(
+export "OPENMAPFLOW_MODELS"=$(
         python -c \
         "from openmapflow.config import get_model_names_as_str; \
         print(get_model_names_as_str())"
@@ -41,42 +41,55 @@ done
 
 echo "4/7 Checking if Artifact Registry needs to be created for storing OpenMapFlow docker images"
 gcloud services enable artifactregistry.googleapis.com
-if [ -z "$(gcloud artifacts repositories list --format='get(name)' --filter $OPENMAPFLOW_PROJECT)" ]; then
-        gcloud artifacts repositories create $OPENMAPFLOW_PROJECT \
-        --location $OPENMAPFLOW_GCLOUD_LOCATION \
+if [ -z "$(gcloud artifacts repositories list --format='get(name)' --filter "$OPENMAPFLOW_PROJECT")" ]; then
+        gcloud artifacts repositories create "$OPENMAPFLOW_PROJECT" \
+        --location "$OPENMAPFLOW_GCLOUD_LOCATION" \
         --repository-format docker
 fi
 
 echo "5/7 Build and push inference docker image to Google Cloud artifact registry"
-gcloud auth configure-docker ${OPENMAPFLOW_GCLOUD_LOCATION}-docker.pkg.dev
+gcloud auth configure-docker "${OPENMAPFLOW_GCLOUD_LOCATION}"-docker.pkg.dev
 docker build . \
-        -f $OPENMAPFLOW_LIBRARY_DIR/Dockerfile \
+        -f "$OPENMAPFLOW_LIBRARY_DIR"/Dockerfile \
         --build-arg MODELS="$OPENMAPFLOW_MODELS" \
         --build-arg MODELS_DIR="$OPENMAPFLOW_MODELS_DIR" \
         --build-arg DEST_BUCKET="$OPENMAPFLOW_GCLOUD_BUCKET_PREDS" \
-        -t $OPENMAPFLOW_DOCKER_TAG
+        -t "$OPENMAPFLOW_DOCKER_TAG"
 
-docker push $OPENMAPFLOW_DOCKER_TAG
+docker push "$OPENMAPFLOW_DOCKER_TAG"
 
 
 echo "6/7 Deploy inference docker image to Google Cloud Run"
 echo "Deploying prediction server on port 8080"
-gcloud run deploy $OPENMAPFLOW_PROJECT --image $OPENMAPFLOW_DOCKER_TAG:latest \
+gcloud run deploy "$OPENMAPFLOW_PROJECT" --image "$OPENMAPFLOW_DOCKER_TAG":latest \
         --cpu=4 \
         --memory=8Gi \
         --platform=managed \
-        --region=$OPENMAPFLOW_GCLOUD_LOCATION \
+        --region="$OPENMAPFLOW_GCLOUD_LOCATION" \
         --allow-unauthenticated \
         --concurrency 10 \
+        --max-instances 1000 \
         --port 8080
 
+gcloud beta run services add-iam-policy-binding \
+        --region="$OPENMAPFLOW_GCLOUD_LOCATION" \
+        --member=allUsers \
+        --role=roles/run.invoker \
+        "$OPENMAPFLOW_PROJECT"-management-api
+
 echo "Deploying model list server on port 8081"
-gcloud run deploy $OPENMAPFLOW_PROJECT-management-api --image $OPENMAPFLOW_DOCKER_TAG:latest \
+gcloud run deploy "$OPENMAPFLOW_PROJECT"-management-api --image "$OPENMAPFLOW_DOCKER_TAG":latest \
         --memory=4Gi \
         --platform=managed \
-        --region=$OPENMAPFLOW_GCLOUD_LOCATION \
+        --region="$OPENMAPFLOW_GCLOUD_LOCATION" \
         --allow-unauthenticated \
         --port 8081
+
+gcloud beta run services add-iam-policy-binding \
+        --region="$OPENMAPFLOW_GCLOUD_LOCATION" \
+        --member=allUsers \
+        --role=roles/run.invoker \
+        "$OPENMAPFLOW_PROJECT"
 
 
 echo "7. Deploy inference trigger as a Google Cloud Function"
