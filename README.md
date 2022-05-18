@@ -32,12 +32,6 @@ openmapflow cp notebooks .
 
 ## Examples
 
-[img1]: https://storage.googleapis.com/harvest-public-assets/openmapflow/crop-mask-example-map.png
-
-[img2]: https://storage.googleapis.com/harvest-public-assets/openmapflow/buildings-example-map.png
-
-[img3]: https://storage.googleapis.com/harvest-public-assets/openmapflow/maize-example-map.png
-
 [ta1]: https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-test.yaml
 [tb1]: https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-test.yaml/badge.svg
 [da1]: https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-deploy.yaml
@@ -53,13 +47,10 @@ openmapflow cp notebooks .
 [da3]: https://github.com/nasaharvest/openmapflow/actions/workflows/maize-example-deploy.yaml
 [db3]: https://github.com/nasaharvest/openmapflow/actions/workflows/maize-example-deploy.yaml/badge.svg
 
-
 ![3maps-gif](assets/3maps.gif)
-
-
-| Cropland                      | Buildings               | Maize                    |
-| ------------                  | ----------------              | --------------                |
-| [![tb1]][ta1] [![db1]][da1] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;   | [![tb2]][ta2] [![db2]][da2] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  | [![tb3]][ta3] [![db3]][da3] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  |
+| Cropland | Buildings | Maize  |
+| ---------| --------   | ------|
+| [![tb1]][ta1] [![db1]][da1] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; | [![tb2]][ta2] [![db2]][da2] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; | [![tb3]][ta3] [![db3]][da3] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  |
 
 
 
