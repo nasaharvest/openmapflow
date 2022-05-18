@@ -54,10 +54,13 @@ openmapflow cp notebooks .
 [db3]: https://github.com/nasaharvest/openmapflow/actions/workflows/maize-example-deploy.yaml/badge.svg
 
 
-| Cropland                      | Buildings               | Maize                   |
+![3maps-gif](assets/3maps.gif)
+
+
+| Cropland                      | Buildings               | Maize                    |
 | ------------                  | ----------------              | --------------                |
-| [![tb1]][ta1] [![db1]][da1]   | [![tb2]][ta2] [![db2]][da2]   | [![tb3]][ta3] [![db3]][da3]   |
-| ![Crop mask][img1]            | ![Buildings][img2]            | ![Crop Type][img3]            |
+| [![tb1]][ta1] [![db1]][da1] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;   | [![tb2]][ta2] [![db2]][da2] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  | [![tb3]][ta3] [![db3]][da3] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  |
+
 
 
 
