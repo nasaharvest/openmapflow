@@ -65,6 +65,7 @@ def fill_in_action(src_yml_path, dest_yml_path, sub_paths, sub_cd):
         content = f.read()
     content = content.replace("<PATHS>", sub_paths)
     content = content.replace("<CD>", sub_cd)
+    dest_yml_path.mkdir(parents=True, exist_ok=True)
     with dest_yml_path.open("w") as f:
         f.write(content)
 
@@ -115,7 +116,7 @@ def setup_dvc(PROJECT_ROOT, is_subdir, dp):
         print_and_run("dvc init")
 
     dvc_files = [dp.RAW_LABELS, dp.PROCESSED_LABELS, dp.COMPRESSED_FEATURES, dp.MODELS]
-    print_and_run("dvc add " + " ".join([dvc_files]))
+    print_and_run("dvc add " + " ".join(dvc_files))
 
     with open("data/.gitignore", "a") as f:
         f.write("/features")
