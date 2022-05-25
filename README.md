@@ -5,16 +5,22 @@
 Rapid map creation with machine learning and earth observation data.
 
 ## How it works
+
+[cb]: https://colab.research.google.com/assets/colab-badge.svg
+[0]: https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/generate_project.ipynb
+[1]: https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/new_data.ipynb
+[2]: https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/train.ipynb
+[3]: https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/create_map.ipynb
+
+Generate an OpenMapFlow project using Colab Notebook: [![cb]][0]
+
+Or generate an OpenMapFlow project using CLI, inside a Github repository:
 ```bash
 pip install openmapflow
 openmapflow generate
 ```
-Generates a project structure for: Adding data ➞ Training a model ➞ Creating a map (all steps accessible through Colab)
 
-[cb]: https://colab.research.google.com/assets/colab-badge.svg
-[1]: https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/new_data.ipynb
-[2]: https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/train.ipynb
-[3]: https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/create_map.ipynb
+Generates a project structure for: Adding data ➞ Training a model ➞ Creating a map (all steps accessible through Colab)
 
 | Adding data  | Training a model | Creating a map |
 | ------------ | ---------------- | -------------- |
