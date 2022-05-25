@@ -65,7 +65,7 @@ def fill_in_action(src_yml_path, dest_yml_path, sub_paths, sub_cd):
         content = f.read()
     content = content.replace("<PATHS>", sub_paths)
     content = content.replace("<CD>", sub_cd)
-    dest_yml_path.mkdir(parents=True, exist_ok=True)
+    dest_yml_path.parent.mkdir(parents=True, exist_ok=True)
     with dest_yml_path.open("w") as f:
         f.write(content)
 
