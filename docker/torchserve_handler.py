@@ -5,23 +5,50 @@ import tempfile
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Tuple
+from typing import Dict, List, Tuple
 
 from cropharvest.inference import Inference
-from google.cloud import storage  # type: ignore
+from google.cloud import storage
 from ts.torch_handler.base_handler import BaseHandler
 
-temp_dir = tempfile.gettempdir()
-
-dest_bucket_name = os.environ.get("DEST_BUCKET")
+dest_bucket_name: str = os.environ["DEST_BUCKET"]
 print(f"HANDLER: Dest bucket: {dest_bucket_name}")
 
 
-def start_date_from_str(p) -> datetime:
-    dates = re.findall(r"\d{4}-\d{2}-\d{2}", str(p))
+def start_date_from_str(uri: str) -> datetime:
+    dates = re.findall(r"\d{4}-\d{2}-\d{2}", str(uri))
     if len(dates) < 2:
-        raise ValueError(f"{p} should have start and end date")
+        raise ValueError(f"{uri} should have start and end date")
     return datetime.strptime(dates[0], "%Y-%m-%d")
+
+
+def download_file(uri: str) -> str:
+    """
+    Downloads file from Google Cloud Storage bucket and returns local file path
+    Args:
+        uri (str):  Path to file on Google Cloud Storage bucket
+    """
+    uri_as_path = Path(uri)
+    bucket_name = uri_as_path.parts[1]
+    file_name = "/".join(uri_as_path.parts[2:])
+    bucket = storage.Client().bucket(bucket_name)
+    retries = 3
+    blob = bucket.blob(file_name)
+    for i in range(retries + 1):
+        if blob.exists():
+            print(f"HANDLER: Verified {uri} exists.")
+            break
+        if i == retries:
+            raise ValueError(f"HANDLER ERROR: {uri} does not exist.")
+
+        print(f"HANDLER: {uri} does not exist, sleeping for 5 seconds and retrying.")
+        time.sleep(5)
+    local_path = f"{tempfile.gettempdir()}/{uri_as_path.name}"
+    blob.download_to_filename(local_path)
+    if not Path(local_path).exists():
+        raise FileExistsError(f"HANDLER: {uri} from storage was not downloaded")
+    print(f"HANDLER: Verified file downloaded to {local_path}")
+    return local_path
 
 
 class ModelHandler(BaseHandler):
@@ -34,31 +61,6 @@ class ModelHandler(BaseHandler):
     def __init__(self):
         print("HANDLER: Starting up handler")
         super().__init__()
-
-    def download_file(self, uri: str):
-        uri_as_path = Path(uri)
-        bucket_name = uri_as_path.parts[1]
-        file_name = "/".join(uri_as_path.parts[2:])
-        bucket = storage.Client().bucket(bucket_name)
-        retries = 3
-        blob = bucket.blob(file_name)
-        for i in range(retries + 1):
-            if blob.exists():
-                print(f"HANDLER: Verified {uri} exists.")
-                break
-            if i == retries:
-                raise ValueError(f"HANDLER ERROR: {uri} does not exist.")
-
-            print(
-                f"HANDLER: {uri} does not yet exist, sleeping for 5 seconds and trying again."
-            )
-            time.sleep(5)
-        local_path = f"{tempfile.gettempdir()}/{uri_as_path.name}"
-        blob.download_to_filename(local_path)
-        if not Path(local_path).exists():
-            raise FileExistsError(f"HANDLER: {uri} from storage was not downloaded")
-        print(f"HANDLER: Verified file downloaded to {local_path}")
-        return local_path
 
     def initialize(self, context):
         super().initialize(context)
@@ -77,15 +79,16 @@ class ModelHandler(BaseHandler):
 
         return uri
 
-    def inference(self, data, *args, **kwargs) -> Tuple[str, str]:
+    def inference(self, data: str, *args, **kwargs) -> Tuple[str, str]:
         uri = data
-        local_path = self.download_file(uri)
+        local_path = download_file(uri)
         uri_as_path = Path(uri)
         local_dest_path = Path(tempfile.gettempdir() + f"/pred_{uri_as_path.stem}.nc")
 
-        print("HANDLER: Starting inference")
         start_date = start_date_from_str(uri)
         print(f"HANDLER: Start date: {start_date}")
+
+        print("HANDLER: Starting inference")
         self.inference_module.run(
             local_path=local_path, start_date=start_date, dest_path=local_dest_path
         )
@@ -100,6 +103,6 @@ class ModelHandler(BaseHandler):
         print(f"HANDLER: Uploaded to {dest_uri}")
         return uri, dest_uri
 
-    def postprocess(self, data):
+    def postprocess(self, data: Tuple[str, str]) -> List[Dict[str, str]]:
         uri, dest_uri = data
         return [{"src_uri": uri, "dest_uri": dest_uri}]
