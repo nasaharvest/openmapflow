@@ -19,12 +19,21 @@ from sklearn.metrics import (
 )
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+
 from tsai.models.TransformerModel import TransformerModel
 
 from openmapflow.config import PROJECT
 from openmapflow.constants import SUBSET
 from openmapflow.pytorch_dataset import PyTorchDataset
 from openmapflow.train_utils import device, generate_model_name, model_path_from_name
+
+try:
+    import google.colab
+
+    IN_COLAB = True
+except:
+    IN_COLAB = False
+
 
 warnings.simplefilter("ignore", UserWarning)  # TorchScript throws excessive warnings
 
@@ -35,7 +44,7 @@ parser.add_argument("--start_month", type=str, default="February")
 parser.add_argument("--batch_size", type=int, default=64)
 parser.add_argument("--upsample_minority_ratio", type=float, default=0.5)
 parser.add_argument("--lr", type=float, default=0.001)
-parser.add_argument("--epochs", type=int, default=100)
+parser.add_argument("--epochs", type=int, default=10)
 parser.add_argument("--wandb", dest="wandb", action="store_true")
 parser.set_defaults(wandb=False)
 
@@ -114,12 +123,18 @@ val_batches = 1 + len(val_data) // batch_size
 
 with tqdm(range(num_epochs)) as tqdm_epoch:
     for epoch in tqdm_epoch:
-        tqdm_epoch.set_description(f"Epoch {epoch}")
+        tqdm_epoch.set_description(f"Epoch {epoch+1}")
 
         # ------------------------ Training ----------------------------------------
         total_train_loss = 0.0
         model.train()
-        for x in tqdm(train_dataloader, total=train_batches, desc="Train", leave=False):
+        for x in tqdm(
+            train_dataloader,
+            total=train_batches,
+            desc="Train",
+            leave=False,
+            disable=IN_COLAB,
+        ):
             inputs, labels = x[0].to(device), x[1].to(device)
 
             # zero the parameter gradients
@@ -141,7 +156,11 @@ with tqdm(range(num_epochs)) as tqdm_epoch:
         model.eval()
         with torch.no_grad():
             for x in tqdm(
-                val_dataloader, total=val_batches, desc="Validate", leave=False
+                val_dataloader,
+                total=val_batches,
+                desc="Validate",
+                leave=False,
+                disable=IN_COLAB,
             ):
                 inputs, labels = x[0].to(device), x[1].to(device)
 
@@ -188,7 +207,7 @@ with tqdm(range(num_epochs)) as tqdm_epoch:
                 model_path.unlink()
             sm.save(str(model_path))
 
-print(f"Model name: {model_name}")
+print(f"MODEL_NAME={model_name}")
 if wandb_enabled and run:
     run.finish()
     print(f"Wandb url: {run.url}")
