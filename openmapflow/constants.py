@@ -5,7 +5,9 @@ LIBRARY_DIR = Path(__file__).parent
 TEMPLATES_DIR = LIBRARY_DIR / "templates"
 DEFAULT_CONFIG_PATH = TEMPLATES_DIR / "openmapflow-default.yaml"
 
-TEMPLATE_DATASETS = TEMPLATES_DIR / "example_datasets.py"
+TEMPLATE_DATASETS = TEMPLATES_DIR / "datasets.py"
+TEMPLATE_TRAIN = TEMPLATES_DIR / "train.py"
+TEMPLATE_EVALUATE = TEMPLATES_DIR / "evaluate.py"
 TEMPLATE_DEPLOY_YML = TEMPLATES_DIR / "openmapflow-github-deploy.yaml"
 TEMPLATE_TEST_YML = TEMPLATES_DIR / "openmapflow-github-test.yaml"
 VERSION = "0.0.1"

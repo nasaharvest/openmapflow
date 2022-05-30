@@ -8,7 +8,9 @@ from openmapflow.constants import (
     CONFIG_FILE,
     TEMPLATE_DATASETS,
     TEMPLATE_DEPLOY_YML,
+    TEMPLATE_EVALUATE,
     TEMPLATE_TEST_YML,
+    TEMPLATE_TRAIN,
 )
 
 
@@ -45,9 +47,13 @@ def create_openmapflow_config(overwrite: bool):
         f.write(openmapflow_str)
 
 
-def copy_datasets_py_file(PROJECT_ROOT, overwrite: bool):
+def copy_template_files(PROJECT_ROOT, overwrite: bool):
     if allow_write("datasets.py", overwrite):
         shutil.copy(str(TEMPLATE_DATASETS), str(PROJECT_ROOT / "datasets.py"))
+    if allow_write("train.py", overwrite):
+        shutil.copy(str(TEMPLATE_TRAIN), str(PROJECT_ROOT / "train.py"))
+    if allow_write("evaluate.py", overwrite):
+        shutil.copy(str(TEMPLATE_EVALUATE), str(PROJECT_ROOT / "evaluate.py"))
 
 
 def create_data_dirs(dp, overwrite):
@@ -150,8 +156,8 @@ if __name__ == "__main__":
     from openmapflow.config import PROJECT, PROJECT_ROOT
     from openmapflow.config import DataPaths as dp  # noqa E402
 
-    print(f"2/{n} Copying datasets.py file")
-    copy_datasets_py_file(PROJECT_ROOT, args.overwrite)
+    print(f"2/{n} Copying datasets.py, train.py, evaluate.py")
+    copy_template_files(PROJECT_ROOT, args.overwrite)
 
     print(f"3/{n} Creating data directories")
     create_data_dirs(dp=dp, overwrite=args.overwrite)
