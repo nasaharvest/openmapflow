@@ -170,20 +170,8 @@ if __name__ == "__main__":
     print(f"5/{n} Setting up dvc (data version control)")
     setup_dvc(PROJECT_ROOT, is_subdir, dp)
 
-    print(f"6/{n} Ready to go! 🎉")
-    colab_url = "https://colab.research.google.com"
-    nb_home = (
-        f"{colab_url}/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks"
-    )
     print(
-        f"""
-Push your changes to Github and you'll be able to run Colab notebooks:
-1) Adding new data\n{nb_home}/new_data.ipynb
-2) Training a model\n{nb_home}/train.ipynb
-3) Creating a map\n{nb_home}/create_map.ipynb
-
-Notebooks can also be run locally:
-openmapflow copy notebooks .
-jupyter notebook
-"""
+        f"6/{n} Ready to go! 🎉\n"
+        f"See: https://github.com/nasaharvest/openmapflow/blob/main/README.md "
+        + "for guides on adding data, training models, and creating maps"
     )
