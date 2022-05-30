@@ -1,0 +1,78 @@
+from argparse import ArgumentParser
+
+import pandas as pd
+import torch
+import yaml
+from datasets import datasets
+from sklearn.metrics import (
+    accuracy_score,
+    f1_score,
+    precision_score,
+    recall_score,
+    roc_auc_score,
+)
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+
+from openmapflow.config import PROJECT_ROOT, DataPaths
+from openmapflow.constants import SUBSET
+from openmapflow.pytorch_dataset import PyTorchDataset
+from openmapflow.train_utils import device, model_path_from_name
+
+# ------------ Arguments -------------------------------------
+parser = ArgumentParser()
+parser.add_argument("--model_name", type=str)
+parser.add_argument("--start_month", type=str, default="February")
+parser.add_argument("--batch_size", type=int, default=64)
+parser.add_argument("--wandb_url", type=str, default="")
+
+args = parser.parse_args().__dict__
+start_month: str = args["start_month"]
+batch_size: int = args["batch_size"]
+wandb_url: str = args["wandb_url"]
+model_name: str = args["model_name"]
+model_path = model_path_from_name(model_name=model_name)
+
+# ------------ Dataloaders -------------------------------------
+df = pd.concat([d.load_labels() for d in datasets])
+test_data = PyTorchDataset(
+    df=df[df[SUBSET] == "testing"], start_month=start_month, subset="testing"
+)
+test_dataloader = DataLoader(test_data, batch_size=batch_size, shuffle=False)
+
+model_pt = torch.jit.load(model_path)
+model_pt.eval()
+
+# ------------ Testing / Evaluation -------------------------------
+test_batches = 1 + len(test_data) // batch_size
+y_true, y_score, y_pred = [], [], []
+with torch.no_grad():
+    for x in tqdm(test_dataloader, total=test_batches, desc="Testing", leave=False):
+        inputs, labels = x[0].to(device), x[1].to(device)
+
+        # Get model outputs
+        outputs = model_pt(inputs)
+        y_true += labels.tolist()
+        y_score += outputs.tolist()
+        y_pred += (outputs > 0.5).long().tolist()
+
+metrics = {
+    "accuracy": accuracy_score(y_true, y_pred),
+    "f1": f1_score(y_true, y_pred),
+    "precision": precision_score(y_true, y_pred),
+    "recall": recall_score(y_true, y_pred),
+    "roc_auc": roc_auc_score(y_true, y_score),
+}
+metrics = {k: round(float(v), 4) for k, v in metrics.items()}
+
+all_metrics = {}
+if (PROJECT_ROOT / DataPaths.METRICS).exists():
+    with (PROJECT_ROOT / DataPaths.METRICS).open() as f:
+        all_metrics = yaml.safe_load(f)
+
+all_metrics[model_name] = {"test_metrics": metrics, **test_data.dataset_info}
+if wandb_url:
+    all_metrics[model_name]["params"] = wandb_url
+
+with open((PROJECT_ROOT / DataPaths.METRICS), "w") as f:
+    yaml.dump(all_metrics, f)
