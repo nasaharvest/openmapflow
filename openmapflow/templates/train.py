@@ -1,3 +1,6 @@
+"""
+Example model training script
+"""
 import warnings
 from argparse import ArgumentParser
 

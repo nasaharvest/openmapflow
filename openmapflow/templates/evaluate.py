@@ -1,3 +1,6 @@
+"""
+Example model evaluation script
+"""
 from argparse import ArgumentParser
 
 import pandas as pd
