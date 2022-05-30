@@ -4,30 +4,7 @@
 
 Rapid map creation with machine learning and earth observation data.
 
-## How it works
-
 [cb]: https://colab.research.google.com/assets/colab-badge.svg
-[0]: https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/generate_project.ipynb
-[1]: https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/new_data.ipynb
-[2]: https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/train.ipynb
-[3]: https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/create_map.ipynb
-
-Generate an OpenMapFlow project using Colab Notebook: [![cb]][0]
-
-Or generate an OpenMapFlow project using CLI, inside a Github repository:
-```bash
-pip install openmapflow
-openmapflow generate
-```
-
-Generates a project structure for: Adding data ➞ Training a model ➞ Creating a map (all steps accessible through Colab)
-
-| Adding data  | Training a model | Creating a map |
-| ------------ | ---------------- | -------------- |
-| [![cb]][1]   | [![cb]][2]       | [![cb]][3]     |
-
-
-Notebooks can also be run locally by pulling them from the package: `openmapflow cp notebooks .`
 
 ## Examples
 
@@ -46,10 +23,94 @@ Notebooks can also be run locally by pulling them from the package: `openmapflow
 [da3]: https://github.com/nasaharvest/openmapflow/actions/workflows/maize-example-deploy.yaml
 [db3]: https://github.com/nasaharvest/openmapflow/actions/workflows/maize-example-deploy.yaml/badge.svg
 
-![3maps-gif](assets/3maps.gif)
 | [Cropland](https://github.com/nasaharvest/openmapflow/tree/main/crop-mask-example) | [Buildings](https://github.com/nasaharvest/openmapflow/tree/main/buildings-example) | [Maize](https://github.com/nasaharvest/openmapflow/tree/main/maize-example) |
 | ---------| --------   | ------|
 | [![tb1]][ta1] [![db1]][da1] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; | [![tb2]][ta2] [![db2]][da2] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; | [![tb3]][ta3] [![db3]][da3] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  |
+
+![3maps-gif](assets/3maps.gif)
+
+
+## Demo
+
+TODO
+## Generating a project
+Inside a Github repository run:
+```bash
+pip install openmapflow
+openmapflow generate
+```
+This generates a project for: Adding data ➞ Training a model ➞ Creating a map 
+
+Alternatively, a project can also be generated within Colab: [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/generate_project.ipynb)
+
+## Adding data [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/new_data.ipynb)
+
+Move raw labels into project:
+```bash
+export RAW_LABEL_DIR=$(openmapflow datapath RAW_LABELS)
+mkdir RAW_LABEL_DIR/<my dataset name>
+cp -r <path to my raw data files> RAW_LABEL_DIR/<my dataset name>
+```
+Add reference to data using a `LabeledDataset` object in datasets.py:
+```python
+datasets = [
+    LabeledDataset(
+        dataset="example_dataset",
+        country="Togo",
+        raw_labels=(
+            RawLabels(
+                filename="Togo_2019.csv",
+                longitude_col="longitude",
+                latitude_col="latitude",
+                class_prob=lambda df: df["crop"],
+                start_year=2019,
+                x_y_from_centroid=False,
+            ),
+        ),
+    ),
+    ...
+]
+```
+Run feature creation:
+```bash
+earthengine authenticate    # For getting new earth observation data
+gcloud auth login           # For getting cached earth observation data
+
+openmapflow create-features # Initiatiates or checks progress of features creation
+# May take long time depending on amount of labels in dataset 
+# TODO make the end more obvious
+
+openmapflow datasets        # Shows the status of datasets
+
+dvc commit && dvc push      # Push new data to data version control
+
+git add .
+git commit -m'Created new features'
+git push
+```
+
+## Training a model [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/train.ipynb)
+```bash
+# Pull in latest data
+dvc pull    
+tar -xzf $(openmapflow datapath COMPRESSED_FEATURES) -C data
+
+export MODEL_NAME=<model_name>              # Set model name
+python train.py --model_name $MODEL_NAME    # Train a model
+python evaluate.py --model_name $MODEL_NAME # Record test metrics
+
+dvc commit && dvc push  # Push new models to data version control
+
+git checkout -b"$MODEL_NAME"
+git add .
+git commit -m "$MODEL_NAME"
+git push --set-upstream origin "$MODEL_NAME"
+```
+
+## Creating a map [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/create_map.ipynb)
+
+Only available through Colab. Cloud Architecture must be deployed using the deploy.yaml Github Action.
+
 
 
 
