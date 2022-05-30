@@ -77,5 +77,7 @@ all_metrics[model_name] = {"test_metrics": metrics, **test_data.dataset_info}
 if wandb_url:
     all_metrics[model_name]["params"] = wandb_url
 
+print(yaml.dump(all_metrics[model_name], allow_unicode=True, default_flow_style=False))
+
 with open((PROJECT_ROOT / DataPaths.METRICS), "w") as f:
     yaml.dump(all_metrics, f)
