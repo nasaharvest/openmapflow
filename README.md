@@ -1,13 +1,3 @@
-# OpenMapFlow 🌍
-[![CI Status](https://github.com/nasaharvest/openmapflow/actions/workflows/ci.yaml/badge.svg)](https://github.com/nasaharvest/openmapflow/actions/workflows/ci.yaml)
-[![Docker Status](https://github.com/nasaharvest/openmapflow/actions/workflows/docker.yaml/badge.svg)](https://github.com/nasaharvest/openmapflow/actions/workflows/docker.yaml)
-
-Rapid map creation with machine learning and earth observation data.
-
-[cb]: https://colab.research.google.com/assets/colab-badge.svg
-
-## Examples
-
 [ta1]: https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-test.yaml
 [tb1]: https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-test.yaml/badge.svg
 [da1]: https://github.com/nasaharvest/openmapflow/actions/workflows/crop-mask-example-deploy.yaml
@@ -23,25 +13,32 @@ Rapid map creation with machine learning and earth observation data.
 [da3]: https://github.com/nasaharvest/openmapflow/actions/workflows/maize-example-deploy.yaml
 [db3]: https://github.com/nasaharvest/openmapflow/actions/workflows/maize-example-deploy.yaml/badge.svg
 
-| [Cropland](https://github.com/nasaharvest/openmapflow/tree/main/crop-mask-example) | [Buildings](https://github.com/nasaharvest/openmapflow/tree/main/buildings-example) | [Maize](https://github.com/nasaharvest/openmapflow/tree/main/maize-example) |
-| ---------| --------   | ------|
-| [![tb1]][ta1] [![db1]][da1] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; | [![tb2]][ta2] [![db2]][da2] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; | [![tb3]][ta3] [![db3]][da3] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  |
+# OpenMapFlow 🌍
+[![CI Status](https://github.com/nasaharvest/openmapflow/actions/workflows/ci.yaml/badge.svg)](https://github.com/nasaharvest/openmapflow/actions/workflows/ci.yaml)
+[![Docker Status](https://github.com/nasaharvest/openmapflow/actions/workflows/docker.yaml/badge.svg)](https://github.com/nasaharvest/openmapflow/actions/workflows/docker.yaml)
+[![tb1]][ta1] [![db1]][da1]
+[![tb2]][ta2] [![db2]][da2]
+[![tb3]][ta3] [![db3]][da3]
+
+
+Rapid map creation with machine learning and earth observation data.
+
+[cb]: https://colab.research.google.com/assets/colab-badge.svg
+
+**Examples:** [Cropland](https://github.com/nasaharvest/openmapflow/tree/main/crop-mask-example), [Buildings](https://github.com/nasaharvest/openmapflow/tree/main/buildings-example), [Maize](https://github.com/nasaharvest/openmapflow/tree/main/maize-example)
 
 ![3maps-gif](assets/3maps.gif)
-
 
 ## Demo
 
 TODO
-## Generating a project
+## Generating a project [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/generate_project.ipynb)
 Inside a Github repository run:
 ```bash
 pip install openmapflow
 openmapflow generate
 ```
 This generates a project for: Adding data ➞ Training a model ➞ Creating a map 
-
-Alternatively, a project can also be generated within Colab: [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/generate_project.ipynb)
 
 ## Adding data [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/new_data.ipynb)
 
