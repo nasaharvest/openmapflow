@@ -29,9 +29,16 @@ Rapid map creation with machine learning and earth observation data.
 
 ![3maps-gif](assets/3maps.gif)
 
-## Demo
+* [Tutorial](#tutorial)
+* [Generating a project](#generating-a-project)
+* [Adding data](#adding-data)
+* [Training a model](#training-a-model)
+* [Creating a map](#creating-a-map)
 
-TODO
+## Tutorial [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/tutorial.ipynb)
+Colab notebook tutorial demonstrating project generation, data ingestion, and model training.
+
+
 ## Generating a project [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/generate_project.ipynb)
 Inside a Github repository run:
 ```bash
