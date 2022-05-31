@@ -19,7 +19,6 @@ from sklearn.metrics import (
 )
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-
 from tsai.models.TransformerModel import TransformerModel
 
 from openmapflow.config import PROJECT
