@@ -27,10 +27,10 @@ from openmapflow.pytorch_dataset import PyTorchDataset
 from openmapflow.train_utils import device, generate_model_name, model_path_from_name
 
 try:
-    import google.colab
+    import google.colab  # noqa
 
     IN_COLAB = True
-except:
+except ImportError:
     IN_COLAB = False
 
 
