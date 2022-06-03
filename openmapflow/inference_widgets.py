@@ -204,7 +204,9 @@ class InferenceWidget:
             return map_key
 
         try:
-            new_version = int(re.search(r"_v\d*", map_key).group().replace("_v", ""))
+            new_version = (
+                int(re.search(r"_v\d*", map_key).group().replace("_v", "")) + 1
+            )
         except Exception:
             new_version = 1
         return f"{map_key}_v{new_version}"
@@ -256,7 +258,7 @@ class InferenceWidget:
             )
         else:
             self.warning_HTML.value = ""
-            self.map_key_HTML.value = self.get_map_key_HTML()
+        self.map_key_HTML.value = self.get_map_key_HTML()
 
     def update_bbox(self, event):
         if event["name"] != "value":
