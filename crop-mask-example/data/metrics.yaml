@@ -12,8 +12,8 @@ Togo_crop-mask_2019_February:
   local_testing_original_size: 309
   local_testing_positive_class_percentage: 0.3463
   test_metrics:
-    accuracy: 0.7638
-    f1: 0.7224
-    precision: 0.609
-    recall: 0.8879
-    roc_auc: 0.8404
+    accuracy: 0.7282
+    f1: 0.5922
+    precision: 0.6162
+    recall: 0.5701
+    roc_auc: 0.8012
