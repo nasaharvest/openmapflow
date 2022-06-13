@@ -49,7 +49,7 @@ datasets: List[LabeledDataset] = [
     LabeledDataset(
         dataset="ref_african_crops_kenya_01_labels",
         country="Kenya",
-        raw_labels=(
+        raw_labels=tuple(
             RawLabels(
                 filename=f"ref_african_crops_kenya_01_labels_0{i}/labels.geojson",
                 latitude_col="Latitude",
