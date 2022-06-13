@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 def trigger(event, context):
     """Triggered by a change to a Cloud Storage bucket.
+    Calls the model inference server for each new file in the bucket.
     Args:
          event (dict): Event payload.
          context (google.cloud.functions.Context): Metadata for the event.
