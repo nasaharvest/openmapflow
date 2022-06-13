@@ -1,18 +1,18 @@
 # from datetime import datetime
+import contextlib
+import tempfile
+from datetime import datetime
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
-from datetime import datetime
+
 from docker.torchserve_handler import (
-    start_date_from_str,
     download_file,
     get_bucket_name,
     get_path,
+    start_date_from_str,
     upload_file,
 )
-from pathlib import Path
-
-import contextlib
-import tempfile
 
 tempdir = tempfile.gettempdir()
 
