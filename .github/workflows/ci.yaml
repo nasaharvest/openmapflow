@@ -39,8 +39,8 @@ jobs:
       run: |
         python -m mypy openmapflow
         python -m mypy tests
-        python -m mypy buildings-example
-        python -m mypy crop-mask-example
-        python -m mypy maize-example
+        python -m mypy buildings-example/*.py
+        python -m mypy crop-mask-example/*.py
+        python -m mypy maize-example/*.py
     - name: unittest
       run: python -m unittest discover -s tests
