@@ -25,7 +25,7 @@ from tsai.models.TransformerModel import TransformerModel
 from openmapflow.config import PROJECT
 from openmapflow.constants import SUBSET
 from openmapflow.pytorch_dataset import PyTorchDataset
-from openmapflow.train_utils import device, generate_model_name, model_path_from_name
+from openmapflow.train_utils import generate_model_name, model_path_from_name
 
 try:
     import google.colab  # noqa
@@ -92,6 +92,7 @@ class Model(torch.nn.Module):
         return x
 
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model = Model().to(device)
 
 # ------------ Model hyperparameters -------------------------------------
