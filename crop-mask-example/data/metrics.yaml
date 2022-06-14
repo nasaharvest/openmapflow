@@ -26,3 +26,12 @@ hannahrules:
     precision: 0.6162
     recall: 0.5701
     roc_auc: 0.8012
+my_model:
+  local_testing_original_size: 309
+  local_testing_positive_class_percentage: 0.3463
+  test_metrics:
+    accuracy: 0.7508
+    f1: 0.6516
+    precision: 0.6316
+    recall: 0.6729
+    roc_auc: 0.8278
