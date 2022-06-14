@@ -3,12 +3,12 @@ import re
 from collections import defaultdict
 from glob import glob
 from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
-from cropharvest.countries import BBox
 import ee
+from cropharvest.countries import BBox
 from google.cloud import storage
 from tqdm.notebook import tqdm
-from typing import Dict, List, Optional, Tuple
 
 from openmapflow.config import GCLOUD_PROJECT_ID
 from openmapflow.config import BucketNames as bn
