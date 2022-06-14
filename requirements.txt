@@ -1,9 +1,7 @@
 -e .
 black
 isort
-ipyleaflet
 flake8
 jupyter
 mypy==0.812
-torch
 torchserve
