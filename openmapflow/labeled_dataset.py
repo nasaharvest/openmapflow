@@ -72,7 +72,7 @@ def distance_point_from_center(lat_idx: int, lon_idx: int, tif) -> int:
     return x_dist + y_dist
 
 
-def bbox_from_str(s: str):
+def bbox_from_str(s: str) -> BBox:
     """
     Generate bbox from str
     """
