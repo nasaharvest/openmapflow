@@ -6,6 +6,7 @@ from pathlib import Path
 
 from openmapflow.constants import (
     CONFIG_FILE,
+    DATA_DIR,
     TEMPLATE_DATASETS,
     TEMPLATE_DEPLOY_YML,
     TEMPLATE_EVALUATE,
@@ -14,15 +15,17 @@ from openmapflow.constants import (
 )
 
 
-def allow_write(p, overwrite=False):
+def allow_write(p: str, overwrite: bool = False) -> bool:
+    """Prompts user if file already exists"""
     if overwrite or not Path(p).exists():
         return True
-    p = Path(*Path(p).parts[-4:])
+    p = Path(*Path(p).parts[-4:])  # Shorten for legibility
     overwrite = input(f"  {str(p)} already exists. Overwrite? (y/[n]): ")
     return overwrite.lower() == "y"
 
 
 def create_openmapflow_config(overwrite: bool):
+    """Creates openmapflow.yaml config file"""
     if not allow_write(CONFIG_FILE, overwrite):
         return
     cwd = Path.cwd()
@@ -47,16 +50,15 @@ def create_openmapflow_config(overwrite: bool):
         f.write(openmapflow_str)
 
 
-def copy_template_files(PROJECT_ROOT, overwrite: bool):
-    if allow_write("datasets.py", overwrite):
-        shutil.copy(str(TEMPLATE_DATASETS), str(PROJECT_ROOT / "datasets.py"))
-    if allow_write("train.py", overwrite):
-        shutil.copy(str(TEMPLATE_TRAIN), str(PROJECT_ROOT / "train.py"))
-    if allow_write("evaluate.py", overwrite):
-        shutil.copy(str(TEMPLATE_EVALUATE), str(PROJECT_ROOT / "evaluate.py"))
+def copy_template_files(PROJECT_ROOT: Path, overwrite: bool):
+    """Copies template files to project directory"""
+    for p in [TEMPLATE_DATASETS, TEMPLATE_TRAIN, TEMPLATE_EVALUATE]:
+        if allow_write(PROJECT_ROOT / p.name, overwrite):
+            shutil.copy(str(p), str(PROJECT_ROOT / p.name))
 
 
-def create_data_dirs(dp, overwrite):
+def create_data_dirs(dp, overwrite: bool):
+    """Creates data directories"""
     for p in [dp.FEATURES, dp.RAW_LABELS, dp.PROCESSED_LABELS, dp.MODELS]:
         if allow_write(p, overwrite):
             Path(p).mkdir(parents=True, exist_ok=True)
@@ -66,7 +68,17 @@ def create_data_dirs(dp, overwrite):
             tar.add(dp.FEATURES, arcname=Path(dp.FEATURES).name)
 
 
-def fill_in_action(src_yml_path, dest_yml_path, sub_paths, sub_cd):
+def fill_in_and_write_action(
+    src_yml_path: Path, dest_yml_path: Path, sub_paths: str, sub_cd: str
+):
+    """
+    Fills in template action and writes to file
+    Args:
+        src_yml_path: Path to template yaml file
+        dest_yml_path: Path to write filled in yaml file
+        sub_paths: Paths to trigger action by
+        sub_cd: Command to cd into project root
+    """
     with src_yml_path.open("r") as f:
         content = f.read()
     content = content.replace("<PATHS>", sub_paths)
@@ -76,7 +88,8 @@ def fill_in_action(src_yml_path, dest_yml_path, sub_paths, sub_cd):
         f.write(content)
 
 
-def get_git_root(PROJECT_ROOT):
+def get_git_root(PROJECT_ROOT: Path):
+    """Returns git root"""
     possible_git_roots = [PROJECT_ROOT, PROJECT_ROOT.parent]
     try:
         return next(r for r in possible_git_roots if (r / ".git").exists())
@@ -86,11 +99,22 @@ def get_git_root(PROJECT_ROOT):
         )
 
 
-def create_github_actions(git_root, is_subdir, PROJECT, dp, overwrite):
+def create_github_actions(
+    git_root: Path, is_subdir: bool, PROJECT: str, dp, overwrite: bool
+):
+    """
+    Creates github actions files based on templates
+    Args:
+        git_root: Path to git root
+        is_subdir: Whether project is a subdirectory
+        PROJECT: Project name
+        dp: Data paths
+        overwrite: Whether to overwrite existing files
+    """
     dest_deploy_yml_path = git_root / f".github/workflows/{PROJECT}-deploy.yaml"
     dest_test_yml_path = git_root / f".github/workflows/{PROJECT}-test.yaml"
     if allow_write(dest_deploy_yml_path, overwrite):
-        fill_in_action(
+        fill_in_and_write_action(
             src_yml_path=TEMPLATE_DEPLOY_YML,
             dest_yml_path=dest_deploy_yml_path,
             sub_paths=f"{f'{PROJECT}/' if is_subdir else ''}{dp.MODELS}.dvc",
@@ -98,33 +122,41 @@ def create_github_actions(git_root, is_subdir, PROJECT, dp, overwrite):
         )
 
     if allow_write(dest_test_yml_path, overwrite):
-        fill_in_action(
+        fill_in_and_write_action(
             src_yml_path=TEMPLATE_TEST_YML,
             dest_yml_path=dest_test_yml_path,
-            sub_paths=f"{f'{PROJECT}/' if is_subdir else ''}data/**",
+            sub_paths=f"{f'{PROJECT}/' if is_subdir else ''}{DATA_DIR}**",
             sub_cd=f"cd {PROJECT}" if is_subdir else "",
         )
 
 
-def print_and_run(cmd):
+def _print_and_run(cmd: str):
+    """Prints command and runs it"""
     print(f"{cmd}")
     os.system(cmd)
 
 
-def setup_dvc(PROJECT_ROOT, is_subdir, dp):
+def setup_dvc(PROJECT_ROOT: Path, is_subdir: bool, dp):
+    """
+    Sets up dvc (data version control)
+    Args:
+        PROJECT_ROOT: Path to project root
+        is_subdir: Whether project is a subdirectory
+        dp: Data paths
+    """
     if (PROJECT_ROOT / ".dvc").exists():
         print(f"  {PROJECT_ROOT}/.dvc already exists. Skipping.")
         return
 
     if is_subdir:
-        print_and_run("dvc init --subdir")
+        _print_and_run("dvc init --subdir")
     else:
-        print_and_run("dvc init")
+        _print_and_run("dvc init")
 
     dvc_files = [dp.RAW_LABELS, dp.PROCESSED_LABELS, dp.COMPRESSED_FEATURES, dp.MODELS]
-    print_and_run("dvc add " + " ".join(dvc_files))
+    _print_and_run("dvc add " + " ".join(dvc_files))
 
-    with open("data/.gitignore", "a") as f:
+    with open(DATA_DIR + ".gitignore", "a") as f:
         f.write("/features")
 
     print("dvc stores data in remote storage (s3, gcs, gdrive, etc)")
@@ -136,15 +168,15 @@ def setup_dvc(PROJECT_ROOT, is_subdir, dp):
     print("We'll follow: https://dvc.org/doc/user-guide/setup-google-drive-remote")
     gdrive_url = input("Last part of gdrive folder url: ")
     if gdrive_url:
-        print_and_run(f"dvc remote add -d gdrive gdrive://{gdrive_url}")
-        print_and_run("dvc push")
+        _print_and_run(f"dvc remote add -d gdrive gdrive://{gdrive_url}")
+        _print_and_run("dvc push")
     else:
         print("You must enter a valid gdrive url")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate OpenMapFlow project.")
-    parser.add_argument("--overwrite", action="store_true", help="overwrite overwrite")
+    parser.add_argument("--overwrite", action="store_true", help="overwrite")
     args = parser.parse_args()
 
     n = 6
