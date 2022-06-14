@@ -59,7 +59,7 @@ jobs:
       if: ${{ runner.os == 'Windows' }}
     - name: Install conda dependencies (Windows)
       run: |
-        conda install 'fiona>=1.5' 'rasterio>=1.2.6' 'hdf5>=1.12.2'
+        conda install 'fiona>=1.5' 'rasterio>=1.2.6' 'hdf5'
       if: ${{ runner.os == 'Windows' }}
     - name: Cache pip
       uses: actions/cache@v2
