@@ -1,6 +1,6 @@
 version: 0.0.1
 project: buildings-example
-description: 
+description: Openmapflow buildings example project
 gcloud:
     project_id: bsos-geog-harvest1
     location: us-central1
