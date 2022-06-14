@@ -61,6 +61,7 @@ jobs:
       run: |
         conda install 'fiona>=1.5' 'rasterio>=1.2.6'
         conda uninstall hdf5
+        conda install hdf5
       if: ${{ runner.os == 'Windows' }}
     - name: Cache pip
       uses: actions/cache@v2
