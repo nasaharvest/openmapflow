@@ -1,13 +1,10 @@
 from pathlib import Path
 
 import pandas as pd
-import torch
 
 from openmapflow.config import PROJECT, PROJECT_ROOT, DataPaths
 from openmapflow.constants import COUNTRY, START
 from openmapflow.utils import to_date
-
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 def generate_model_name(val_df: pd.DataFrame, start_month: str) -> str:
