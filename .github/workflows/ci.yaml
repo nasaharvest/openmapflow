@@ -60,8 +60,7 @@ jobs:
     - name: Install conda dependencies (Windows)
       run: |
         conda install 'fiona>=1.5' 'rasterio>=1.2.6'
-        conda uninstall hdf5
-        conda install hdf5
+        pip install -r requirements.txt
       if: ${{ runner.os == 'Windows' }}
     - name: Cache pip
       uses: actions/cache@v2
@@ -74,14 +73,12 @@ jobs:
     - name: Install dependencies
       if: ${{ runner.os != 'Windows' }}
       run: pip install -r requirements.txt
-    - name: Run tests
-      if: ${{ runner.os != 'Windows' }}
-      run: python -m unittest discover -s tests
     - name: Run tests (Windows)
       if: ${{ runner.os == 'Windows' }}
       env:
         PROJ_LIB: C:\Miniconda\envs\test\Library\share\proj
         GDAL_DATA: C:\Miniconda\envs\test\Library\share\gdal
-      run: |
-        pip install -r requirements.txt
-        python -m unittest discover -s tests
+      run: python -m unittest discover -s tests
+    - name: Run tests
+      if: ${{ runner.os != 'Windows' }}
+      run: python -m unittest discover -s tests
