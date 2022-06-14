@@ -194,8 +194,9 @@ class InferenceUtilsTest(TestCase):
         mock_storage_client.list_blobs.side_effect = full_and_missing_return()
 
         actual_missing_preds = find_missing_predictions("fake_prefix")
-        expected_missing_preds = {"parent2": ["file5", "file6"]}
-        self.assertEqual(actual_missing_preds, expected_missing_preds)
+        self.assertListEqual(
+            sorted(actual_missing_preds["parent2"]), ["file5", "file6"]
+        )
 
     @patch("openmapflow.inference_utils.storage")
     def test_find_missing_predictions_none(self, mock_storage):
