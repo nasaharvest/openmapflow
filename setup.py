@@ -10,15 +10,16 @@ long_description = "\n".join(
 setup(
     name="openmapflow",
     description="Creating maps with machine learning models and earth observation data.",
-    # long_description=long_description,
-    # long_description_content_type="text/markdown",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     author="Ivan Zvonkov",
     author_email="izvonkov@umd.edu",
     url="https://github.com/nasaharvest/openmapflow",
     version="0.0.1",
+    license="Apache License 2.0",
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: Other/Proprietary License",
+        "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ],
     packages=["openmapflow"]
