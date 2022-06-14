@@ -48,7 +48,7 @@ case $1 in
         ;;
     *)
         echo "--------------------"
-        echo "openmapflow 🌍 CLI" 
+        echo "openmapflow CLI" 
         echo "--------------------"
         echo "openmapflow cp <source> <destination> - copy a file or directory from the library"
         echo "openmapflow create-features - creates features for all datasets in datasets.py"
