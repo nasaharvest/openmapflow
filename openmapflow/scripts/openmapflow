@@ -38,7 +38,7 @@ case $1 in
         python3 "$(librarydir)/generate.py"
         ;;
     "ls")
-        ls "$2" "$(librarydir)"
+        ls "$(librarydir)/$2"
         ;;
     "version")
         version
