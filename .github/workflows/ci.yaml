@@ -9,8 +9,8 @@ on:
     branches: [ main ]
 
 jobs:
-  CI:
-    name: CI
+  formatting:
+    name: formatting
     runs-on: ubuntu-latest
     steps:
     - name: Clone repo
@@ -43,5 +43,51 @@ jobs:
         python -m mypy buildings-example/*.py
         python -m mypy crop-mask-example/*.py
         python -m mypy maize-example/*.py
-    - name: unittest
+
+  test:
+    runs-on: ${{ matrix.os }}
+    env:
+      MPLBACKEND: Agg
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: [3.6, 3.7, 3.8, 3.9]
+        exclude:
+        - os: windows-latest
+          python-version: 3.6
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install conda (Windows)
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+        channels: conda-forge
+        channel-priority: strict
+      if: ${{ runner.os == 'Windows' }}
+    - name: Install conda dependencies (Windows)
+      run: |
+        conda install 'fiona>=1.5' 'rasterio>=1.2.6'
+      if: ${{ runner.os == 'Windows' }}
+    - name: Cache pip
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          ${{ runner.os }}-
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+    - name: Run tests (Windows)
+      if: ${{ runner.os == 'Windows' }}
+      env:
+        PROJ_LIB: C:\Miniconda\envs\test\Library\share\proj
+        GDAL_DATA: C:\Miniconda\envs\test\Library\share\gdal
+      run: python -m unittest discover -s tests
+    - name: Run tests
+      if: ${{ runner.os != 'Windows' }}
       run: python -m unittest discover -s tests
