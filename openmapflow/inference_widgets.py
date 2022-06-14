@@ -48,7 +48,7 @@ class InferenceBBox(BBox):
         polygon = ops.transform(
             partial(
                 pyproj.transform,
-                pyproj.Proj("EPSG:4326"),
+                pyproj.Proj(init="EPSG:4326"),
                 pyproj.Proj(
                     proj="aea", lat_1=polygon.bounds[1], lat_2=polygon.bounds[3]
                 ),
@@ -230,8 +230,8 @@ class InferenceWidget:
           <div style='padding-left:1em'>
           <h3>Estimates</h3>
           <b>Area:</b> {self.bbox.get_area_km2():,.1f} km² <br>
-          <b>Time:</b> TBD <br>
-          <b>Cost:</b> TBD
+          <b>Time:</b> Coming soon. <br>
+          <b>Cost:</b> Coming soon.
           <div/>
         """
 
