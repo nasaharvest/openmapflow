@@ -61,6 +61,14 @@ jobs:
       run: |
         conda install 'fiona>=1.5' 'rasterio>=1.2.6'
       if: ${{ runner.os == 'Windows' }}
+    - name: Cache pip
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          ${{ runner.os }}-
     - name: Install dependencies
       run: pip install -r requirements.txt
     - name: Run tests (Windows)
