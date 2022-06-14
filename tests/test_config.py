@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from openmapflow.config import load_default_config, DataPaths, deploy_env_variables
+from openmapflow.config import DataPaths, deploy_env_variables, load_default_config
 from openmapflow.constants import LIBRARY_DIR
 
 

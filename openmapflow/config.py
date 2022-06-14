@@ -1,4 +1,4 @@
-import collections.abc
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Dict
 
@@ -6,19 +6,19 @@ import yaml
 
 from openmapflow.constants import (
     CONFIG_FILE,
+    DATA_DIR,
     DEFAULT_CONFIG_PATH,
     LIBRARY_DIR,
-    DATA_DIR,
 )
 
 
-def update_dict(d: Dict, u: Dict) -> Dict:
+def update_dict(d: Dict, u: Mapping) -> Dict:
     """
     Update a dictionary with another dictionary.
     Source: https://stackoverflow.com/a/3233356/8702341
     """
     for k, v in u.items():
-        if isinstance(v, collections.abc.Mapping):
+        if isinstance(v, Mapping):
             d[k] = update_dict(d.get(k, {}), v)
         else:
             d[k] = v

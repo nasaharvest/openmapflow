@@ -3,6 +3,7 @@ import os
 import shutil
 import tarfile
 from pathlib import Path
+from typing import Union
 
 from openmapflow.constants import (
     CONFIG_FILE,
@@ -15,13 +16,13 @@ from openmapflow.constants import (
 )
 
 
-def allow_write(p: str, overwrite: bool = False) -> bool:
+def allow_write(p: Union[Path, str], overwrite: bool = False) -> bool:
     """Prompts user if file already exists"""
     if overwrite or not Path(p).exists():
         return True
     p = Path(*Path(p).parts[-4:])  # Shorten for legibility
-    overwrite = input(f"  {str(p)} already exists. Overwrite? (y/[n]): ")
-    return overwrite.lower() == "y"
+    overwrite_input = input(f"  {str(p)} already exists. Overwrite? (y/[n]): ")
+    return overwrite_input.lower() == "y"
 
 
 def create_openmapflow_config(overwrite: bool):

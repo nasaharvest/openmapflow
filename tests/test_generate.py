@@ -1,25 +1,25 @@
+import os
+import tempfile
 from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 
-import os
-import tempfile
 import yaml
 
 from openmapflow.constants import (
     DATA_DIR,
     TEMPLATE_DATASETS,
-    TEMPLATE_TRAIN,
-    TEMPLATE_EVALUATE,
     TEMPLATE_DEPLOY_YML,
+    TEMPLATE_EVALUATE,
     TEMPLATE_TEST_YML,
+    TEMPLATE_TRAIN,
 )
 from openmapflow.generate import (
     allow_write,
     copy_template_files,
     create_data_dirs,
-    fill_in_and_write_action,
     create_github_actions,
+    fill_in_and_write_action,
     get_git_root,
     setup_dvc,
 )
@@ -179,11 +179,14 @@ class TestGenerate(TestCase):
                             "env": {
                                 "GDRIVE_CREDENTIALS_DATA": "${{ secrets.GDRIVE_CREDENTIALS_DATA }}"
                             },
-                            "run": "\ndvc pull $(openmapflow datapath PROCESSED_LABELS) -f\ndvc pull $(openmapflow datapath COMPRESSED_FEATURES) -f\ntar -xvzf $(openmapflow datapath COMPRESSED_FEATURES) -C data/\n",
+                            "run": "\ndvc pull $(openmapflow datapath PROCESSED_LABELS) -f"
+                            + "\ndvc pull $(openmapflow datapath COMPRESSED_FEATURES) -f"
+                            + "\ntar -xvzf $(openmapflow datapath COMPRESSED_FEATURES) -C data/\n",
                         },
                         {
                             "name": "Integration test - Data integrity",
-                            "run": "\nopenmapflow cp templates/integration_test_datasets.py .\npython -m unittest integration_test_datasets.py\n",
+                            "run": "\nopenmapflow cp templates/integration_test_datasets.py ."
+                            + "\npython -m unittest integration_test_datasets.py\n",
                         },
                     ],
                 }
