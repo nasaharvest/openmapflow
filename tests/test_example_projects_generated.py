@@ -20,7 +20,8 @@ class TestExampleProjectsGenerated(TestCase):
             os.chdir(project_dir)
 
             reload(openmapflow.config)
-            from openmapflow.config import PROJECT_ROOT, CONFIG_YML, DataPaths as dp
+            from openmapflow.config import CONFIG_YML, PROJECT_ROOT
+            from openmapflow.config import DataPaths as dp
 
             self.assertTrue(
                 (PROJECT_ROOT / CONFIG_FILE).exists(),
