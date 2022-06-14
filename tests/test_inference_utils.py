@@ -20,7 +20,7 @@ class MockBlob:
         self.name = name
 
 
-class InferenceUtilsTest(TestCase):
+class TestInferenceUtils(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.fake_bucket = "fake_bucket"
