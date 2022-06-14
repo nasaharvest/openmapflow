@@ -1,6 +1,7 @@
 from pathlib import Path
 
 CONFIG_FILE = "openmapflow.yaml"
+DATA_DIR = "data/"
 LIBRARY_DIR = Path(__file__).parent
 TEMPLATES_DIR = LIBRARY_DIR / "templates"
 DEFAULT_CONFIG_PATH = TEMPLATES_DIR / "openmapflow-default.yaml"

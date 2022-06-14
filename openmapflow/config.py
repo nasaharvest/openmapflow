@@ -1,21 +1,31 @@
-import collections.abc
+from collections.abc import Mapping
 from pathlib import Path
+from typing import Dict
 
 import yaml
 
-from openmapflow.constants import CONFIG_FILE, DEFAULT_CONFIG_PATH, LIBRARY_DIR
+from openmapflow.constants import (
+    CONFIG_FILE,
+    DATA_DIR,
+    DEFAULT_CONFIG_PATH,
+    LIBRARY_DIR,
+)
 
 
-def update(d, u):
+def update_dict(d: Dict, u: Mapping) -> Dict:
+    """
+    Update a dictionary with another dictionary.
+    Source: https://stackoverflow.com/a/3233356/8702341
+    """
     for k, v in u.items():
-        if isinstance(v, collections.abc.Mapping):
-            d[k] = update(d.get(k, {}), v)
+        if isinstance(v, Mapping):
+            d[k] = update_dict(d.get(k, {}), v)
         else:
             d[k] = v
     return d
 
 
-def load_custom_config(path: Path) -> dict:
+def load_custom_config(path: Path) -> Dict:
     if path.exists():
         with path.open() as f:
             return yaml.safe_load(f)
@@ -24,34 +34,34 @@ def load_custom_config(path: Path) -> dict:
     return {"project": path.parent.name}
 
 
-def load_default_config(project_name: str) -> dict:
+def load_default_config(project_name: str) -> Dict:
     with DEFAULT_CONFIG_PATH.open() as f:
         content = f.read().replace("<PROJECT>", project_name)
         return yaml.safe_load(content)
 
 
 cwd = Path.cwd()
-PROJECT_ROOT = cwd.parent if (cwd.parent / CONFIG_FILE).exists() else cwd
+PROJECT_ROOT: Path = cwd.parent if (cwd.parent / CONFIG_FILE).exists() else cwd
 CUSTOM_CONFIG = load_custom_config(PROJECT_ROOT / CONFIG_FILE)
 PROJECT = CUSTOM_CONFIG["project"]
 DEFAULT_CONFIG = load_default_config(PROJECT)
-CONFIG_YML = update(DEFAULT_CONFIG, CUSTOM_CONFIG)
+CONFIG_YML = update_dict(DEFAULT_CONFIG, CUSTOM_CONFIG)
 GCLOUD_PROJECT_ID = CONFIG_YML["gcloud"]["project_id"]
 GCLOUD_LOCATION = CONFIG_YML["gcloud"]["location"]
 DOCKER_TAG = f"{GCLOUD_LOCATION}-docker.pkg.dev/{GCLOUD_PROJECT_ID}/{PROJECT}/{PROJECT}"
 
 
 class DataPaths:
-    RAW_LABELS = "data/" + CONFIG_YML["data_paths"]["raw_labels"]
-    PROCESSED_LABELS = "data/" + CONFIG_YML["data_paths"]["processed_labels"]
-    FEATURES = "data/" + CONFIG_YML["data_paths"]["features"]
-    COMPRESSED_FEATURES = "data/" + CONFIG_YML["data_paths"]["compressed_features"]
-    MODELS = "data/" + CONFIG_YML["data_paths"]["models"]
-    METRICS = "data/" + CONFIG_YML["data_paths"]["metrics"]
-    DATASETS = "data/" + CONFIG_YML["data_paths"]["datasets"]
-    MISSING = "data/" + CONFIG_YML["data_paths"]["missing"]
-    DUPLICATES = "data/" + CONFIG_YML["data_paths"]["duplicates"]
-    UNEXPORTED = "data/" + CONFIG_YML["data_paths"]["unexported"]
+    RAW_LABELS = DATA_DIR + CONFIG_YML["data_paths"]["raw_labels"]
+    PROCESSED_LABELS = DATA_DIR + CONFIG_YML["data_paths"]["processed_labels"]
+    FEATURES = DATA_DIR + CONFIG_YML["data_paths"]["features"]
+    COMPRESSED_FEATURES = DATA_DIR + CONFIG_YML["data_paths"]["compressed_features"]
+    MODELS = DATA_DIR + CONFIG_YML["data_paths"]["models"]
+    METRICS = DATA_DIR + CONFIG_YML["data_paths"]["metrics"]
+    DATASETS = DATA_DIR + CONFIG_YML["data_paths"]["datasets"]
+    MISSING = DATA_DIR + CONFIG_YML["data_paths"]["missing"]
+    DUPLICATES = DATA_DIR + CONFIG_YML["data_paths"]["duplicates"]
+    UNEXPORTED = DATA_DIR + CONFIG_YML["data_paths"]["unexported"]
 
     @classmethod
     def get(cls, key: str = "") -> str:
