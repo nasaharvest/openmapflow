@@ -1,9 +1,12 @@
 import os
+import shutil
 import tempfile
 from pathlib import Path
 from unittest import TestCase
 
 from openmapflow.constants import VERSION
+
+from subprocess import Popen, check_output
 
 
 class TestCLI(TestCase):
@@ -12,18 +15,24 @@ class TestCLI(TestCase):
     """
 
     def test_cp(self):
-        with tempfile.TemporaryDirectory() as tmpdir:
-            os.chdir(tmpdir)
-            self.assertFalse(Path("Dockerfile").exists())
-            os.system("openmapflow cp Dockerfile .")
-            self.assertTrue(Path("Dockerfile").exists())
+        if os.name == "nt":
+            return
+
+        tmpdir = tempfile.mkdtemp()
+        p = Path(tmpdir) / "Dockerfile"
+        self.assertFalse(p.exists())
+        output = check_output(
+            ["openmapflow", "cp", "Dockerfile", f"{tmpdir}"], cwd=tmpdir
+        ).decode()
+        self.assertTrue(p.exists())
+        shutil.rmtree(tmpdir)
 
     def test_dir(self):
-        output = os.popen("openmapflow dir").read().rstrip()
+        output = check_output(["openmapflow", "dir"]).decode().rstrip()
         self.assertTrue(output.endswith("openmapflow"))
 
     def test_ls(self):
-        output = os.popen("openmapflow ls").read().rstrip()
+        output = check_output(["openmapflow", "ls"]).decode().rstrip()
         self.assertIn("Dockerfile", output)
         self.assertIn("__init__.py", output)
         self.assertIn("config.py", output)
@@ -44,11 +53,15 @@ class TestCLI(TestCase):
         self.assertIn("utils.py", output)
 
     def test_version(self):
-        self.assertEqual(os.popen("openmapflow version").read().rstrip(), VERSION)
-        self.assertEqual(os.popen("openmapflow --version").read().rstrip(), VERSION)
+        self.assertEqual(
+            check_output(["openmapflow", "version"]).decode().rstrip(), VERSION
+        )
+        self.assertEqual(
+            check_output(["openmapflow", "--version"]).decode().rstrip(), VERSION
+        )
 
     def test_help(self):
-        actual_output = os.popen("openmapflow help").read().rstrip()
+        actual_output = check_output(["openmapflow", "help"]).decode().rstrip()
         expected_output = """---------------------------------------------------------------------------------
                               OpenMapFlow CLI
 ---------------------------------------------------------------------------------
