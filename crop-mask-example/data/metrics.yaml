@@ -16,3 +16,12 @@ Togo_test_model:
     precision: 0.5912
     recall: 0.757
     roc_auc: 0.8078
+ivan_model_predemo:
+  local_testing_original_size: 309
+  local_testing_positive_class_percentage: 0.3463
+  test_metrics:
+    accuracy: 0.7346
+    f1: 0.6639
+    precision: 0.5912
+    recall: 0.757
+    roc_auc: 0.8078
