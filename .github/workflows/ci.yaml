@@ -37,13 +37,24 @@ jobs:
         python -m mypy maize-example/*.py
 
   test:
-    on:
-      push:
-        branches: [ main ]
-        paths: 
-          - openmapflow/**
-          - docker/**
-          - tests/**
+    name: single-test
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clone repo
+      uses: actions/checkout@v2
+    - name: Set up python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+    - name: Run tests
+      run: python -m unittest discover -s tests
+
+  cross-platform-test:
+    name: cross-platform-test
+    if: github.ref == 'refs/heads/main'
     runs-on: ${{ matrix.os }}
     env:
       MPLBACKEND: Agg
