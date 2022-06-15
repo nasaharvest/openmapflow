@@ -54,7 +54,7 @@ jobs:
 
   cross-platform-test:
     name: cross-platform-test
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags')
     runs-on: ${{ matrix.os }}
     env:
       MPLBACKEND: Agg
