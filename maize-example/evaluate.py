@@ -20,7 +20,7 @@ from tqdm import tqdm
 from openmapflow.config import PROJECT_ROOT, DataPaths
 from openmapflow.constants import SUBSET
 from openmapflow.pytorch_dataset import PyTorchDataset
-from openmapflow.train_utils import device, model_path_from_name
+from openmapflow.train_utils import model_path_from_name
 
 # ------------ Arguments -------------------------------------
 parser = ArgumentParser()
@@ -45,6 +45,7 @@ test_dataloader = DataLoader(test_data, batch_size=batch_size, shuffle=False)
 
 model_pt = torch.jit.load(model_path)
 model_pt.eval()
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # ------------ Testing / Evaluation -------------------------------
 test_batches = 1 + len(test_data) // batch_size

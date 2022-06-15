@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 
@@ -7,6 +8,7 @@ from openmapflow.inference_utils import (
     find_missing_predictions,
     gdal_cmd,
     get_available_bboxes,
+    get_available_models,
     get_ee_task_amount,
     get_gcs_file_amount,
     get_gcs_file_dict_and_amount,
@@ -35,6 +37,25 @@ class TestInferenceUtils(TestCase):
             25.0448,
             name=f"gs://{cls.fake_bucket}/{cls.namibia_bbox_name}",
         )
+
+    @patch("openmapflow.inference_utils.requests")
+    def test_get_available_models_200(self, mock_requests):
+        mock_requests.get.return_value.status_code = 200
+        mock_requests.get.return_value.json.return_value = {
+            "models": [
+                {"modelName": "model1", "modelUrl": "model1.mar"},
+                {"modelName": "model2", "modelUrl": "model2.mar"},
+                {"modelName": "model3", "modelUrl": "model3.mar"},
+            ]
+        }
+        models = get_available_models("https://fake-url.com/models")
+        self.assertEqual(models, ["model1", "model2", "model3"])
+
+    @patch("openmapflow.inference_utils.requests")
+    def test_get_available_models_403(self, mock_requests):
+        mock_requests.get.return_value.status_code = 403
+        models = get_available_models("https://fake-url.com/models")
+        self.assertEqual(models, [])
 
     @patch("openmapflow.inference_utils.storage")
     def test_get_available_bboxes_none(self, mock_storage):
@@ -149,10 +170,15 @@ class TestInferenceUtils(TestCase):
         )
         self.assertEqual(actual_amount, 6)
         self.assertEqual(
-            actual_files_dict["grandparent1/parent1"], ["file1", "file2", "file3"]
+            actual_files_dict[str(Path("grandparent1/parent1"))],
+            ["file1", "file2", "file3"],
         )
-        self.assertEqual(actual_files_dict["grandparent1/parent2"], ["file4", "file5"])
-        self.assertEqual(actual_files_dict["grandparent2/parent2"], ["file6"])
+        self.assertEqual(
+            actual_files_dict[str(Path("grandparent1/parent2"))], ["file4", "file5"]
+        )
+        self.assertEqual(
+            actual_files_dict[str(Path("grandparent2/parent2"))], ["file6"]
+        )
 
     @patch("openmapflow.inference_utils.storage")
     def test_get_gcs_file_dict_and_amount_pred_sub(self, mock_storage):

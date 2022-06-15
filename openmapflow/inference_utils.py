@@ -6,13 +6,32 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import ee
+import requests
 from cropharvest.countries import BBox
 from google.cloud import storage
 from tqdm.notebook import tqdm
 
-from openmapflow.config import GCLOUD_PROJECT_ID
+from openmapflow.config import GCLOUD_LOCATION, GCLOUD_PROJECT_ID, PROJECT
 from openmapflow.config import BucketNames as bn
 from openmapflow.labeled_dataset import bbox_from_str
+
+
+def get_available_models(models_url: str) -> List[str]:
+    response = requests.get(models_url)
+    if response.status_code == 403:
+        print(
+            f"""
+By default Cloud Run containers are deployed privately, to allow access without authentication run \
+the following commands and rerun this cell:
+!gcloud run services add-iam-policy-binding --region={GCLOUD_LOCATION} --member=allUsers \
+--platform=managed --role=roles/run.invoker {PROJECT}-management-api --project {GCLOUD_PROJECT_ID}
+!gcloud run services add-iam-policy-binding --region={GCLOUD_LOCATION} --member=allUsers \
+--platform=managed --role=roles/run.invoker {PROJECT} --project {GCLOUD_PROJECT_ID}
+"""
+        )
+        return []
+
+    return [item["modelName"] for item in response.json()["models"]]
 
 
 def get_available_bboxes(
@@ -142,11 +161,11 @@ def find_missing_predictions(
         print_between_lines(prefix)
 
     if batches_with_issues == 0:
-        print("\u2714 all files in each batch match")
+        print("All files in each batch match")
         return missing
 
     print(
-        f"\u2716 {batches_with_issues}/{len(tif_files.keys())} "
+        f"{batches_with_issues}/{len(tif_files.keys())} "
         + f"batches have a total {tif_amount - pred_amount} missing predictions"
     )
 

@@ -54,7 +54,7 @@ def download_file(uri: str) -> str:
     else:
         raise ValueError(f"HANDLER ERROR: {uri} does not exist.")
 
-    local_path = f"{tempfile.gettempdir()}/{Path(uri).name}"
+    local_path = str(Path(tempfile.gettempdir()) / Path(uri).name)
     blob.download_to_filename(local_path)
     if not Path(local_path).exists():
         raise FileExistsError(f"HANDLER: {uri} from storage was not downloaded")

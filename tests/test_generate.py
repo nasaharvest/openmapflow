@@ -1,7 +1,7 @@
 import os
 import tempfile
 from pathlib import Path
-from unittest import TestCase
+from unittest import TestCase, skipIf
 from unittest.mock import patch
 
 import yaml
@@ -42,7 +42,9 @@ class TestGenerate(TestCase):
             for p in [TEMPLATE_DATASETS, TEMPLATE_TRAIN, TEMPLATE_EVALUATE]:
                 self.assertTrue((Path(tmpdir) / p.name).exists())
 
+    @skipIf(os.name == "nt", "Tempdir doesn't work on windows")
     def test_create_data_dirs(self):
+
         with tempfile.TemporaryDirectory() as tmpdir:
             os.chdir(tmpdir)
 
@@ -60,7 +62,9 @@ class TestGenerate(TestCase):
             ]:
                 self.assertTrue(Path(p).exists())
 
+    @skipIf(os.name == "nt", "Tempdir doesn't work on windows")
     def test_fill_in_and_write_action(self):
+
         srcs = [TEMPLATE_DEPLOY_YML, TEMPLATE_TEST_YML]
         dests = [Path("test.yaml"), Path("deploy.yaml")]
 
@@ -93,6 +97,7 @@ class TestGenerate(TestCase):
             self.assertIn("path/project/data", project_action)
             self.assertIn("cd path/project", project_action)
 
+    @skipIf(os.name == "nt", "Tempdir doesn't work on windows")
     def test_create_github_actions(self):
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -109,10 +114,13 @@ class TestGenerate(TestCase):
                 overwrite=False,
             )
 
-            with open(f"{tmpdir}/.github/workflows/fake-project-deploy.yaml", "r") as f:
+            deploy_path = Path(f"{tmpdir}/.github/workflows/fake-project-deploy.yaml")
+            test_path = Path(f"{tmpdir}/.github/workflows/fake-project-test.yaml")
+
+            with deploy_path.open("r") as f:
                 actual_deploy_action = yaml.safe_load(f)
 
-            with open(f"{tmpdir}/.github/workflows/fake-project-test.yaml", "r") as f:
+            with test_path.open("r") as f:
                 actual_test_action = yaml.safe_load(f)
 
         expected_deploy_action = {
@@ -203,6 +211,7 @@ class TestGenerate(TestCase):
             (tmpdir_path / "subdir").mkdir()
             self.assertEqual(get_git_root(tmpdir_path / "subdir"), tmpdir_path)
 
+    @skipIf(os.name == "nt", "Tempdir doesn't work on windows")
     @patch("openmapflow.generate.os.system")
     def test_setup_dvc(self, mock_system):
         def input_response(prompt):
@@ -220,16 +229,15 @@ class TestGenerate(TestCase):
             __builtins__["input"] = input_response
 
             setup_dvc(Path(tmpdir), is_subdir=False, dp=dp)
-            system_calls = [call[0][0] for call in mock_system.call_args_list]
-            dvc_files = [
-                dp.RAW_LABELS,
-                dp.PROCESSED_LABELS,
-                dp.COMPRESSED_FEATURES,
-                dp.MODELS,
-            ]
-            self.assertIn("dvc init", system_calls)
-            self.assertIn("dvc add " + " ".join(dvc_files), system_calls)
-            self.assertIn(
-                "dvc remote add -d gdrive gdrive://fake-gdrive-id", system_calls
-            )
-            self.assertIn("dvc push", system_calls)
+
+        system_calls = [call[0][0] for call in mock_system.call_args_list]
+        dvc_files = [
+            dp.RAW_LABELS,
+            dp.PROCESSED_LABELS,
+            dp.COMPRESSED_FEATURES,
+            dp.MODELS,
+        ]
+        self.assertIn("dvc init", system_calls)
+        self.assertIn("dvc add " + " ".join(dvc_files), system_calls)
+        self.assertIn("dvc remote add -d gdrive gdrive://fake-gdrive-id", system_calls)
+        self.assertIn("dvc push", system_calls)
