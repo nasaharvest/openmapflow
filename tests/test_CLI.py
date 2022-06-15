@@ -2,11 +2,10 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
+from subprocess import check_output
 from unittest import TestCase
 
 from openmapflow.constants import VERSION
-
-from subprocess import Popen, check_output
 
 
 class TestCLI(TestCase):
@@ -21,7 +20,7 @@ class TestCLI(TestCase):
         tmpdir = tempfile.mkdtemp()
         p = Path(tmpdir) / "Dockerfile"
         self.assertFalse(p.exists())
-        output = check_output(
+        check_output(
             ["openmapflow", "cp", "Dockerfile", f"{tmpdir}"], cwd=tmpdir
         ).decode()
         self.assertTrue(p.exists())
