@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 
@@ -149,10 +150,15 @@ class TestInferenceUtils(TestCase):
         )
         self.assertEqual(actual_amount, 6)
         self.assertEqual(
-            actual_files_dict["grandparent1/parent1"], ["file1", "file2", "file3"]
+            actual_files_dict[str(Path("grandparent1/parent1"))],
+            ["file1", "file2", "file3"],
         )
-        self.assertEqual(actual_files_dict["grandparent1/parent2"], ["file4", "file5"])
-        self.assertEqual(actual_files_dict["grandparent2/parent2"], ["file6"])
+        self.assertEqual(
+            actual_files_dict[str(Path("grandparent1/parent2"))], ["file4", "file5"]
+        )
+        self.assertEqual(
+            actual_files_dict[str(Path("grandparent2/parent2"))], ["file6"]
+        )
 
     @patch("openmapflow.inference_utils.storage")
     def test_get_gcs_file_dict_and_amount_pred_sub(self, mock_storage):

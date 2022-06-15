@@ -1,4 +1,5 @@
 import os
+import shutil
 import tempfile
 from pathlib import Path
 from unittest import TestCase
@@ -59,6 +60,11 @@ class TestGenerate(TestCase):
                 dp.COMPRESSED_FEATURES,
             ]:
                 self.assertTrue(Path(p).exists())
+                # Cleanup for windows
+                if p == dp.COMPRESSED_FEATURES:
+                    Path(p).unlink()
+                else:
+                    shutil.rmtree(p)
 
     def test_fill_in_and_write_action(self):
         srcs = [TEMPLATE_DEPLOY_YML, TEMPLATE_TEST_YML]
@@ -83,6 +89,9 @@ class TestGenerate(TestCase):
 
                 with dest.open("r") as f:
                     project_action = f.read()
+
+                # Cleanup for windows
+                dest.unlink()
 
             yaml.safe_load(project_action)  # Verify it's valid YAML
 
@@ -109,11 +118,18 @@ class TestGenerate(TestCase):
                 overwrite=False,
             )
 
-            with open(f"{tmpdir}/.github/workflows/fake-project-deploy.yaml", "r") as f:
+            deploy_path = Path(f"{tmpdir}/.github/workflows/fake-project-deploy.yaml")
+            test_path = Path(f"{tmpdir}/.github/workflows/fake-project-test.yaml")
+
+            with deploy_path.open("r") as f:
                 actual_deploy_action = yaml.safe_load(f)
 
-            with open(f"{tmpdir}/.github/workflows/fake-project-test.yaml", "r") as f:
+            with test_path.open("r") as f:
                 actual_test_action = yaml.safe_load(f)
+
+            # Cleanup for windows
+            deploy_path.unlink()
+            test_path.unlink()
 
         expected_deploy_action = {
             "name": "deploy",
@@ -220,16 +236,19 @@ class TestGenerate(TestCase):
             __builtins__["input"] = input_response
 
             setup_dvc(Path(tmpdir), is_subdir=False, dp=dp)
-            system_calls = [call[0][0] for call in mock_system.call_args_list]
-            dvc_files = [
-                dp.RAW_LABELS,
-                dp.PROCESSED_LABELS,
-                dp.COMPRESSED_FEATURES,
-                dp.MODELS,
-            ]
-            self.assertIn("dvc init", system_calls)
-            self.assertIn("dvc add " + " ".join(dvc_files), system_calls)
-            self.assertIn(
-                "dvc remote add -d gdrive gdrive://fake-gdrive-id", system_calls
-            )
-            self.assertIn("dvc push", system_calls)
+
+            # Cleanup necessary for windows
+            Path(DATA_DIR + ".gitignore").unlink()
+            shutil.rmtree(DATA_DIR)
+
+        system_calls = [call[0][0] for call in mock_system.call_args_list]
+        dvc_files = [
+            dp.RAW_LABELS,
+            dp.PROCESSED_LABELS,
+            dp.COMPRESSED_FEATURES,
+            dp.MODELS,
+        ]
+        self.assertIn("dvc init", system_calls)
+        self.assertIn("dvc add " + " ".join(dvc_files), system_calls)
+        self.assertIn("dvc remote add -d gdrive gdrive://fake-gdrive-id", system_calls)
+        self.assertIn("dvc push", system_calls)

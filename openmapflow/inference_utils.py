@@ -142,11 +142,11 @@ def find_missing_predictions(
         print_between_lines(prefix)
 
     if batches_with_issues == 0:
-        print("\u2714 all files in each batch match")
+        print("All files in each batch match")
         return missing
 
     print(
-        f"\u2716 {batches_with_issues}/{len(tif_files.keys())} "
+        f"{batches_with_issues}/{len(tif_files.keys())} "
         + f"batches have a total {tif_amount - pred_amount} missing predictions"
     )
 
