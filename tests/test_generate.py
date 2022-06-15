@@ -1,5 +1,4 @@
 import os
-import shutil
 import tempfile
 from pathlib import Path
 from unittest import TestCase
@@ -44,6 +43,9 @@ class TestGenerate(TestCase):
                 self.assertTrue((Path(tmpdir) / p.name).exists())
 
     def test_create_data_dirs(self):
+        if os.name == "nt":  # Tempdir doesn't work on windows
+            return
+
         with tempfile.TemporaryDirectory() as tmpdir:
             os.chdir(tmpdir)
 
@@ -61,11 +63,10 @@ class TestGenerate(TestCase):
             ]:
                 self.assertTrue(Path(p).exists())
 
-            # Cleanup necessary for windows
-            if os.name == "nt":
-                os.system(f"rmdir /S /Q '{tmpdir}'")
-
     def test_fill_in_and_write_action(self):
+        if os.name == "nt":  # Tempdir doesn't work on windows
+            return
+
         srcs = [TEMPLATE_DEPLOY_YML, TEMPLATE_TEST_YML]
         dests = [Path("test.yaml"), Path("deploy.yaml")]
 
@@ -89,10 +90,6 @@ class TestGenerate(TestCase):
                 with dest.open("r") as f:
                     project_action = f.read()
 
-                # Cleanup necessary for windows
-                if os.name == "nt":
-                    os.system(f"rmdir /S /Q '{tmpdir}'")
-
             yaml.safe_load(project_action)  # Verify it's valid YAML
 
             self.assertIn("<PATHS>", template_action)
@@ -103,6 +100,8 @@ class TestGenerate(TestCase):
             self.assertIn("cd path/project", project_action)
 
     def test_create_github_actions(self):
+        if os.name == "nt":  # Tempdir doesn't work on windows
+            return
 
         with tempfile.TemporaryDirectory() as tmpdir:
             os.chdir(tmpdir)
@@ -126,10 +125,6 @@ class TestGenerate(TestCase):
 
             with test_path.open("r") as f:
                 actual_test_action = yaml.safe_load(f)
-
-            # Cleanup necessary for windows
-            if os.name == "nt":
-                os.system(f"rmdir /S /Q '{tmpdir}'")
 
         expected_deploy_action = {
             "name": "deploy",
@@ -221,6 +216,9 @@ class TestGenerate(TestCase):
 
     @patch("openmapflow.generate.os.system")
     def test_setup_dvc(self, mock_system):
+        if os.name == "nt":  # Tempdir doesn't work on windows
+            return
+
         def input_response(prompt):
             if "a)" in prompt:
                 return "a"
@@ -236,10 +234,6 @@ class TestGenerate(TestCase):
             __builtins__["input"] = input_response
 
             setup_dvc(Path(tmpdir), is_subdir=False, dp=dp)
-
-            # Cleanup necessary for windows
-            if os.name == "nt":
-                os.system(f"rmdir /S /Q '{tmpdir}'")
 
         system_calls = [call[0][0] for call in mock_system.call_args_list]
         dvc_files = [
