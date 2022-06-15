@@ -60,11 +60,10 @@ class TestGenerate(TestCase):
                 dp.COMPRESSED_FEATURES,
             ]:
                 self.assertTrue(Path(p).exists())
-                # Cleanup for windows
-                if p == dp.COMPRESSED_FEATURES:
-                    Path(p).unlink()
-                else:
-                    shutil.rmtree(p)
+
+            # Cleanup necessary for windows
+            if os.name == "nt":
+                os.system(f"rmdir /S /Q '{tmpdir}'")
 
     def test_fill_in_and_write_action(self):
         srcs = [TEMPLATE_DEPLOY_YML, TEMPLATE_TEST_YML]
@@ -90,8 +89,9 @@ class TestGenerate(TestCase):
                 with dest.open("r") as f:
                     project_action = f.read()
 
-                # Cleanup for windows
-                dest.unlink()
+                # Cleanup necessary for windows
+                if os.name == "nt":
+                    os.system(f"rmdir /S /Q '{tmpdir}'")
 
             yaml.safe_load(project_action)  # Verify it's valid YAML
 
@@ -127,9 +127,9 @@ class TestGenerate(TestCase):
             with test_path.open("r") as f:
                 actual_test_action = yaml.safe_load(f)
 
-            # Cleanup for windows
-            deploy_path.unlink()
-            test_path.unlink()
+            # Cleanup necessary for windows
+            if os.name == "nt":
+                os.system(f"rmdir /S /Q '{tmpdir}'")
 
         expected_deploy_action = {
             "name": "deploy",
@@ -238,8 +238,8 @@ class TestGenerate(TestCase):
             setup_dvc(Path(tmpdir), is_subdir=False, dp=dp)
 
             # Cleanup necessary for windows
-            Path(DATA_DIR + ".gitignore").unlink()
-            shutil.rmtree(DATA_DIR)
+            if os.name == "nt":
+                os.system(f"rmdir /S /Q '{tmpdir}'")
 
         system_calls = [call[0][0] for call in mock_system.call_args_list]
         dvc_files = [
