@@ -1,13 +1,3 @@
-Togo_2019_February:
-  local_testing_original_size: 309
-  local_testing_positive_class_percentage: 0.3463
-  params: https://wandb.ai/izvonkov/crop-mask-example/runs/24i5iwmc
-  test_metrics:
-    accuracy: 0.7411
-    f1: 0.7015
-    precision: 0.5839
-    recall: 0.8785
-    roc_auc: 0.873
 Togo_crop-mask_2019_February:
   local_testing_original_size: 309
   local_testing_positive_class_percentage: 0.3463
@@ -26,21 +16,3 @@ Togo_test_model:
     precision: 0.5912
     recall: 0.757
     roc_auc: 0.8078
-hannahrules:
-  local_testing_original_size: 309
-  local_testing_positive_class_percentage: 0.3463
-  test_metrics:
-    accuracy: 0.7282
-    f1: 0.5922
-    precision: 0.6162
-    recall: 0.5701
-    roc_auc: 0.8012
-my_model:
-  local_testing_original_size: 309
-  local_testing_positive_class_percentage: 0.3463
-  test_metrics:
-    accuracy: 0.7508
-    f1: 0.6516
-    precision: 0.6316
-    recall: 0.6729
-    roc_auc: 0.8278
