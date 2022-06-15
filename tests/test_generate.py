@@ -138,7 +138,7 @@ class TestGenerate(TestCase):
                         },
                         {
                             "name": "Install dependencies",
-                            "run": "python setup.py install",
+                            "run": "pip install -r requirements.txt",
                         },
                         {
                             "uses": "google-github-actions/setup-gcloud@v0",
@@ -180,7 +180,7 @@ class TestGenerate(TestCase):
                         },
                         {
                             "name": "Install dependencies",
-                            "run": "python setup.py install",
+                            "run": "pip install -r requirements.txt",
                         },
                         {
                             "name": "dvc pull data",
