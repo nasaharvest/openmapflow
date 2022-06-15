@@ -81,6 +81,7 @@ class TestGenerate(TestCase):
                 fill_in_and_write_action(
                     src_yml_path=src,
                     dest_yml_path=dest,
+                    sub_prefix="project-prefix",
                     sub_paths="path/project/data",
                     sub_cd="cd path/project",
                 )
@@ -90,10 +91,13 @@ class TestGenerate(TestCase):
 
             yaml.safe_load(project_action)  # Verify it's valid YAML
 
+            self.assertIn("<PREFIX>", template_action)
             self.assertIn("<PATHS>", template_action)
             self.assertIn("<CD>", template_action)
+            self.assertNotIn("<PREFIX>", project_action)
             self.assertNotIn("<PATHS>", project_action)
             self.assertNotIn("<CD>", project_action)
+            self.assertIn("project-prefix", project_action)
             self.assertIn("path/project/data", project_action)
             self.assertIn("cd path/project", project_action)
 
@@ -124,7 +128,7 @@ class TestGenerate(TestCase):
                 actual_test_action = yaml.safe_load(f)
 
         expected_deploy_action = {
-            "name": "deploy",
+            "name": "fake-deploy",
             True: {"push": {"branches": ["main"], "paths": "data/models.dvc"}},
             "jobs": {
                 "deploy": {
@@ -163,7 +167,7 @@ class TestGenerate(TestCase):
         self.assertEqual(expected_deploy_action, actual_deploy_action)
 
         expected_test_action = {
-            "name": "test",
+            "name": "fake-test",
             True: {
                 "push": {"branches": ["main"], "paths": "data/**"},
                 "pull_request": {"branches": ["main"], "paths": "data/**"},
