@@ -37,6 +37,13 @@ jobs:
         python -m mypy maize-example/*.py
 
   test:
+    on:
+      push:
+        branches: [ main ]
+        paths: 
+          - openmapflow/**
+          - docker/**
+          - tests/**
     runs-on: ${{ matrix.os }}
     env:
       MPLBACKEND: Agg
