@@ -78,6 +78,7 @@ jobs:
       env:
         PROJ_LIB: C:\Miniconda\envs\test\Library\share\proj
         GDAL_DATA: C:\Miniconda\envs\test\Library\share\gdal
+      shell: bash
       run: python -m unittest discover -s tests
     - name: Run tests
       if: ${{ runner.os != 'Windows' }}
