@@ -47,9 +47,9 @@ case $1 in
         version
         ;;
     *)
-        echo "--------------------"
-        echo "openmapflow CLI" 
-        echo "--------------------"
+        echo "---------------------------------------------------------------------------------"
+        echo "                              OpenMapFlow CLI" 
+        echo "---------------------------------------------------------------------------------"
         echo "openmapflow cp <source> <destination> - copy a file or directory from the library"
         echo "openmapflow create-features - creates features for all datasets in datasets.py"
         echo "openmapflow datapath <DATAPATH> - outputs a relative path to the data directory"
