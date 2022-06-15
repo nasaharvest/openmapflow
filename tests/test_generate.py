@@ -1,7 +1,7 @@
 import os
 import tempfile
 from pathlib import Path
-from unittest import TestCase
+from unittest import TestCase, skipIf
 from unittest.mock import patch
 
 import yaml
@@ -42,9 +42,8 @@ class TestGenerate(TestCase):
             for p in [TEMPLATE_DATASETS, TEMPLATE_TRAIN, TEMPLATE_EVALUATE]:
                 self.assertTrue((Path(tmpdir) / p.name).exists())
 
+    @skipIf(os.name == "nt", "Tempdir doesn't work on windows")
     def test_create_data_dirs(self):
-        if os.name == "nt":  # Tempdir doesn't work on windows
-            return
 
         with tempfile.TemporaryDirectory() as tmpdir:
             os.chdir(tmpdir)
@@ -63,9 +62,8 @@ class TestGenerate(TestCase):
             ]:
                 self.assertTrue(Path(p).exists())
 
+    @skipIf(os.name == "nt", "Tempdir doesn't work on windows")
     def test_fill_in_and_write_action(self):
-        if os.name == "nt":  # Tempdir doesn't work on windows
-            return
 
         srcs = [TEMPLATE_DEPLOY_YML, TEMPLATE_TEST_YML]
         dests = [Path("test.yaml"), Path("deploy.yaml")]
@@ -99,9 +97,8 @@ class TestGenerate(TestCase):
             self.assertIn("path/project/data", project_action)
             self.assertIn("cd path/project", project_action)
 
+    @skipIf(os.name == "nt", "Tempdir doesn't work on windows")
     def test_create_github_actions(self):
-        if os.name == "nt":  # Tempdir doesn't work on windows
-            return
 
         with tempfile.TemporaryDirectory() as tmpdir:
             os.chdir(tmpdir)
@@ -214,11 +211,9 @@ class TestGenerate(TestCase):
             (tmpdir_path / "subdir").mkdir()
             self.assertEqual(get_git_root(tmpdir_path / "subdir"), tmpdir_path)
 
+    @skipIf(os.name == "nt", "Tempdir doesn't work on windows")
     @patch("openmapflow.generate.os.system")
     def test_setup_dvc(self, mock_system):
-        if os.name == "nt":  # Tempdir doesn't work on windows
-            return
-
         def input_response(prompt):
             if "a)" in prompt:
                 return "a"

@@ -3,7 +3,7 @@ import shutil
 import tempfile
 from pathlib import Path
 from subprocess import check_output
-from unittest import TestCase
+from unittest import TestCase, skipIf
 
 from openmapflow.constants import VERSION
 
@@ -13,10 +13,8 @@ class TestCLI(TestCase):
     openmapflow must be installed for these tests to run
     """
 
+    @skipIf(os.name == "nt", "Not yet available on Windows")
     def test_cp(self):
-        if os.name == "nt":
-            return
-
         tmpdir = tempfile.mkdtemp()
         p = Path(tmpdir) / "Dockerfile"
         self.assertFalse(p.exists())
@@ -26,10 +24,12 @@ class TestCLI(TestCase):
         self.assertTrue(p.exists())
         shutil.rmtree(tmpdir)
 
+    @skipIf(os.name == "nt", "Not yet available on Windows")
     def test_dir(self):
         output = check_output(["openmapflow", "dir"]).decode().rstrip()
         self.assertTrue(output.endswith("openmapflow"))
 
+    @skipIf(os.name == "nt", "Not yet available on Windows")
     def test_ls(self):
         output = check_output(["openmapflow", "ls"]).decode().rstrip()
         self.assertIn("Dockerfile", output)
@@ -51,6 +51,7 @@ class TestCLI(TestCase):
         self.assertIn("trigger_inference_function", output)
         self.assertIn("utils.py", output)
 
+    @skipIf(os.name == "nt", "Not yet available on Windows")
     def test_version(self):
         self.assertEqual(
             check_output(["openmapflow", "version"]).decode().rstrip(), VERSION
@@ -59,6 +60,7 @@ class TestCLI(TestCase):
             check_output(["openmapflow", "--version"]).decode().rstrip(), VERSION
         )
 
+    @skipIf(os.name == "nt", "Not yet available on Windows")
     def test_help(self):
         actual_output = check_output(["openmapflow", "help"]).decode().rstrip()
         expected_output = """---------------------------------------------------------------------------------
