@@ -54,7 +54,7 @@ jobs:
 
   cross-platform-test:
     name: cross-platform-test
-    if: github.ref == 'refs/heads/main2'
+    if: github.ref == 'refs/heads/main'
     runs-on: ${{ matrix.os }}
     env:
       MPLBACKEND: Agg
