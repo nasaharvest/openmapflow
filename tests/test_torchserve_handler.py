@@ -1,4 +1,3 @@
-# from datetime import datetime
 import contextlib
 import tempfile
 from datetime import datetime
@@ -6,13 +5,21 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 
-from docker.torchserve_handler import (
-    download_file,
-    get_bucket_name,
-    get_path,
-    start_date_from_str,
-    upload_file,
-)
+try:
+    import ts  # noqa: F401
+
+    TORCHSERVE_INSTALLED = True
+except ImportError:
+    TORCHSERVE_INSTALLED = False
+
+if TORCHSERVE_INSTALLED:
+    from docker.torchserve_handler import (
+        download_file,
+        get_bucket_name,
+        get_path,
+        start_date_from_str,
+        upload_file,
+    )
 
 tempdir = tempfile.gettempdir()
 
@@ -29,6 +36,10 @@ def create_and_delete_temp_file(filename):
 
 
 class TestTorchserveHandler(TestCase):
+    def setUp(self) -> None:
+        if not TORCHSERVE_INSTALLED:
+            self.skipTest("Torchserve is not installed")
+
     def test_start_date_from_str_expected(self):
         actual_start_date = start_date_from_str("98-togo_2019-02-06_2020-02-01")
         expected_start_date = datetime(2019, 2, 6, 0, 0)
