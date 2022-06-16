@@ -7,8 +7,8 @@ from argparse import ArgumentParser
 import matplotlib.pyplot as plt
 import pandas as pd
 import torch
-from cropharvest.bands import BANDS_MAX
 import yaml
+from cropharvest.bands import BANDS_MAX
 from datasets import datasets
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
