@@ -1,0 +1,9 @@
+-e .
+black
+isort
+flake8
+jupyter
+mypy==0.812
+torchserve
+torch
+tsai

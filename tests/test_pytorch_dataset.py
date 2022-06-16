@@ -6,7 +6,16 @@ import pandas as pd
 
 from openmapflow.constants import CLASS_PROB, END, FEATURE_PATH, LAT, LON, START
 from openmapflow.features import create_feature
-from openmapflow.pytorch_dataset import PyTorchDataset, _upsample_df
+
+try:
+    import torch  # noqa: F401
+
+    TORCH_INSTALLED = True
+except ImportError:
+    TORCH_INSTALLED = False
+
+if TORCH_INSTALLED:
+    from openmapflow.pytorch_dataset import PyTorchDataset, _upsample_df
 
 tempdir = tempfile.gettempdir()
 
@@ -18,6 +27,9 @@ class TestPyTorchDataset(TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        if not TORCH_INSTALLED:
+            return
+
         cls.tif_values = np.zeros((24, 18))
         feature_path = tempdir + "/test.pkl"
         create_feature(
@@ -38,6 +50,10 @@ class TestPyTorchDataset(TestCase):
                 LON: [0.0, 1.0],
             }
         )
+
+    def setUp(self) -> None:
+        if not TORCH_INSTALLED:
+            self.skipTest("Torchserve is not installed")
 
     def test_df_empty_arg(self):
         df = pd.DataFrame({})

@@ -4,6 +4,6 @@ Uganda_buildings_2020_February:
   test_metrics:
     accuracy: 0.9888
     f1: 0.9899
-    precision: 0.9941
-    recall: 0.9858
+    precision: 0.9952
+    recall: 0.9847
     roc_auc: 0.9998

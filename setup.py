@@ -15,10 +15,11 @@ setup(
     author="Ivan Zvonkov",
     author_email="izvonkov@umd.edu",
     url="https://github.com/nasaharvest/openmapflow",
-    version="0.0.1",
+    version="0.0.1rc1",
+    license="Apache License 2.0",
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: Other/Proprietary License",
+        "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ],
     packages=["openmapflow"]
@@ -34,13 +35,15 @@ setup(
     },
     scripts=["openmapflow/scripts/openmapflow", "openmapflow/scripts/deploy.sh"],
     install_requires=[
+        "cmocean",
         "cropharvest>=0.3.0",
         "dvc[gdrive]>=2.10.1",
         "earthengine-api",
+        "h5py>=3.1.0,!=3.7.0",
+        "ipyleaflet>=0.16.0",
         "pandas==1.3.5",
         "protobuf==3.20.1",
         "pyyaml>=6.0",
     ],
     python_requires=">=3.6",
-    include_package_data=True,
 )

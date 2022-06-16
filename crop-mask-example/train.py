@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 import matplotlib.pyplot as plt
 import pandas as pd
 import torch
+import yaml
 from datasets import datasets
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
@@ -24,7 +25,7 @@ from tsai.models.TransformerModel import TransformerModel
 from openmapflow.config import PROJECT
 from openmapflow.constants import SUBSET
 from openmapflow.pytorch_dataset import PyTorchDataset
-from openmapflow.train_utils import device, generate_model_name, model_path_from_name
+from openmapflow.train_utils import generate_model_name, model_path_from_name
 
 try:
     import google.colab  # noqa
@@ -41,7 +42,7 @@ parser = ArgumentParser()
 parser.add_argument("--model_name", type=str, default="")
 parser.add_argument("--start_month", type=str, default="February")
 parser.add_argument("--batch_size", type=int, default=64)
-parser.add_argument("--upsample_minority_ratio", type=float, default=None)
+parser.add_argument("--upsample_minority_ratio", type=float, default=0.5)
 parser.add_argument("--lr", type=float, default=0.001)
 parser.add_argument("--epochs", type=int, default=10)
 parser.add_argument("--wandb", dest="wandb", action="store_true")
@@ -91,6 +92,7 @@ class Model(torch.nn.Module):
         return x
 
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model = Model().to(device)
 
 # ------------ Model hyperparameters -------------------------------------
@@ -117,12 +119,12 @@ if wandb_enabled:
     run = wandb.init(project=PROJECT, config=training_config)
 
 lowest_validation_loss = None
+metrics = {}
 train_batches = 1 + len(train_data) // batch_size
 val_batches = 1 + len(val_data) // batch_size
 
-with tqdm(range(num_epochs)) as tqdm_epoch:
+with tqdm(range(num_epochs), desc="Epoch") as tqdm_epoch:
     for epoch in tqdm_epoch:
-        tqdm_epoch.set_description(f"Epoch {epoch}")
 
         # ------------------------ Training ----------------------------------------
         total_train_loss = 0.0
@@ -175,8 +177,17 @@ with tqdm(range(num_epochs)) as tqdm_epoch:
         # ------------------------ Metrics + Logging -------------------------------
         train_loss = total_train_loss / len(train_data)
         val_loss = total_val_loss / len(val_data)
+
         if lowest_validation_loss is None or val_loss < lowest_validation_loss:
             lowest_validation_loss = val_loss
+            metrics = {
+                "accuracy": accuracy_score(y_true, y_pred),
+                "f1": f1_score(y_true, y_pred),
+                "precision": precision_score(y_true, y_pred),
+                "recall": recall_score(y_true, y_pred),
+                "roc_auc": roc_auc_score(y_true, y_score),
+            }
+            metrics = {k: round(float(v), 4) for k, v in metrics.items()}
 
         tqdm_epoch.set_postfix(loss=val_loss)
 
@@ -207,6 +218,8 @@ with tqdm(range(num_epochs)) as tqdm_epoch:
             sm.save(str(model_path))
 
 print(f"MODEL_NAME={model_name}")
+print(yaml.dump(metrics, allow_unicode=True, default_flow_style=False))
+
 if wandb_enabled and run:
     run.finish()
     print(f"Wandb url: {run.url}")
