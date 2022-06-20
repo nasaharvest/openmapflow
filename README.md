@@ -38,6 +38,12 @@ Rapid map creation with machine learning and earth observation data.
 ## Tutorial [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/tutorial.ipynb)
 Colab notebook tutorial demonstrating data exploration, model training, and inference over small region.
 
+**Prerequisites:**
+- Github account
+- Github access token (obtained [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token))
+- Forked OpenMapFlow repository 
+- Basic Python knowledge 
+
 
 ## Generating a project [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/generate_project.ipynb)
 Inside a Github repository run:
