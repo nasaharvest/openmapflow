@@ -73,11 +73,14 @@ def get_ee_task_amount(prefix: Optional[str] = None):
     Returns:
         Amount of active tasks.
     """
+    ee_prefix = prefix.replace("/", "-").replace("=", "-")
     amount = 0
     task_list = ee.data.getTaskList()
     for t in tqdm(task_list):
         valid_state = t["state"] in ["READY", "RUNNING"]
-        if valid_state and (prefix is None or prefix in t["description"]):
+        if valid_state and (
+            ee_prefix is None or t["description"].startswith(ee_prefix)
+        ):
             amount += 1
     return amount
 
@@ -123,7 +126,7 @@ def get_status(prefix: str) -> Tuple[int, int, int]:
         amount of predictions made.
     """
     print_between_lines(prefix)
-    ee_task_amount = get_ee_task_amount(prefix=prefix.replace("/", "-"))
+    ee_task_amount = get_ee_task_amount(prefix=prefix)
     tifs_amount = get_gcs_file_amount(bn.INFERENCE_TIFS, prefix=prefix)
     predictions_amount = get_gcs_file_amount(bn.PREDS, prefix=prefix)
     print(f"1) Obtaining input data: {ee_task_amount}")
