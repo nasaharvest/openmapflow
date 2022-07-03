@@ -72,7 +72,6 @@ train_data = PyTorchDataset(
     upsample_minority_ratio=upsample_minority_ratio
 )
 
-print(train_data)
 val_data = PyTorchDataset(df=val_df, start_month=start_month, subset="validation")
 train_dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
 val_dataloader = DataLoader(val_data, batch_size=batch_size, shuffle=False)
