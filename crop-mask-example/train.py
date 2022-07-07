@@ -21,6 +21,8 @@ from sklearn.metrics import (
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from tsai.models.TransformerModel import TransformerModel
+from tsai.models.TSiTPlus import TSiTPlus
+from tsai.models.RNN import RNN
 
 from openmapflow.config import PROJECT
 from openmapflow.constants import SUBSET
@@ -81,7 +83,9 @@ num_timesteps, num_bands = train_data[0][0].shape
 class Model(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.model = TransformerModel(c_in=num_bands, c_out=1)
+        # self.model = TransformerModel(c_in=num_bands, c_out=1)
+        # self.model = RNN(c_in=num_bands, c_out=1, n_layers=1, hidden_size=64, fc_dropout=0.1)
+        self.model = RNN(c_in=num_bands, c_out=1, fc_dropout=0.08, n_layers=2)
 
     def forward(self, x):
         with torch.no_grad():
