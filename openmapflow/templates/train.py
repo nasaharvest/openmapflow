@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import torch
 import yaml
+from cropharvest.bands import BANDS_MAX
 from datasets import datasets
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
@@ -85,7 +86,7 @@ class Model(torch.nn.Module):
 
     def forward(self, x):
         with torch.no_grad():
-            x = x * 1e-4  # TODO Fix
+            x = x / torch.tensor(BANDS_MAX)
             x = x.transpose(2, 1)
         x = self.model(x).squeeze(dim=1)
         x = torch.sigmoid(x)
