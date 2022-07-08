@@ -160,7 +160,9 @@ def _set_lat_lon(
         df[LAT] = y
         return df
 
-    raise ValueError("Must specify latitude_col and longitude_col or x_y_from_centroid=True")
+    raise ValueError(
+        "Must specify latitude_col and longitude_col or x_y_from_centroid=True"
+    )
 
 
 def _set_label_metadata(df, label_duration: Optional[str], labeler_name: Optional[str]):
@@ -185,6 +187,8 @@ class RawLabels:
             train, validation, and test set.  The sum of the values must be 1.0
             Default: (1.0, 0.0, 0.0) [All data used for training]
         filter_df (Callable[[pd.DataFrame]]): A function to filter the dataframe before processing
+            Example: lambda df: df[df["class"].notnull()]
+            Default: None
         start_year (int): The year when the labels were collected, should be used when all labels
             are from the same year
             Example: 2019
@@ -229,7 +233,7 @@ class RawLabels:
     transform_crs_from: Optional[int] = None
 
     # Label metadata
-    label_duruation: Optional[str] = None
+    label_duration: Optional[str] = None
     labeler_name: Optional[str] = None
 
     def __post_init__(self):
@@ -252,7 +256,7 @@ class RawLabels:
         df[SOURCE] = self.filename
         df = _set_class_prob(df, self.class_prob)
         df = _set_start_end_dates(df, self.start_year, self.start_date_col)
-        df = _set_label_metadata(df, self.label_duruation, self.labeler_name)
+        df = _set_label_metadata(df, self.label_duration, self.labeler_name)
         df = df.dropna(subset=[LON, LAT, CLASS_PROB])
         df = df.round({LON: 8, LAT: 8})
         df = _train_val_test_split(df, self.train_val_test)
