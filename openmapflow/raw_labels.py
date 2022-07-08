@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from cropharvest.utils import set_seed
 from dateutil.relativedelta import relativedelta
+from fiona.errors import DriverError
 from pyproj import Transformer
 
 from openmapflow.constants import (
@@ -71,9 +72,12 @@ def _read_in_file(file_path) -> pd.DataFrame:
         except UnicodeDecodeError:
             return pd.read_csv(file_path, engine="python")
     elif file_path.suffix == ".zip":
-        with zipfile.ZipFile(file_path, "r") as zip_ref:
-            zip_ref.extractall(file_path.parent)
-        return gpd.read_file(file_path.parent / file_path.stem)
+        try:
+            return gpd.read_file(file_path)
+        except DriverError:
+            with zipfile.ZipFile(file_path, "r") as zip_ref:
+                zip_ref.extractall(file_path.parent)
+            return gpd.read_file(file_path.parent / file_path.stem)
     else:
         return gpd.read_file(file_path)
 
@@ -141,7 +145,7 @@ def _set_lat_lon(
         df = df[df.geometry != None]  # noqa: E711
         df["samples"] = (df.geometry.area / 0.001).astype(int)
         list_of_points = np.vectorize(_get_points)(df.geometry, df.samples)
-        return gpd.GeoDataFrame(geometry=pd.concat(list_of_points, ignore_index=True))
+        df = gpd.GeoDataFrame(geometry=pd.concat(list_of_points, ignore_index=True))
 
     if x_y_from_centroid:
         df = df[df.geometry != None]  # noqa: E711
@@ -156,10 +160,12 @@ def _set_lat_lon(
         df[LAT] = y
         return df
 
+    raise ValueError("Must specify latitude_col and longitude_col or x_y_from_centroid=True")
+
 
 def _set_label_metadata(df, label_duration: Optional[str], labeler_name: Optional[str]):
-    df[LABEL_DUR] = df[label_duration].astype(str) if label_duration else ""
-    df[LABELER_NAMES] = df[labeler_name].astype(str) if labeler_name else ""
+    df[LABEL_DUR] = df[label_duration].astype(str) if label_duration else None
+    df[LABELER_NAMES] = df[labeler_name].astype(str) if labeler_name else None
     return df
 
 
@@ -178,6 +184,7 @@ class RawLabels:
         train_val_test (Tuple[float, float, float]): A tuple of floats representing the ratio of
             train, validation, and test set.  The sum of the values must be 1.0
             Default: (1.0, 0.0, 0.0) [All data used for training]
+        filter_df (Callable[[pd.DataFrame]]): A function to filter the dataframe before processing
         start_year (int): The year when the labels were collected, should be used when all labels
             are from the same year
             Example: 2019
@@ -186,7 +193,7 @@ class RawLabels:
             Example: "Planting Date"
         x_y_from_centroid (bool): Whether to use the centroid of the label as the latitude and
             longitude coordinates
-            Default: True
+            Default: False
         latitude_col (str): The name of the column representing the latitude of the label
             Default: None, will use the latitude of the centroid of the label
         longitude_col (str): The name of the column representing the longitude of the label
@@ -198,7 +205,8 @@ class RawLabels:
             Default: None, assumes EPSG:4326
         label_duration (str): The name of the column representing the labeling duration of the label
             Default: None
-        labeler_name
+        labeler_name (str): The name of the column representing the name of the labeler
+            Default: None
 
     """
 
@@ -231,7 +239,6 @@ class RawLabels:
 
     def process(self, raw_folder: Path) -> pd.DataFrame:
         df = _read_in_file(raw_folder / self.filename)
-        df[SOURCE] = self.filename
         if self.filter_df:
             df = self.filter_df(df)
         df = _set_lat_lon(
@@ -242,6 +249,7 @@ class RawLabels:
             x_y_from_centroid=self.x_y_from_centroid,
             transform_crs_from=self.transform_crs_from,
         )
+        df[SOURCE] = self.filename
         df = _set_class_prob(df, self.class_prob)
         df = _set_start_end_dates(df, self.start_year, self.start_date_col)
         df = _set_label_metadata(df, self.label_duruation, self.labeler_name)
