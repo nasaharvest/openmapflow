@@ -200,6 +200,26 @@ class TestInferenceUtils(TestCase):
         ] * 10
         self.assertEqual(get_status("fake_prefix"), (10, 100, 100))
 
+    @patch("openmapflow.inference_utils.ee")
+    @patch("openmapflow.inference_utils.storage")
+    def test_get_status_special_chars(self, mock_storage, mock_ee):
+        mock_storage_client = mock_storage.Client()
+        mock_storage_client.list_blobs.return_value = [MockBlob("file")] * 100
+        mock_ee.data.getTaskList.return_value = [
+            {"state": "READY", "description": "fake_prefix_lon-10"}
+        ] * 10
+        self.assertEqual(get_status("fake_prefix_lon=10"), (10, 100, 100))
+
+    @patch("openmapflow.inference_utils.ee")
+    @patch("openmapflow.inference_utils.storage")
+    def test_get_status_prefix(self, mock_storage, mock_ee):
+        mock_storage_client = mock_storage.Client()
+        mock_storage_client.list_blobs.return_value = [MockBlob("file")] * 100
+        mock_ee.data.getTaskList.return_value = [
+            {"state": "READY", "description": "fake_prefix_lon_10"}
+        ] * 10
+        self.assertEqual(get_status("fake_prefix"), (10, 100, 100))
+
     @patch("openmapflow.inference_utils.storage")
     def test_find_missing_predictions(self, mock_storage):
         mock_storage_client = mock_storage.Client()
