@@ -119,7 +119,7 @@ Add reference to data using a `LabeledDataset` object in datasets.py, example:
 ```python
 datasets = [
     LabeledDataset(
-        dataset="example_dataset",                 
+        dataset="example_dataset",
         country="Togo",
         raw_labels=(
             RawLabels(
