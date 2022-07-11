@@ -34,9 +34,17 @@ def create_openmapflow_config(overwrite: bool):
     description = input("  Description: ")
     gcloud_project_id = input("  GCloud project ID: ")
     gcloud_location = input("  GCloud location [us-central1]: ") or "us-central1"
-    gcloud_bucket_labeled_tifs = (
-        input("  GCloud bucket labeled tifs [crop-mask-tifs2]: ") or "crop-mask-tifs2"
-    )
+
+    buckets = {
+        "bucket_labeled_tifs": f"{project_name}-labeled-tifs",
+        "bucket_inference_tifs": f"{project_name}-inference-tifs",
+        "bucket_preds": f"{project_name}-preds",
+        "bucket_preds_merged": f"{project_name}-preds-merged",
+    }
+
+    for k, v in buckets.items():
+        buckets[k] = input(f"  Gcloud {k.replace('_', ' ')} [{v}]: ") or v
+
     openmapflow_str = (
         "version: 0.0.1"
         + f"\nproject: {project_name}"
@@ -44,7 +52,10 @@ def create_openmapflow_config(overwrite: bool):
         + "\ngcloud:"
         + f"\n    project_id: {gcloud_project_id}"
         + f"\n    location: {gcloud_location}"
-        + f"\n    bucket_labeled_tifs: {gcloud_bucket_labeled_tifs}"
+        + f"\n    bucket_labeled_tifs: {buckets['bucket_labeled_tifs']}"
+        + f"\n    bucket_inference_tifs: {buckets['bucket_inference_tifs']}"
+        + f"\n    bucket_preds: {buckets['bucket_preds']}"
+        + f"\n    bucket_preds_merged: {buckets['bucket_preds_merged']}"
     )
 
     with open(CONFIG_FILE, "w") as f:
