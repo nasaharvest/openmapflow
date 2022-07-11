@@ -73,7 +73,9 @@ def get_ee_task_amount(prefix: Optional[str] = None):
     Returns:
         Amount of active tasks.
     """
-    ee_prefix = prefix.replace("/", "-").replace("=", "-")
+    ee_prefix = None
+    if prefix is not None:
+        ee_prefix = prefix.replace("/", "-").replace("=", "-")
     amount = 0
     task_list = ee.data.getTaskList()
     for t in tqdm(task_list):

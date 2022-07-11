@@ -206,7 +206,7 @@ class TestInferenceUtils(TestCase):
         mock_storage_client = mock_storage.Client()
         mock_storage_client.list_blobs.return_value = [MockBlob("file")] * 100
         mock_ee.data.getTaskList.return_value = [
-            {"state": "READY", "description": "fake_prefix_lon_10"}
+            {"state": "READY", "description": "fake_prefix_lon-10"}
         ] * 10
         self.assertEqual(get_status("fake_prefix_lon=10"), (10, 100, 100))
 
