@@ -76,11 +76,12 @@ class TestDataset(TestCase):
         expected = np.ones((24, 18)) * 0.0
         self.assertTrue((labelled_np == expected).all())
 
+    @patch("openmapflow.labeled_dataset.storage")
     @patch("openmapflow.labeled_dataset.Path.open")
     @patch("openmapflow.labeled_dataset.find_matching_point")
     @patch("openmapflow.features.pickle.dump")
     def test_create_pickled_labeled_dataset(
-        self, mock_dump, mock_find_matching_point, mock_open
+        self, mock_dump, mock_find_matching_point, mock_open, mock_storage
     ):
         mock_find_matching_point.return_value = (
             np.array([0.0]),
