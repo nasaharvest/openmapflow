@@ -95,7 +95,7 @@ After all configuration is set, the following project structure will be generate
     |   raw_labels.dvc                  # Reference to a version of raw_labels/
     |   processed_labels.dvc            # Reference to a version of processed_labels/
     │   compressed_features.tar.gz.dvc  # Reference to a version of features/
-    │   models/                         # Reference to a version of models/
+    │   models.dvc                      # Reference to a version of models/
     
 ```
 
