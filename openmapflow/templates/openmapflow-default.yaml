@@ -15,7 +15,7 @@ data_paths:
 gcloud:
   project_id: ~
   location: us-central1
-  bucket_labeled_tifs: crop-mask-tifs2
+  bucket_labeled_tifs: <PROJECT>-labeled-tifs
   bucket_inference_tifs: <PROJECT>-inference-tifs
   bucket_preds: <PROJECT>-preds
   bucket_preds_merged: <PROJECT>-preds-merged
