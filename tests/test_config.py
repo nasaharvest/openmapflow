@@ -26,7 +26,7 @@ class TestConfig(TestCase):
             "gcloud": {
                 "project_id": None,
                 "location": "us-central1",
-                "bucket_labeled_tifs": "crop-mask-tifs2",
+                "bucket_labeled_tifs": "fake-project-labeled-tifs",
                 "bucket_inference_tifs": "fake-project-inference-tifs",
                 "bucket_preds": "fake-project-preds",
                 "bucket_preds_merged": "fake-project-preds-merged",
@@ -58,7 +58,7 @@ class TestConfig(TestCase):
             + f"OPENMAPFLOW_LIBRARY_DIR={LIBRARY_DIR} "
             + "OPENMAPFLOW_GCLOUD_PROJECT_ID=None "
             + "OPENMAPFLOW_GCLOUD_LOCATION=us-central1 "
-            + "OPENMAPFLOW_GCLOUD_BUCKET_LABELED_TIFS=crop-mask-tifs2 "
+            + "OPENMAPFLOW_GCLOUD_BUCKET_LABELED_TIFS=openmapflow-labeled-tifs "
             + "OPENMAPFLOW_GCLOUD_BUCKET_INFERENCE_TIFS=openmapflow-inference-tifs "
             + "OPENMAPFLOW_GCLOUD_BUCKET_PREDS=openmapflow-preds "
             + "OPENMAPFLOW_GCLOUD_BUCKET_PREDS_MERGED=openmapflow-preds-merged "

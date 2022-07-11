@@ -145,12 +145,12 @@ class TestGenerate(TestCase):
                             "run": "pip install -r requirements.txt",
                         },
                         {
+                            "uses": "google-github-actions/auth@v0",
+                            "with": {"credentials_json": "${{ secrets.GCP_SA_KEY }}"},
+                        },
+                        {
+                            "name": "Set up Cloud SDK",
                             "uses": "google-github-actions/setup-gcloud@v0",
-                            "with": {
-                                "project_id": "${{ secrets.GCP_PROJECT_ID }}",
-                                "service_account_key": "${{ secrets.GCP_SA_KEY }}",
-                                "export_default_credentials": True,
-                            },
                         },
                         {"uses": "iterative/setup-dvc@v1"},
                         {

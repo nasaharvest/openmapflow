@@ -317,14 +317,20 @@ class LabeledDataset:
 
         # Combine duplicate labels
         df[NUM_LABELERS] = 1
+
+        def join_if_exists(values):
+            if all((isinstance(v, str) for v in values)):
+                return ",".join(values)
+            return ""
+
         df = df.groupby([LON, LAT, START, END], as_index=False, sort=False).agg(
             {
                 SOURCE: lambda sources: ",".join(sources.unique()),
                 CLASS_PROB: "mean",
                 NUM_LABELERS: "sum",
                 SUBSET: "first",
-                LABEL_DUR: lambda dur: ",".join(dur),
-                LABELER_NAMES: lambda name: ",".join(name),
+                LABEL_DUR: join_if_exists,
+                LABELER_NAMES: join_if_exists,
             }
         )
         df[COUNTRY] = self.country

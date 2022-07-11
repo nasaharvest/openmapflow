@@ -40,7 +40,7 @@ setup(
         "dvc[gdrive]>=2.10.1",
         "earthengine-api",
         "h5py>=3.1.0,!=3.7.0",
-        "ipyleaflet>=0.16.0",
+        "ipyleaflet==0.16.0",
         "pandas==1.3.5",
         "protobuf==3.20.1",
         "pyyaml>=6.0",
