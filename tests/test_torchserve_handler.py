@@ -14,10 +14,10 @@ except ImportError:
 
 if TORCHSERVE_INSTALLED:
     from docker.torchserve_handler import (
+        Inference,
         download_file,
         get_bucket_name,
         get_path,
-        Inference,
         upload_file,
     )
 
