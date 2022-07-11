@@ -62,7 +62,8 @@ class InferenceBBox(BBox):
             bounds=((self.min_lat, self.min_lon), (self.max_lat, self.max_lon))
         )
 
-    def get_time_estimate(with_earth_engine=True):
+    def get_time_estimate(self):
+        # TODO: with_earth_engine=True parameter
         # Earth Engine Export
         # margin 0.01 -> 1 min
         # margin 0.02 -> 3 mins

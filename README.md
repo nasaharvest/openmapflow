@@ -37,7 +37,7 @@ Rapid map creation with machine learning and earth observation data.
 * [Creating a map](#creating-a-map-)
 
 ## Tutorial [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/tutorial.ipynb)
-Colab notebook tutorial demonstrating data exploration, model training, and inference over small region.
+Colab notebook tutorial demonstrating data exploration, model training, and inference over small region. ([video](https://youtu.be/UHEUB4RSAi4))
 
 **Prerequisites:**
 - Github access token (obtained [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token))

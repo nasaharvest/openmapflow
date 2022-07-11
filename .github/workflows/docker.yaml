@@ -2,9 +2,8 @@ name: docker
 
 on:
   push:
-    branches: [ main ]
-    paths:
-    - 'docker/**'
+    tags:
+      - '*'
 jobs:
   docker:
     runs-on: ubuntu-latest
@@ -18,5 +17,5 @@ jobs:
       - name: Build and Push
         run: |
           cd docker
-          docker build . -t ivanzvonkov/openmapflow
-          docker push ivanzvonkov/openmapflow
+          docker build . -t ivanzvonkov/openmapflow:$(git describe --tags --abbrev=0)
+          docker push ivanzvonkov/openmapflow:$(git describe --tags --abbrev=0)
