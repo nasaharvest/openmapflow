@@ -1,23 +1,24 @@
 from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
+
 import numpy as np
 import pandas as pd
 import xarray as xr
 
 from openmapflow.constants import (
     CLASS_PROB,
+    END,
     FEATURE_PATH,
     LAT,
     LON,
     START,
-    END,
     TIF_PATHS,
 )
 from openmapflow.data_instance import DataInstance
 from openmapflow.labeled_dataset import (
-    find_matching_point,
     create_pickled_labeled_dataset,
+    find_matching_point,
 )
 
 
