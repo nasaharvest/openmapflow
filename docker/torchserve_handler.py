@@ -6,16 +6,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
+import numpy as np
 from cropharvest.inference import Inference
 from google.cloud import storage
 from ts.torch_handler.base_handler import BaseHandler
-
-
-def start_date_from_str(uri: str) -> datetime:
-    dates = re.findall(r"\d{4}-\d{2}-\d{2}", str(uri))
-    if len(dates) < 2:
-        raise ValueError(f"{uri} should have start and end date")
-    return datetime.strptime(dates[0], "%Y-%m-%d")
 
 
 def get_bucket_name(uri: str) -> str:
@@ -96,7 +90,20 @@ class ModelHandler(BaseHandler):
         properties = context.system_properties
         model_dir = properties.get("model_dir")
         sys.path.append(model_dir)
-        self.inference_module = Inference(model=self.model, normalizing_dict=None)
+
+        normalizing_dict = None
+        if hasattr(self.model, "normalizing_dict_jit"):
+            normalizing_dict = {
+                k: np.array(v) for k, v in self.model.normalizing_dict_jit.items()
+            }
+
+        batch_size = 64
+        if hasattr(self.model, "batch_size"):
+            batch_size = self.model.batch_size
+
+        self.inference_module = Inference(
+            model=self.model, normalizing_dict=normalizing_dict, batch_size=batch_size
+        )
         self.dest_bucket_name: str = os.environ["DEST_BUCKET"]
         print(f"HANDLER: Dest bucket: {self.dest_bucket_name}")
 
@@ -120,7 +127,7 @@ class ModelHandler(BaseHandler):
         local_src_path = download_file(uri)
         local_dest_path = Path(tempfile.gettempdir() + f"/pred_{Path(uri).stem}.nc")
 
-        start_date = start_date_from_str(uri)
+        start_date = Inference.start_date_from_str(uri)
         print(f"HANDLER: Start date: {start_date}")
 
         print("HANDLER: Starting inference")
