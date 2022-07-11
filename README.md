@@ -30,7 +30,7 @@ Rapid map creation with machine learning and earth observation data.
 ![3maps-gif](assets/3maps.gif)
 
 * [Tutorial](#tutorial-)
-* [How it works](#how-it-works-)
+* [How it works](#how-it-works)
 * [Generating a project](#generating-a-project-)
 * [Adding data](#adding-data-)
 * [Training a model](#training-a-model-)
@@ -59,8 +59,7 @@ To create your own maps with OpenMapFlow, you need to
 **Prerequisites:**
 - [ ] [Github repository](https://docs.github.com/en/get-started/quickstart/create-a-repo) - where your project will be stored
 - [ ] [Google/Gmail based account](https://www.google.com/account/about/) - for accessing Google Drive and Google Cloud
-- [ ] [Google Cloud Project](https://console.cloud.google.com/projectcreate) - for deploying Cloud resources (storage, compute) for creating a map
-    - Additional information about Google Cloud Projects can be found [here](https://cloud.google.com/resource-manager/docs/creating-managing-projects#console)
+- [ ] [Google Cloud Project](https://console.cloud.google.com/projectcreate) - for deploying Cloud resources for creating a map ([additional info](https://cloud.google.com/resource-manager/docs/creating-managing-projects#console))
 
 Once all prerequisites are satisfied, inside your Github repository run:
 ```bash
@@ -185,7 +184,7 @@ git push --set-upstream origin "$MODEL_NAME"
 
 **Important:** When a new model is pushed to the repository a Github action will be run to deploy this model to Google Cloud. To allow the Github action to access Google Cloud add a new repository secret ([instructions](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository)). 
 - In step 5 of the instructions, name the secret: `GCP_SA_KEY`
-- In step 6, enter a Google Cloud Service Accoutn key ([how to create](https://cloud.google.com/iam/docs/creating-managing-service-account-keys))
+- In step 6, enter a Google Cloud Service Account key ([how to create](https://cloud.google.com/iam/docs/creating-managing-service-account-keys))
 
 Now after merging the pull request, the model will be deployed to Google Cloud.
 
