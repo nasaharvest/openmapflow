@@ -82,8 +82,8 @@ num_timesteps, num_bands = train_data[0][0].shape
 class Model(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        # self.model = TSiTPlus(c_in=18, c_out=1, seq_len=12, d_model=64, depth=1, n_heads=2, dropout=0.1, flatten=True)
-        self.model = TSSequencerPlus(c_in=18, c_out=1, seq_len=12, d_model=24, depth=1, dropout=0.2, flatten=True)
+        self.model = TSiTPlus(c_in=18, c_out=1, seq_len=12, d_model=64, depth=1, n_heads=4, dropout=0.1, flatten=True)
+        # self.model = TSSequencerPlus(c_in=18, c_out=1, seq_len=12, d_model=24, depth=1, dropout=0.2, flatten=True)
 
     def forward(self, x):
         with torch.no_grad():
