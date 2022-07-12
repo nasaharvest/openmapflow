@@ -21,6 +21,8 @@ from sklearn.metrics import (
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from tsai.models.TransformerModel import TransformerModel
+from tsai.models.TSiTPlus import TSiTPlus
+from tsai.models.TSSequencerPlus import TSSequencerPlus
 
 from openmapflow.config import PROJECT
 from openmapflow.constants import SUBSET
@@ -41,9 +43,9 @@ warnings.simplefilter("ignore", UserWarning)  # TorchScript throws excessive war
 parser = ArgumentParser()
 parser.add_argument("--model_name", type=str, default="")
 parser.add_argument("--start_month", type=str, default="February")
-parser.add_argument("--batch_size", type=int, default=64)
+parser.add_argument("--batch_size", type=int, default=256)
 parser.add_argument("--upsample_minority_ratio", type=float, default=0.5)
-parser.add_argument("--lr", type=float, default=0.001)
+parser.add_argument("--lr", type=float, default=0.002)
 parser.add_argument("--epochs", type=int, default=10)
 parser.add_argument("--wandb", dest="wandb", action="store_true")
 parser.set_defaults(wandb=False)
@@ -77,11 +79,11 @@ val_dataloader = DataLoader(val_data, batch_size=batch_size, shuffle=False)
 # ------------ Model -----------------------------------------
 num_timesteps, num_bands = train_data[0][0].shape
 
-
 class Model(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.model = TransformerModel(c_in=num_bands, c_out=1)
+        # self.model = TSiTPlus(c_in=18, c_out=1, seq_len=12, d_model=64, depth=1, n_heads=2, dropout=0.1, flatten=True)
+        self.model = TSSequencerPlus(c_in=18, c_out=1, seq_len=12, d_model=24, depth=1, dropout=0.2, flatten=True)
 
     def forward(self, x):
         with torch.no_grad():
@@ -215,7 +217,7 @@ with tqdm(range(num_epochs), desc="Epoch") as tqdm_epoch:
             model_path = model_path_from_name(model_name=model_name)
             if model_path.exists():
                 model_path.unlink()
-            sm.save(str(model_path))
+            sm.save("./data/models/aditya_shrivastava_model.pt")
 
 print(f"MODEL_NAME={model_name}")
 print(yaml.dump(metrics, allow_unicode=True, default_flow_style=False))
