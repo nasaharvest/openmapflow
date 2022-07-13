@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:experimental
-FROM ivanzvonkov/openmapflow
+FROM ivanzvonkov/openmapflow:0.0.1rc1
 
 # Ensures that everytime models.dvc is updated 
 # This following docker steps are rerun

@@ -1,9 +1,6 @@
 *.egg-info
 *.pyc
 
-buildings-example/notebooks
-crop-mask-example/notebooks
-
 .vscode/
 
 build/
