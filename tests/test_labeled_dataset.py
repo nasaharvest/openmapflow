@@ -18,10 +18,10 @@ from openmapflow.constants import (
 from openmapflow.data_instance import DataInstance
 from openmapflow.labeled_dataset import (
     create_pickled_labeled_dataset,
-    find_matching_point,
-    find_nearest,
     distance,
     distance_point_from_center,
+    find_matching_point,
+    find_nearest,
 )
 
 
