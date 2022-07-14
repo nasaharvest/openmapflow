@@ -136,9 +136,9 @@ class TestDataset(TestCase):
         self.assertEqual(idx, 0)
 
     def test_distance(self):
-        self.assertEqual(distance(0, 0, 0.01, 0.01), 1.5725337265584898)
-        self.assertEqual(distance(0, 0, 0.01, 0), 1.1119492645167193)
-        self.assertEqual(distance(0, 0, 0, 0.01), 1.1119492645167193)
+        self.assertAlmostEqual(distance(0, 0, 0.01, 0.01), 1.5725337265584898)
+        self.assertAlmostEqual(distance(0, 0, 0.01, 0), 1.1119492645167193)
+        self.assertAlmostEqual(distance(0, 0, 0, 0.01), 1.1119492645167193)
 
     def test_distance_point_from_center(self):
         tif = xr.DataArray(
