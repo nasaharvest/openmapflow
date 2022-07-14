@@ -15,7 +15,7 @@ setup(
     author="Ivan Zvonkov",
     author_email="izvonkov@umd.edu",
     url="https://github.com/nasaharvest/openmapflow",
-    version="0.0.1rc1",
+    version="0.0.2",
     license="Apache License 2.0",
     classifiers=[
         "Programming Language :: Python :: 3",
