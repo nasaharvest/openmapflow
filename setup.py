@@ -1,5 +1,7 @@
 from setuptools import find_packages, setup
 
+from openmapflow.constants import VERSION
+
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
@@ -15,7 +17,7 @@ setup(
     author="Ivan Zvonkov",
     author_email="izvonkov@umd.edu",
     url="https://github.com/nasaharvest/openmapflow",
-    version="0.0.2",
+    version=VERSION,
     license="Apache License 2.0",
     classifiers=[
         "Programming Language :: Python :: 3",

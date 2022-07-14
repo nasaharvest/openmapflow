@@ -13,6 +13,7 @@ from openmapflow.constants import (
     TEMPLATE_EVALUATE,
     TEMPLATE_TEST_YML,
     TEMPLATE_TRAIN,
+    VERSION,
 )
 
 
@@ -46,7 +47,7 @@ def create_openmapflow_config(overwrite: bool):
         buckets[k] = input(f"  Gcloud {k.replace('_', ' ')} [{v}]: ") or v
 
     openmapflow_str = (
-        "version: 0.0.1"
+        f"version: {VERSION}"
         + f"\nproject: {project_name}"
         + f"\ndescription: {description}"
         + "\ngcloud:"

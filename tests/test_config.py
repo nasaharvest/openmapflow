@@ -1,14 +1,14 @@
 from unittest import TestCase
 
 from openmapflow.config import DataPaths, deploy_env_variables, load_default_config
-from openmapflow.constants import LIBRARY_DIR
+from openmapflow.constants import LIBRARY_DIR, VERSION
 
 
 class TestConfig(TestCase):
     def test_load_default_config(self):
         actual_config = load_default_config(project_name="fake-project")
         expected_config = {
-            "version": "0.0.1",
+            "version": VERSION,
             "project": "fake-project",
             "description": None,
             "data_paths": {

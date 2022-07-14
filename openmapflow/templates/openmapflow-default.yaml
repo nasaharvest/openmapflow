@@ -1,6 +1,6 @@
-version: 0.0.1
+version: <VERSION>
 project: <PROJECT>
-description: ~
+description: <PROJECT_DESCRIPTION>
 data_paths:
   raw_labels: raw_labels
   processed_labels: processed_labels
@@ -13,7 +13,7 @@ data_paths:
   duplicates: duplicates.txt
   unexported: unexported.txt
 gcloud:
-  project_id: ~
+  project_id: <GCLOUD_PROJECT_ID>
   location: us-central1
   bucket_labeled_tifs: <PROJECT>-labeled-tifs
   bucket_inference_tifs: <PROJECT>-inference-tifs
