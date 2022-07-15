@@ -20,7 +20,7 @@ jobs:
       with:
         python-version: 3.7
     - name: Install dependencies
-      run: pip install -r requirements.txt
+      run: pip install -r requirements-ci.txt
     - name: isort
       run: python -m  isort . --check --diff
     - name: black
@@ -48,7 +48,7 @@ jobs:
       with:
         python-version: 3.7
     - name: Install dependencies
-      run: pip install -r requirements.txt
+      run: pip install -r requirements-ci.txt
     - name: Run tests
       run: python -m unittest discover -s tests
 
@@ -78,19 +78,19 @@ jobs:
     - name: Install conda dependencies (Windows)
       run: |
         conda install 'fiona>=1.5' 'rasterio>=1.2.6'
-        pip install -r requirements.txt
+        pip install -r requirements-ci.txt
       if: ${{ runner.os == 'Windows' }}
     - name: Cache pip
       uses: actions/cache@v2
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements-ci.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
           ${{ runner.os }}-
     - name: Install dependencies
       if: ${{ runner.os != 'Windows' }}
-      run: pip install -r requirements.txt
+      run: pip install -r requirements-ci.txt
     - name: Run tests (Windows)
       if: ${{ runner.os == 'Windows' }}
       env:

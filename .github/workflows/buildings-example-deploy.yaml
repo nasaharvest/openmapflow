@@ -11,6 +11,9 @@ on:
 jobs:
   deploy: 
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: buildings-example
     steps:
     - uses: actions/checkout@v2
     - name: Set up python
@@ -18,16 +21,14 @@ jobs:
       with:
         python-version: 3.8
     - name: Install dependencies
-      run: pip install -r requirements.txt
-    - uses: google-github-actions/setup-gcloud@v0
+      run: cd .. && pip install -r requirements.txt
+    - uses: google-github-actions/auth@v0
       with:
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
-        service_account_key: ${{ secrets.GCP_SA_KEY }}
-        export_default_credentials: true   
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v0  
     - uses: iterative/setup-dvc@v1
     - name: Deploy Google Cloud Architecture
       env:
           GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
-      run: |
-        cd buildings-example
-        openmapflow deploy
+      run: openmapflow deploy

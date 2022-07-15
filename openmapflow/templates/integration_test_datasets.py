@@ -1,5 +1,4 @@
 import os
-import sys
 import unittest
 from datetime import date
 from pathlib import Path
@@ -7,6 +6,7 @@ from unittest import TestCase
 
 import numpy as np
 import pandas as pd
+from datasets import datasets
 from dateutil.relativedelta import relativedelta
 
 from openmapflow.constants import (
@@ -22,11 +22,6 @@ from openmapflow.constants import (
 from openmapflow.data_instance import DataInstance
 from openmapflow.features import load_all_features_as_df, load_feature
 from openmapflow.labeled_dataset import get_label_timesteps
-
-os.chdir(os.path.dirname(os.path.realpath(__file__)))
-sys.path.append("..")
-
-from datasets import datasets  # noqa: E402
 
 
 class IntegrationTestLabeledData(TestCase):
