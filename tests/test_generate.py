@@ -84,7 +84,7 @@ class TestGenerate(TestCase):
                     sub_prefix="project-prefix",
                     sub_paths="path/project/data",
                     sub_cd="path/project",
-                    sub_requirements="requirements.txt",
+                    sub_requirements="pip install -r requirements.txt",
                 )
 
                 with dest.open("r") as f:
@@ -93,14 +93,14 @@ class TestGenerate(TestCase):
             yaml.safe_load(project_action)  # Verify it's valid YAML
 
             self.assertIn("<PREFIX>", template_action)
-            self.assertIn("<REQUIREMENTS_TXT>", template_action)
+            self.assertIn("<REQUIREMENTS>", template_action)
             self.assertIn("<CD>", template_action)
             self.assertNotIn("<PREFIX>", project_action)
             self.assertNotIn("<PATHS>", project_action)
-            self.assertNotIn("<REQUIREMENTS_TXT>", project_action)
+            self.assertNotIn("<REQUIREMENTS>", project_action)
             self.assertNotIn("<CD>", project_action)
             self.assertIn("project-prefix", project_action)
-            self.assertIn("requirements.txt", project_action)
+            self.assertIn("pip install -r requirements.txt", project_action)
             self.assertIn("path/project", project_action)
 
     @skipIf(os.name == "nt", "Tempdir doesn't work on windows")

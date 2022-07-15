@@ -104,7 +104,7 @@ def fill_in_and_write_action(
     content = content.replace("<PREFIX>", sub_prefix)
     content = content.replace("<PATHS>", sub_paths)
     content = content.replace("<CD>", sub_cd)
-    content = content.replace("<REQUIREMENTS_TXT>", sub_requirements)
+    content = content.replace("<REQUIREMENTS>", sub_requirements)
 
     dest_yml_path.parent.mkdir(parents=True, exist_ok=True)
     with dest_yml_path.open("w") as f:
@@ -136,6 +136,7 @@ def create_github_actions(
     """
     dest_deploy_yml_path = git_root / f".github/workflows/{PROJECT}-deploy.yaml"
     dest_test_yml_path = git_root / f".github/workflows/{PROJECT}-test.yaml"
+    pip_install = "pip install -r requirements.txt"
     if allow_write(dest_deploy_yml_path, overwrite):
         fill_in_and_write_action(
             src_yml_path=TEMPLATE_DEPLOY_YML,
@@ -143,7 +144,7 @@ def create_github_actions(
             sub_prefix=PROJECT.split("-")[0],
             sub_paths=f"{f'{PROJECT}/' if is_subdir else ''}{dp.MODELS}.dvc",
             sub_cd=PROJECT if is_subdir else ".",
-            sub_requirements="../requirements.txt" if is_subdir else "requirements.txt",
+            sub_requirements=f"cd .. && {pip_install}" if is_subdir else pip_install,
         )
 
     if allow_write(dest_test_yml_path, overwrite):
@@ -153,7 +154,7 @@ def create_github_actions(
             sub_prefix=PROJECT.split("-")[0],
             sub_paths="",
             sub_cd=PROJECT if is_subdir else ".",
-            sub_requirements="../requirements.txt" if is_subdir else "requirements.txt",
+            sub_requirements=f"cd .. && {pip_install}" if is_subdir else pip_install,
         )
 
 

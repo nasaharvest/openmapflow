@@ -23,7 +23,7 @@ jobs:
       with:
         python-version: 3.8
     - name: Install dependencies
-      run: pip install -r ../requirements.txt
+      run: cd .. && pip install -r requirements.txt
 
     - name: dvc pull data
       env:
