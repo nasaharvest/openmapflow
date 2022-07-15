@@ -11,6 +11,9 @@ on:
 jobs:
   deploy: 
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: <CD>
     steps:
     - uses: actions/checkout@v2
     - name: Set up python
@@ -18,7 +21,7 @@ jobs:
       with:
         python-version: 3.8
     - name: Install dependencies
-      run: pip install -r requirements.txt
+      run: pip install -r <REQUIREMENTS_TXT>
     - uses: google-github-actions/auth@v0
       with:
         credentials_json: ${{ secrets.GCP_SA_KEY }}
@@ -28,6 +31,4 @@ jobs:
     - name: Deploy Google Cloud Architecture
       env:
           GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
-      run: |
-        <CD>
-        openmapflow deploy
+      run: openmapflow deploy
