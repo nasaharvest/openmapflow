@@ -87,6 +87,7 @@ def fill_in_and_write_action(
     sub_prefix: str,
     sub_paths: str,
     sub_cd: str,
+    sub_requirements: str,
 ):
     """
     Fills in template action and writes to file
@@ -96,12 +97,15 @@ def fill_in_and_write_action(
         sub_prefix: Prefix to add to action name
         sub_paths: Paths to trigger action by
         sub_cd: Command to cd into project root
+        sub_requirements: Location of requirements.txt
     """
     with src_yml_path.open("r") as f:
         content = f.read()
     content = content.replace("<PREFIX>", sub_prefix)
     content = content.replace("<PATHS>", sub_paths)
     content = content.replace("<CD>", sub_cd)
+    content = content.replace("<REQUIREMENTS_TXT>", sub_requirements)
+
     dest_yml_path.parent.mkdir(parents=True, exist_ok=True)
     with dest_yml_path.open("w") as f:
         f.write(content)
@@ -138,7 +142,8 @@ def create_github_actions(
             dest_yml_path=dest_deploy_yml_path,
             sub_prefix=PROJECT.split("-")[0],
             sub_paths=f"{f'{PROJECT}/' if is_subdir else ''}{dp.MODELS}.dvc",
-            sub_cd=f"cd {PROJECT}" if is_subdir else "",
+            sub_cd=PROJECT if is_subdir else ".",
+            sub_requirements="../requirements.txt" if is_subdir else "requirements.txt",
         )
 
     if allow_write(dest_test_yml_path, overwrite):
@@ -146,8 +151,9 @@ def create_github_actions(
             src_yml_path=TEMPLATE_TEST_YML,
             dest_yml_path=dest_test_yml_path,
             sub_prefix=PROJECT.split("-")[0],
-            sub_paths=f"{f'{PROJECT}/' if is_subdir else ''}{DATA_DIR}**",
-            sub_cd=f"cd {PROJECT}" if is_subdir else "",
+            sub_paths="",
+            sub_cd=PROJECT if is_subdir else ".",
+            sub_requirements="../requirements.txt" if is_subdir else "requirements.txt",
         )
 
 
