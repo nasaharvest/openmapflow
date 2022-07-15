@@ -1,18 +1,9 @@
 import os
 import unittest
-
 from pathlib import Path
 
-from openmapflow.constants import (
-    CONFIG_FILE,
-    TEMPLATE_DATASETS,
-    TEMPLATE_EVALUATE,
-    TEMPLATE_TRAIN,
-    VERSION,
-)
-
-from openmapflow.config import CONFIG_YML, PROJECT_ROOT
-from openmapflow.config import DataPaths as dp
+from openmapflow.config import CONFIG_YML, PROJECT_ROOT, DataPaths as dp
+from openmapflow.constants import CONFIG_FILE, TEMPLATE_DATASETS, VERSION
 
 
 class TestProjectConfig(unittest.TestCase):
@@ -21,17 +12,18 @@ class TestProjectConfig(unittest.TestCase):
 
         has_issues = False
         if (PROJECT_ROOT / CONFIG_FILE).exists():
-            print(f"\u2714 openmapflow.yaml exists")
+            print("\u2714 openmapflow.yaml exists")
         else:
             has_issues = True
-            print(f"\u2716 openmapflow.yaml not found")
+            print("\u2716 openmapflow.yaml not found")
 
         if CONFIG_YML["version"] == VERSION:
             print(f"\u2714 openmapflow.yaml version matches package version: {VERSION}")
         else:
             has_issues = True
             print(
-                f"\u2716 openmapflow.yaml version: {CONFIG_YML['version']} does not match package version: {VERSION}"
+                f"\u2716 openmapflow.yaml version: {CONFIG_YML['version']} "
+                + "does not match package version: {VERSION}"
             )
 
         for p in [

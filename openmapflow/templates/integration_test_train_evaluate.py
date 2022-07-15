@@ -1,9 +1,8 @@
 import os
-import unittest
 import subprocess
+import unittest
 from random import randrange
 from unittest import TestCase
-from unittest.mock import patch
 
 from openmapflow.config import PROJECT_ROOT, DataPaths
 from openmapflow.constants import TEMPLATE_EVALUATE, TEMPLATE_TRAIN
@@ -22,19 +21,19 @@ class TestExampleProjectsGenerated(TestCase):
         subprocess.check_output(
             ["python", "train.py", "--epochs", "2", "--model_name", test_model_name]
         )
-        print(f"\u2714 train.py ran successfully")
+        print("\u2714 train.py ran successfully")
 
         models_after = set((PROJECT_ROOT / DataPaths.MODELS).glob("*.pt"))
         model_difference = list(models_after - models_before)
         self.assertEqual(len(model_difference), 1)
         new_model_path = model_difference[0]
         self.assertEqual(new_model_path.stem, test_model_name)
-        print(f"\u2714 train.py generated a new model")
+        print("\u2714 train.py generated a new model")
 
         subprocess.check_output(
             ["python", "evaluate.py", "--skip_yaml", "--model_name", test_model_name]
         )
-        print(f"\u2714 evaluate.py ran successfully on new model")
+        print("\u2714 evaluate.py ran successfully on new model")
 
         new_model_path.unlink()
 
