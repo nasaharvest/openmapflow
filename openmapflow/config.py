@@ -91,7 +91,7 @@ def get_model_names_as_str(most_recent: int = 3) -> str:
     return " ".join(latest_models)
 
 
-def deploy_env_variables() -> str:
+def deploy_env_variables(empty_check: bool = True) -> str:
     prefix = "OPENMAPFLOW"
     deploy_env_dict = {
         "PROJECT": PROJECT,
@@ -105,5 +105,10 @@ def deploy_env_variables() -> str:
         "GCLOUD_BUCKET_PREDS_MERGED": BucketNames.PREDS_MERGED,
         "DOCKER_TAG": DOCKER_TAG,
     }
+    if empty_check:
+        for k, v in deploy_env_dict.items():
+            if v == "" or v is None:
+                raise ValueError(f"{k} is not set")
+
     env_variables = " ".join([f"{prefix}_{k}={v}" for k, v in deploy_env_dict.items()])
     return env_variables
