@@ -2,7 +2,8 @@ import os
 import unittest
 from pathlib import Path
 
-from openmapflow.config import CONFIG_YML, PROJECT_ROOT, DataPaths as dp
+from openmapflow.config import CONFIG_YML, PROJECT_ROOT
+from openmapflow.config import DataPaths as dp
 from openmapflow.constants import CONFIG_FILE, TEMPLATE_DATASETS, VERSION
 
 
