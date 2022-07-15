@@ -11,7 +11,7 @@ TEMPLATE_TRAIN = TEMPLATES_DIR / "train.py"
 TEMPLATE_EVALUATE = TEMPLATES_DIR / "evaluate.py"
 TEMPLATE_DEPLOY_YML = TEMPLATES_DIR / "github-deploy.yaml"
 TEMPLATE_TEST_YML = TEMPLATES_DIR / "github-test.yaml"
-VERSION = "0.0.1"
+VERSION = "0.0.2"
 
 # -------------- Dataframe column names ---------------------------------------
 SOURCE = "source"
