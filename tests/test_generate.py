@@ -83,7 +83,8 @@ class TestGenerate(TestCase):
                     dest_yml_path=dest,
                     sub_prefix="project-prefix",
                     sub_paths="path/project/data",
-                    sub_cd="cd path/project",
+                    sub_cd="path/project",
+                    sub_requirements="requirements.txt",
                 )
 
                 with dest.open("r") as f:
@@ -92,17 +93,18 @@ class TestGenerate(TestCase):
             yaml.safe_load(project_action)  # Verify it's valid YAML
 
             self.assertIn("<PREFIX>", template_action)
-            self.assertIn("<PATHS>", template_action)
+            self.assertIn("<REQUIREMENTS_TXT>", template_action)
             self.assertIn("<CD>", template_action)
             self.assertNotIn("<PREFIX>", project_action)
             self.assertNotIn("<PATHS>", project_action)
+            self.assertNotIn("<REQUIREMENTS_TXT>", project_action)
             self.assertNotIn("<CD>", project_action)
             self.assertIn("project-prefix", project_action)
-            self.assertIn("path/project/data", project_action)
-            self.assertIn("cd path/project", project_action)
+            self.assertIn("requirements.txt", project_action)
+            self.assertIn("path/project", project_action)
 
     @skipIf(os.name == "nt", "Tempdir doesn't work on windows")
-    def test_create_github_actions(self):
+    def test_create_github_actions_deploy(self):
 
         with tempfile.TemporaryDirectory() as tmpdir:
             os.chdir(tmpdir)
@@ -119,13 +121,9 @@ class TestGenerate(TestCase):
             )
 
             deploy_path = Path(f"{tmpdir}/.github/workflows/fake-project-deploy.yaml")
-            test_path = Path(f"{tmpdir}/.github/workflows/fake-project-test.yaml")
 
             with deploy_path.open("r") as f:
                 actual_deploy_action = yaml.safe_load(f)
-
-            with test_path.open("r") as f:
-                actual_test_action = yaml.safe_load(f)
 
         expected_deploy_action = {
             "name": "fake-deploy",
@@ -133,6 +131,7 @@ class TestGenerate(TestCase):
             "jobs": {
                 "deploy": {
                     "runs-on": "ubuntu-latest",
+                    "defaults": {"run": {"working-directory": "."}},
                     "steps": [
                         {"uses": "actions/checkout@v2"},
                         {
@@ -158,7 +157,7 @@ class TestGenerate(TestCase):
                             "env": {
                                 "GDRIVE_CREDENTIALS_DATA": "${{ secrets.GDRIVE_CREDENTIALS_DATA }}"
                             },
-                            "run": "\nopenmapflow deploy",
+                            "run": "openmapflow deploy",
                         },
                     ],
                 }
@@ -166,15 +165,40 @@ class TestGenerate(TestCase):
         }
         self.assertEqual(expected_deploy_action, actual_deploy_action)
 
+    @skipIf(os.name == "nt", "Tempdir doesn't work on windows")
+    def test_create_github_actions_test(self):
+
+        self.maxDiff = None
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            os.chdir(tmpdir)
+
+            # Can only be imported once in directory
+            from openmapflow.config import DataPaths as dp
+
+            create_github_actions(
+                git_root=Path(tmpdir),
+                is_subdir=False,
+                PROJECT="fake-project",
+                dp=dp,
+                overwrite=False,
+            )
+
+            test_path = Path(f"{tmpdir}/.github/workflows/fake-project-test.yaml")
+
+            with test_path.open("r") as f:
+                actual_test_action = yaml.safe_load(f)
+
         expected_test_action = {
             "name": "fake-test",
             True: {
-                "push": {"branches": ["main"], "paths": "data/**"},
-                "pull_request": {"branches": ["main"], "paths": "data/**"},
+                "push": {"branches": ["main"]},
+                "pull_request": {"branches": ["main"]},
             },
             "jobs": {
                 "test": {
                     "runs-on": "ubuntu-latest",
+                    "defaults": {"run": {"working-directory": "."}},
                     "steps": [
                         {"name": "Clone repo", "uses": "actions/checkout@v2"},
                         {
@@ -191,14 +215,25 @@ class TestGenerate(TestCase):
                             "env": {
                                 "GDRIVE_CREDENTIALS_DATA": "${{ secrets.GDRIVE_CREDENTIALS_DATA }}"
                             },
-                            "run": "\ndvc pull $(openmapflow datapath PROCESSED_LABELS) -f"
+                            "run": "dvc pull $(openmapflow datapath PROCESSED_LABELS) -f"
                             + "\ndvc pull $(openmapflow datapath COMPRESSED_FEATURES) -f"
-                            + "\ntar -xvzf $(openmapflow datapath COMPRESSED_FEATURES) -C data/\n",
+                            + "\ntar -xvzf $(openmapflow datapath COMPRESSED_FEATURES) -C data/"
+                            + "\ndvc pull $(openmapflow datapath MODELS) -f\n",
+                        },
+                        {
+                            "name": "Integration test - Project",
+                            "run": "openmapflow cp templates/integration_test_project.py ."
+                            + "\npython -m unittest integration_test_project.py\n",
                         },
                         {
                             "name": "Integration test - Data integrity",
-                            "run": "\nopenmapflow cp templates/integration_test_datasets.py ."
+                            "run": "openmapflow cp templates/integration_test_datasets.py ."
                             + "\npython -m unittest integration_test_datasets.py\n",
+                        },
+                        {
+                            "name": "Integration test - Train and evaluate",
+                            "run": "openmapflow cp templates/integration_test_train_evaluate.py ."
+                            + "\npython -m unittest integration_test_train_evaluate.py\n",
                         },
                     ],
                 }
