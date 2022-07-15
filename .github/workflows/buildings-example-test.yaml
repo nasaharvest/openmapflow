@@ -6,14 +6,15 @@ name: buildings-test
 on:
   push:
     branches: [ main ]
-    paths: buildings-example/data/**
   pull_request:
     branches: [ main ]
-    paths: buildings-example/data/**
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: buildings-example
     steps:
     - name: Clone repo
       uses: actions/checkout@v2
@@ -22,19 +23,29 @@ jobs:
       with:
         python-version: 3.8
     - name: Install dependencies
-      run: pip install -r requirements.txt
+      run: pip install -r ../requirements.txt
+
     - name: dvc pull data
       env:
         # https://dvc.org/doc/user-guide/setup-google-drive-remote#authorization
         GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
       run: |
-        cd buildings-example
         dvc pull $(openmapflow datapath PROCESSED_LABELS) -f
         dvc pull $(openmapflow datapath COMPRESSED_FEATURES) -f
         tar -xvzf $(openmapflow datapath COMPRESSED_FEATURES) -C data/
+        dvc pull $(openmapflow datapath MODELS) -f
+
+    - name: Integration test - Project
+      run: |
+        openmapflow cp templates/integration_test_project.py .
+        python -m unittest integration_test_project.py
 
     - name: Integration test - Data integrity
       run: |
-        cd buildings-example
         openmapflow cp templates/integration_test_datasets.py .
         python -m unittest integration_test_datasets.py
+
+    - name: Integration test - Train and evaluate
+      run: |
+        openmapflow cp templates/integration_test_train_evaluate.py .
+        python -m unittest integration_test_train_evaluate.py

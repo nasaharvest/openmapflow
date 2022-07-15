@@ -1,7 +1,10 @@
-version: 0.0.1
+version: 0.0.2
 project: buildings-example
-description: Openmapflow buildings example project
+description: OpenMapFlow buildings example
 gcloud:
     project_id: bsos-geog-harvest1
     location: us-central1
     bucket_labeled_tifs: crop-mask-tifs2
+    bucket_inference_tifs: buildings-example-inference-tifs
+    bucket_preds: buildings-example-preds
+    bucket_preds_merged: buildings-example-preds-merged
