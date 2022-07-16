@@ -11,6 +11,7 @@ from openmapflow.constants import (
     TEMPLATE_DATASETS,
     TEMPLATE_DEPLOY_YML,
     TEMPLATE_EVALUATE,
+    TEMPLATE_REQUIREMENTS,
     TEMPLATE_TEST_YML,
     TEMPLATE_TRAIN,
     VERSION,
@@ -44,7 +45,7 @@ def create_openmapflow_config(overwrite: bool):
     }
 
     for k, v in buckets.items():
-        buckets[k] = input(f"  Gcloud {k.replace('_', ' ')} [{v}]: ") or v
+        buckets[k] = input(f"  GCloud {k.replace('_', ' ')} [{v}]: ") or v
 
     openmapflow_str = (
         f"version: {VERSION}"
@@ -65,7 +66,12 @@ def create_openmapflow_config(overwrite: bool):
 
 def copy_template_files(PROJECT_ROOT: Path, overwrite: bool):
     """Copies template files to project directory"""
-    for p in [TEMPLATE_DATASETS, TEMPLATE_TRAIN, TEMPLATE_EVALUATE]:
+    for p in [
+        TEMPLATE_DATASETS,
+        TEMPLATE_TRAIN,
+        TEMPLATE_EVALUATE,
+        TEMPLATE_REQUIREMENTS,
+    ]:
         if allow_write(PROJECT_ROOT / p.name, overwrite):
             shutil.copy(str(p), str(PROJECT_ROOT / p.name))
 
@@ -216,7 +222,7 @@ if __name__ == "__main__":
     from openmapflow.config import PROJECT, PROJECT_ROOT
     from openmapflow.config import DataPaths as dp  # noqa E402
 
-    print(f"2/{n} Copying datasets.py, train.py, evaluate.py")
+    print(f"2/{n} Copying datasets.py, train.py, evaluate.py requirements.txt")
     copy_template_files(PROJECT_ROOT, args.overwrite)
 
     print(f"3/{n} Creating data directories")
