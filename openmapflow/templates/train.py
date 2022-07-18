@@ -80,7 +80,7 @@ num_timesteps, num_bands = train_data[0][0].shape
 
 
 class Model(torch.nn.Module):
-    def __init__(self, normalization_vals = BANDS_MAX):
+    def __init__(self, normalization_vals=BANDS_MAX):
         super().__init__()
         self.model = TransformerModel(c_in=num_bands, c_out=1)
         self.normalization_vals = torch.tensor(normalization_vals)
