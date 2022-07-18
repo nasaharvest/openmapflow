@@ -33,7 +33,8 @@ def create_openmapflow_config(overwrite: bool):
         return
     cwd = Path.cwd()
     project_name = input(f"  Project name [{cwd.stem}]: ") or cwd.stem
-    description = input("  Description: ")
+    auto_description = f"OpenMapFlow {project_name.replace('-', ' ').replace('_', ' ')}"
+    description = input(f"  Description [{auto_description}]: ") or auto_description
     gcloud_project_id = input("  GCloud project ID: ")
     gcloud_location = input("  GCloud location [us-central1]: ") or "us-central1"
 
