@@ -1,4 +1,5 @@
 import os
+import sys
 import unittest
 from datetime import date
 from pathlib import Path
@@ -237,6 +238,7 @@ class IntegrationTestLabeledData(TestCase):
             else:
                 mark = "\u2714"
             print(f"{mark} {name}:\t\tMismatches: {num_mismatched}")
+            total_num_mismatched += num_mismatched
         self.assertTrue(
             total_num_mismatched == 0,
             f"Found {total_num_mismatched} mismatched labels+tifs.",
