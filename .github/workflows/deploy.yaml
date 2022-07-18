@@ -9,5 +9,5 @@ jobs:
   profile_deployment:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout openmapflow
+      - name: Run deployment script
         run: ./deploy.sh
