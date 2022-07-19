@@ -25,7 +25,7 @@ class TestDataset(TestCase):
         mock_load_tif.return_value = mock_data, 0.0
         labelled_np, closest_lon, closest_lat, source_file = find_matching_point(
             start="2020-10-10",
-            tif_paths=[Path("mock")],
+            eo_paths=[Path("mock")],
             label_lon=5,
             label_lat=5,
             tif_bucket=mock_storage.Client().bucket,
