@@ -1,10 +1,10 @@
-version: 0.0.3
+version: 0.1.0
 project: crop-mask-example
 description: OpenMapFlow crop mask example
 gcloud:
     project_id: bsos-geog-harvest1
     location: us-central1
-    bucket_labeled_tifs: crop-mask-tifs2
+    bucket_labeled_tifs: crop-mask-example-labeled-tifs
     bucket_inference_tifs: crop-mask-example-inference-tifs
     bucket_preds: crop-mask-example-preds
     bucket_preds_merged: crop-mask-example-preds-merged

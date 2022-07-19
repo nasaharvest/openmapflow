@@ -1,5 +1,0 @@
-outs:
-- md5: c36b120d80fce1015ca6dd9b1f0277b4.dir
-  size: 6484412
-  nfiles: 2
-  path: processed_labels
