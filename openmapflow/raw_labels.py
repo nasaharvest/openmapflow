@@ -272,6 +272,7 @@ class RawLabels:
         for col in [EO_DATA, EO_LAT, EO_LON, EO_FILE]:
             df[col] = None
         df[EO_DATA] = df[EO_DATA].astype(object)
+        df[EO_FILE] = df[EO_DATA].astype(str)
 
         return df[
             [
