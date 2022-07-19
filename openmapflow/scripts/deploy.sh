@@ -26,8 +26,8 @@ echo "MODELS: $OPENMAPFLOW_MODELS"
 
 
 echo "3/7 Create Google Cloud Buckets if they don't exist"
-for BUCKET in $OPENMAPFLOW_GCLOUD_BUCKET_LABELED_TIFS \
-        $OPENMAPFLOW_GCLOUD_BUCKET_INFERENCE_TIFS \
+for BUCKET in $OPENMAPFLOW_GCLOUD_BUCKET_LABELED_EO \
+        $OPENMAPFLOW_GCLOUD_BUCKET_INFERENCE_EO \
         $OPENMAPFLOW_GCLOUD_BUCKET_PREDS \
         $OPENMAPFLOW_GCLOUD_BUCKET_PREDS_MERGED
 do
@@ -86,7 +86,7 @@ export OPENMAPFLOW_URL=$(gcloud run services list --platform managed --filter $O
 
 gcloud functions deploy trigger-"$OPENMAPFLOW_PROJECT" \
     --source="$OPENMAPFLOW_LIBRARY_DIR"/trigger_inference_function \
-    --trigger-bucket="$OPENMAPFLOW_GCLOUD_BUCKET_INFERENCE_TIFS" \
+    --trigger-bucket="$OPENMAPFLOW_GCLOUD_BUCKET_INFERENCE_EO" \
     --allow-unauthenticated \
     --runtime=python39 \
     --entry-point=trigger \

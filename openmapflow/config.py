@@ -54,15 +54,10 @@ DOCKER_TAG = f"{GCLOUD_LOCATION}-docker.pkg.dev/{GCLOUD_PROJECT_ID}/{PROJECT}/{P
 
 class DataPaths:
     RAW_LABELS = DATA_DIR + CONFIG_YML["data_paths"]["raw_labels"]
-    PROCESSED_LABELS = DATA_DIR + CONFIG_YML["data_paths"]["processed_labels"]
-    FEATURES = DATA_DIR + CONFIG_YML["data_paths"]["features"]
-    COMPRESSED_FEATURES = DATA_DIR + CONFIG_YML["data_paths"]["compressed_features"]
+    DATASETS = DATA_DIR + CONFIG_YML["data_paths"]["datasets"]
     MODELS = DATA_DIR + CONFIG_YML["data_paths"]["models"]
     METRICS = DATA_DIR + CONFIG_YML["data_paths"]["metrics"]
-    DATASETS = DATA_DIR + CONFIG_YML["data_paths"]["datasets"]
-    MISSING = DATA_DIR + CONFIG_YML["data_paths"]["missing"]
-    DUPLICATES = DATA_DIR + CONFIG_YML["data_paths"]["duplicates"]
-    UNEXPORTED = DATA_DIR + CONFIG_YML["data_paths"]["unexported"]
+    REPORT = DATA_DIR + CONFIG_YML["data_paths"]["report"]
 
     @classmethod
     def get(cls, key: str = "") -> str:
@@ -77,8 +72,8 @@ class DataPaths:
 
 
 class BucketNames:
-    LABELED_TIFS = CONFIG_YML["gcloud"]["bucket_labeled_tifs"]
-    INFERENCE_TIFS = CONFIG_YML["gcloud"]["bucket_inference_tifs"]
+    LABELED_EO = CONFIG_YML["gcloud"]["bucket_labeled_eo"]
+    INFERENCE_EO = CONFIG_YML["gcloud"]["bucket_inference_eo"]
     PREDS = CONFIG_YML["gcloud"]["bucket_preds"]
     PREDS_MERGED = CONFIG_YML["gcloud"]["bucket_preds_merged"]
 
@@ -99,8 +94,8 @@ def deploy_env_variables(empty_check: bool = True) -> str:
         "LIBRARY_DIR": LIBRARY_DIR,
         "GCLOUD_PROJECT_ID": GCLOUD_PROJECT_ID,
         "GCLOUD_LOCATION": GCLOUD_LOCATION,
-        "GCLOUD_BUCKET_LABELED_TIFS": BucketNames.LABELED_TIFS,
-        "GCLOUD_BUCKET_INFERENCE_TIFS": BucketNames.INFERENCE_TIFS,
+        "GCLOUD_BUCKET_LABELED_EO": BucketNames.LABELED_EO,
+        "GCLOUD_BUCKET_INFERENCE_EO": BucketNames.INFERENCE_EO,
         "GCLOUD_BUCKET_PREDS": BucketNames.PREDS,
         "GCLOUD_BUCKET_PREDS_MERGED": BucketNames.PREDS_MERGED,
         "DOCKER_TAG": DOCKER_TAG,

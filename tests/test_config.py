@@ -13,22 +13,17 @@ class TestConfig(TestCase):
             "project": "fake-project",
             "description": "",
             "data_paths": {
+                "datasets": "datasets",
                 "raw_labels": "raw_labels",
-                "processed_labels": "processed_labels",
-                "features": "features",
-                "compressed_features": "compressed_features.tar.gz",
                 "models": "models",
                 "metrics": "metrics.yaml",
-                "datasets": "datasets.txt",
-                "missing": "missing.txt",
-                "duplicates": "duplicates.txt",
-                "unexported": "unexported.txt",
+                "report": "report.txt",
             },
             "gcloud": {
                 "project_id": "",
                 "location": "us-central1",
-                "bucket_labeled_tifs": "fake-project-labeled-tifs",
-                "bucket_inference_tifs": "fake-project-inference-tifs",
+                "bucket_labeled_eo": "fake-project-labeled-eo",
+                "bucket_inference_eo": "fake-project-inference-eo",
                 "bucket_preds": "fake-project-preds",
                 "bucket_preds_merged": "fake-project-preds-merged",
             },
@@ -39,15 +34,10 @@ class TestConfig(TestCase):
         actual_data_path_str = DataPaths.get()
         expected_data_path_str = (
             "RAW_LABELS: data/raw_labels"
-            + "\nPROCESSED_LABELS: data/processed_labels"
-            + "\nFEATURES: data/features"
-            + "\nCOMPRESSED_FEATURES: data/compressed_features.tar.gz"
+            + "\nDATASETS: data/datasets"
             + "\nMODELS: data/models"
             + "\nMETRICS: data/metrics.yaml"
-            + "\nDATASETS: data/datasets.txt"
-            + "\nMISSING: data/missing.txt"
-            + "\nDUPLICATES: data/duplicates.txt"
-            + "\nUNEXPORTED: data/unexported.txt"
+            + "\nREPORT: data/report.txt"
         )
         self.assertEqual(actual_data_path_str, expected_data_path_str)
 
@@ -63,8 +53,8 @@ class TestConfig(TestCase):
             + f"OPENMAPFLOW_LIBRARY_DIR={LIBRARY_DIR} "
             + "OPENMAPFLOW_GCLOUD_PROJECT_ID= "
             + "OPENMAPFLOW_GCLOUD_LOCATION=us-central1 "
-            + "OPENMAPFLOW_GCLOUD_BUCKET_LABELED_TIFS=openmapflow-labeled-tifs "
-            + "OPENMAPFLOW_GCLOUD_BUCKET_INFERENCE_TIFS=openmapflow-inference-tifs "
+            + "OPENMAPFLOW_GCLOUD_BUCKET_LABELED_EO=openmapflow-labeled-eo "
+            + "OPENMAPFLOW_GCLOUD_BUCKET_INFERENCE_EO=openmapflow-inference-eo "
             + "OPENMAPFLOW_GCLOUD_BUCKET_PREDS=openmapflow-preds "
             + "OPENMAPFLOW_GCLOUD_BUCKET_PREDS_MERGED=openmapflow-preds-merged "
             + "OPENMAPFLOW_DOCKER_TAG=us-central1-docker.pkg.dev//openmapflow/openmapflow"

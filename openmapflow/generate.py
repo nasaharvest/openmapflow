@@ -1,16 +1,15 @@
 import argparse
 import os
 import shutil
-import tarfile
 from pathlib import Path
 from typing import Union
 
 from openmapflow.constants import (
     CONFIG_FILE,
-    DATA_DIR,
     TEMPLATE_DATASETS,
     TEMPLATE_DEPLOY_YML,
     TEMPLATE_EVALUATE,
+    TEMPLATE_REQUIREMENTS,
     TEMPLATE_TEST_YML,
     TEMPLATE_TRAIN,
     VERSION,
@@ -32,19 +31,20 @@ def create_openmapflow_config(overwrite: bool):
         return
     cwd = Path.cwd()
     project_name = input(f"  Project name [{cwd.stem}]: ") or cwd.stem
-    description = input("  Description: ")
+    auto_description = f"OpenMapFlow {project_name.replace('-', ' ').replace('_', ' ')}"
+    description = input(f"  Description [{auto_description}]: ") or auto_description
     gcloud_project_id = input("  GCloud project ID: ")
     gcloud_location = input("  GCloud location [us-central1]: ") or "us-central1"
 
     buckets = {
-        "bucket_labeled_tifs": f"{project_name}-labeled-tifs",
-        "bucket_inference_tifs": f"{project_name}-inference-tifs",
+        "bucket_labeled_eo": f"{project_name}-labeled-eo",
+        "bucket_inference_eo": f"{project_name}-inference-eo",
         "bucket_preds": f"{project_name}-preds",
         "bucket_preds_merged": f"{project_name}-preds-merged",
     }
 
     for k, v in buckets.items():
-        buckets[k] = input(f"  Gcloud {k.replace('_', ' ')} [{v}]: ") or v
+        buckets[k] = input(f"  GCloud {k.replace('_', ' ')} [{v}]: ") or v
 
     openmapflow_str = (
         f"version: {VERSION}"
@@ -53,8 +53,8 @@ def create_openmapflow_config(overwrite: bool):
         + "\ngcloud:"
         + f"\n    project_id: {gcloud_project_id}"
         + f"\n    location: {gcloud_location}"
-        + f"\n    bucket_labeled_tifs: {buckets['bucket_labeled_tifs']}"
-        + f"\n    bucket_inference_tifs: {buckets['bucket_inference_tifs']}"
+        + f"\n    bucket_labeled_eo: {buckets['bucket_labeled_eo']}"
+        + f"\n    bucket_inference_eo: {buckets['bucket_inference_eo']}"
         + f"\n    bucket_preds: {buckets['bucket_preds']}"
         + f"\n    bucket_preds_merged: {buckets['bucket_preds_merged']}"
     )
@@ -65,20 +65,21 @@ def create_openmapflow_config(overwrite: bool):
 
 def copy_template_files(PROJECT_ROOT: Path, overwrite: bool):
     """Copies template files to project directory"""
-    for p in [TEMPLATE_DATASETS, TEMPLATE_TRAIN, TEMPLATE_EVALUATE]:
+    for p in [
+        TEMPLATE_DATASETS,
+        TEMPLATE_TRAIN,
+        TEMPLATE_EVALUATE,
+        TEMPLATE_REQUIREMENTS,
+    ]:
         if allow_write(PROJECT_ROOT / p.name, overwrite):
             shutil.copy(str(p), str(PROJECT_ROOT / p.name))
 
 
 def create_data_dirs(dp, overwrite: bool):
     """Creates data directories"""
-    for p in [dp.FEATURES, dp.RAW_LABELS, dp.PROCESSED_LABELS, dp.MODELS]:
+    for p in [dp.RAW_LABELS, dp.DATASETS, dp.MODELS]:
         if allow_write(p, overwrite):
             Path(p).mkdir(parents=True, exist_ok=True)
-
-    if allow_write(dp.COMPRESSED_FEATURES):
-        with tarfile.open(dp.COMPRESSED_FEATURES, "w:gz") as tar:
-            tar.add(dp.FEATURES, arcname=Path(dp.FEATURES).name)
 
 
 def fill_in_and_write_action(
@@ -181,11 +182,8 @@ def setup_dvc(PROJECT_ROOT: Path, is_subdir: bool, dp):
     else:
         _print_and_run("dvc init")
 
-    dvc_files = [dp.RAW_LABELS, dp.PROCESSED_LABELS, dp.COMPRESSED_FEATURES, dp.MODELS]
+    dvc_files = [dp.RAW_LABELS, dp.DATASETS, dp.MODELS]
     _print_and_run("dvc add " + " ".join(dvc_files))
-
-    with open(DATA_DIR + ".gitignore", "a") as f:
-        f.write("/features")
 
     print("dvc stores data in remote storage (s3, gcs, gdrive, etc)")
     print("https://dvc.org/doc/command-reference/remote/add#supported-storage-types")
@@ -216,7 +214,7 @@ if __name__ == "__main__":
     from openmapflow.config import PROJECT, PROJECT_ROOT
     from openmapflow.config import DataPaths as dp  # noqa E402
 
-    print(f"2/{n} Copying datasets.py, train.py, evaluate.py")
+    print(f"2/{n} Copying datasets.py, train.py, evaluate.py requirements.txt")
     copy_template_files(PROJECT_ROOT, args.overwrite)
 
     print(f"3/{n} Creating data directories")

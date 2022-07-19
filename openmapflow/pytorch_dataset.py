@@ -14,8 +14,7 @@ from cropharvest.countries import BBox
 from dateutil.relativedelta import relativedelta
 from tqdm import tqdm
 
-from openmapflow.constants import CLASS_PROB, END, FEATURE_PATH, LAT, LON, MONTHS, START
-from openmapflow.features import load_feature
+from openmapflow.constants import CLASS_PROB, END, EO_DATA, LAT, LON, MONTHS, START
 
 IS_POSITIVE_CLASS = "is_positive_class"
 IS_LOCAL = "is_local"
@@ -145,7 +144,7 @@ class PyTorchDataset(Dataset):
         probability_threshold: float = 0.5,
     ) -> None:
 
-        for col in [CLASS_PROB, END, FEATURE_PATH, LAT, LON, START]:
+        for col in [CLASS_PROB, END, LAT, LON, START, EO_DATA]:
             if col not in df.columns:
                 raise ValueError(f"{col} is not a column in the dataframe")
 
@@ -243,7 +242,7 @@ class PyTorchDataset(Dataset):
             )
 
         label_row = self.df.iloc[index]
-        x = load_feature(label_row[FEATURE_PATH]).labelled_array
+        x = label_row[EO_DATA]
         x = x[self.start_month_index : self.end_month_index]  # noqa E203
         x = self._pad_if_necessary(x)
         return (

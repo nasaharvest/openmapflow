@@ -15,6 +15,13 @@ from pyproj import Transformer
 from openmapflow.constants import (
     CLASS_PROB,
     END,
+    EO_DATA,
+    EO_FILE,
+    EO_LAT,
+    EO_LON,
+    EO_STATUS,
+    EO_STATUS_SKIPPED,
+    EO_STATUS_WAITING,
     LABEL_DUR,
     LABELER_NAMES,
     LAT,
@@ -165,9 +172,21 @@ def _set_lat_lon(
     )
 
 
-def _set_label_metadata(df, label_duration: Optional[str], labeler_name: Optional[str]):
+def _set_label_metadata(
+    df, label_duration: Optional[str], labeler_name: Optional[str]
+) -> pd.DataFrame:
     df[LABEL_DUR] = df[label_duration].astype(str) if label_duration else None
     df[LABELER_NAMES] = df[labeler_name].astype(str) if labeler_name else None
+    return df
+
+
+def _set_eo_columns(df) -> pd.DataFrame:
+    df[EO_STATUS] = EO_STATUS_WAITING
+    df.loc[df[CLASS_PROB] == 0.5, EO_STATUS] = EO_STATUS_SKIPPED
+    for col in [EO_DATA, EO_LAT, EO_LON, EO_FILE]:
+        df[col] = None
+    df[EO_DATA] = df[EO_DATA].astype(object)
+    df[EO_FILE] = df[EO_DATA].astype(str)
     return df
 
 
@@ -260,6 +279,23 @@ class RawLabels:
         df = df.dropna(subset=[LON, LAT, CLASS_PROB])
         df = df.round({LON: 8, LAT: 8})
         df = _train_val_test_split(df, self.train_val_test)
+        df = _set_eo_columns(df)
+
         return df[
-            [SOURCE, CLASS_PROB, START, END, LON, LAT, SUBSET, LABELER_NAMES, LABEL_DUR]
+            [
+                SOURCE,
+                CLASS_PROB,
+                START,
+                END,
+                LON,
+                LAT,
+                SUBSET,
+                LABELER_NAMES,
+                LABEL_DUR,
+                EO_DATA,
+                EO_LAT,
+                EO_LON,
+                EO_FILE,
+                EO_STATUS,
+            ]
         ]

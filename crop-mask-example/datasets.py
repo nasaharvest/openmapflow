@@ -1,6 +1,6 @@
 from typing import List
 
-from openmapflow.labeled_dataset import LabeledDataset
+from openmapflow.labeled_dataset import LabeledDataset, create_datasets
 from openmapflow.raw_labels import RawLabels
 
 datasets: List[LabeledDataset] = [
@@ -62,3 +62,6 @@ datasets: List[LabeledDataset] = [
         ),
     ),
 ]
+
+if __name__ == "__main__":
+    create_datasets(datasets)

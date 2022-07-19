@@ -12,8 +12,10 @@ class TestExampleProjectsGenerated(TestCase):
     def test_train_and_evaluate(self):
         """Runs the train and evaluate scripts for the given project."""
 
-        for p in [TEMPLATE_TRAIN, TEMPLATE_EVALUATE]:
-            self.assertTrue((PROJECT_ROOT / p.name).exists())
+        if not (PROJECT_ROOT / TEMPLATE_TRAIN).exists():
+            raise unittest.SkipTest("train.py script not found.")
+        if not (PROJECT_ROOT / TEMPLATE_EVALUATE).exists():
+            raise unittest.SkipTest("evaluate.py script not found.")
 
         models_before = set((PROJECT_ROOT / DataPaths.MODELS).glob("*.pt"))
 
@@ -39,8 +41,13 @@ class TestExampleProjectsGenerated(TestCase):
 
     def test_evaluate_existing_models(self):
         """Checks that existing models can be evaluated."""
+        if not (PROJECT_ROOT / TEMPLATE_EVALUATE).exists():
+            raise unittest.SkipTest("evaluate.py script not found.")
 
         model_paths = list((PROJECT_ROOT / DataPaths.MODELS).glob("*.pt"))
+        if len(model_paths) == 0:
+            raise unittest.SkipTest(f"No models found in {DataPaths.MODELS}")
+
         for model_path in model_paths:
             evaluate_output = subprocess.check_output(
                 [

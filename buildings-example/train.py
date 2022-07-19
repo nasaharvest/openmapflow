@@ -62,7 +62,7 @@ if wandb_enabled:
     import wandb
 
 # ------------ Dataloaders -------------------------------------
-df = pd.concat([d.load_labels() for d in datasets])
+df = pd.concat([d.load_df() for d in tqdm(datasets, desc="Loading datasets")])
 train_df = df[df[SUBSET] == "training"].copy()
 val_df = df[df[SUBSET] == "validation"].copy()
 train_data = PyTorchDataset(

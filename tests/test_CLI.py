@@ -37,7 +37,6 @@ class TestCLI(TestCase):
         self.assertIn("config.py", output)
         self.assertIn("constants.py", output)
         self.assertIn("data_instance.py", output)
-        self.assertIn("features.py", output)
         self.assertIn("generate.py", output)
         self.assertIn("inference_utils.py", output)
         self.assertIn("inference_widgets.py", output)
@@ -67,7 +66,7 @@ class TestCLI(TestCase):
                               OpenMapFlow CLI
 ---------------------------------------------------------------------------------
 openmapflow cp <source> <destination> - copy a file or directory from the library
-openmapflow create-features - creates features for all datasets in datasets.py
+openmapflow create-datasets - creates datasets for all datasets in datasets.py
 openmapflow datapath <DATAPATH> - outputs a relative path to the data directory
 openmapflow datasets - outputs a list of all datasets
 openmapflow deploy - deploys Google Cloud Architecture for project
