@@ -9,6 +9,6 @@ Kenya_non_crop_2019 (Timesteps: 24)
 
 ref_african_crops_kenya_01_labels (Timesteps: 24)
 ----------------------------------------------------------------------------
-✔ training amount: 183, positive class: 65.0%
+✔ training amount: 179, positive class: 64.8%
 ✔ testing amount: 71, positive class: 56.3%
-✔ validation amount: 65, positive class: 58.5%
+✔ validation amount: 62, positive class: 61.3%
