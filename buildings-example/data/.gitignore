@@ -1,5 +1,3 @@
+/datasets
 /raw_labels
-/processed_labels
-/compressed_features.tar.gz
 /models
-/features

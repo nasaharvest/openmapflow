@@ -40,7 +40,7 @@ skip_yaml = bool = args["skip_yaml"]
 model_path = model_path_from_name(model_name=model_name)
 
 # ------------ Dataloaders -------------------------------------
-df = pd.concat([d.load_labels() for d in datasets])
+df = pd.concat([d.load_df() for d in datasets])
 test_data = PyTorchDataset(
     df=df[df[SUBSET] == "testing"], start_month=start_month, subset="testing"
 )
