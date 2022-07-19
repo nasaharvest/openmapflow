@@ -35,7 +35,7 @@ the following commands and rerun this cell:
 
 
 def get_available_bboxes(
-    buckets_to_check: List[str] = [bn.INFERENCE_TIFS],
+    buckets_to_check: List[str] = [bn.INFERENCE_EO],
 ) -> List[BBox]:
     """
     Get all available bboxes from the given buckets using regex.
@@ -129,7 +129,7 @@ def get_status(prefix: str) -> Tuple[int, int, int]:
     """
     print_between_lines(prefix)
     ee_task_amount = get_ee_task_amount(prefix=prefix)
-    tifs_amount = get_gcs_file_amount(bn.INFERENCE_TIFS, prefix=prefix)
+    tifs_amount = get_gcs_file_amount(bn.INFERENCE_EO, prefix=prefix)
     predictions_amount = get_gcs_file_amount(bn.PREDS, prefix=prefix)
     print(f"1) Obtaining input data: {ee_task_amount}")
     print(f"2) Input data available: {tifs_amount}")
@@ -150,7 +150,7 @@ def find_missing_predictions(
         Dictionary of missing predictions.
     """
     print("Addressing missing files")
-    tif_files, tif_amount = get_gcs_file_dict_and_amount(bn.INFERENCE_TIFS, prefix)
+    tif_files, tif_amount = get_gcs_file_dict_and_amount(bn.INFERENCE_EO, prefix)
     pred_files, pred_amount = get_gcs_file_dict_and_amount(bn.PREDS, prefix)
     missing = {}
     for full_k in tqdm(tif_files.keys(), desc="Missing files"):
@@ -186,7 +186,7 @@ def find_missing_predictions(
 
 
 def make_new_predictions(
-    missing: Dict[str, List[str]], bucket_name: str = bn.INFERENCE_TIFS
+    missing: Dict[str, List[str]], bucket_name: str = bn.INFERENCE_EO
 ):
     """
     Renames missing files which retriggers inference.

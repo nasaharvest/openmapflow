@@ -22,8 +22,8 @@ class TestConfig(TestCase):
             "gcloud": {
                 "project_id": "",
                 "location": "us-central1",
-                "bucket_labeled_tifs": "fake-project-labeled-tifs",
-                "bucket_inference_tifs": "fake-project-inference-tifs",
+                "bucket_labeled_eo": "fake-project-labeled-eo",
+                "bucket_inference_eo": "fake-project-inference-eo",
                 "bucket_preds": "fake-project-preds",
                 "bucket_preds_merged": "fake-project-preds-merged",
             },

@@ -72,8 +72,8 @@ class DataPaths:
 
 
 class BucketNames:
-    LABELED_TIFS = CONFIG_YML["gcloud"]["bucket_labeled_tifs"]
-    INFERENCE_TIFS = CONFIG_YML["gcloud"]["bucket_inference_tifs"]
+    LABELED_EO = CONFIG_YML["gcloud"]["bucket_labeled_eo"]
+    INFERENCE_EO = CONFIG_YML["gcloud"]["bucket_inference_eo"]
     PREDS = CONFIG_YML["gcloud"]["bucket_preds"]
     PREDS_MERGED = CONFIG_YML["gcloud"]["bucket_preds_merged"]
 

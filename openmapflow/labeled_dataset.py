@@ -92,10 +92,10 @@ def bbox_from_str(s: str) -> BBox:
 
 @memoized
 def generate_bbox_from_paths() -> Dict[Path, BBox]:
-    cloud_tif_uris = [uri for uri in get_cloud_tif_list(BucketNames.LABELED_TIFS)]
+    cloud_eo_uris = [uri for uri in get_cloud_tif_list(BucketNames.LABELED_EO)]
     return {
         Path(uri): bbox_from_str(uri)
-        for uri in tqdm(cloud_tif_uris, desc="Generating BBoxes from paths")
+        for uri in tqdm(cloud_eo_uris, desc="Generating BBoxes from paths")
     }
 
 
@@ -415,7 +415,7 @@ class LabeledDataset:
                 EarthEngineExporter(
                     check_ee=True,
                     check_gcp=True,
-                    dest_bucket=BucketNames.LABELED_TIFS,
+                    dest_bucket=BucketNames.LABELED_EO,
                 ).export_for_labels(labels=df_with_no_eo_files)
                 df.loc[df_with_no_eo_files.index, EO_STATUS] = EO_STATUS_EXPORTING
 
@@ -423,7 +423,7 @@ class LabeledDataset:
         # STEP 5: Create the dataset (earth observation data, label)
         # ---------------------------------------------------------------------
         if len(df_with_eo_files) > 0:
-            tif_bucket = storage.Client().bucket(BucketNames.LABELED_TIFS)
+            tif_bucket = storage.Client().bucket(BucketNames.LABELED_EO)
 
             def set_df(i, start, eo_paths, lon, lat, pbar):
                 (eo_data, eo_lon, eo_lat, eo_file) = find_matching_point(

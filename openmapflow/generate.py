@@ -37,8 +37,8 @@ def create_openmapflow_config(overwrite: bool):
     gcloud_location = input("  GCloud location [us-central1]: ") or "us-central1"
 
     buckets = {
-        "bucket_labeled_tifs": f"{project_name}-labeled-tifs",
-        "bucket_inference_tifs": f"{project_name}-inference-tifs",
+        "bucket_labeled_eo": f"{project_name}-labeled-tifs",
+        "bucket_inference_eo": f"{project_name}-inference-tifs",
         "bucket_preds": f"{project_name}-preds",
         "bucket_preds_merged": f"{project_name}-preds-merged",
     }
@@ -53,8 +53,8 @@ def create_openmapflow_config(overwrite: bool):
         + "\ngcloud:"
         + f"\n    project_id: {gcloud_project_id}"
         + f"\n    location: {gcloud_location}"
-        + f"\n    bucket_labeled_tifs: {buckets['bucket_labeled_tifs']}"
-        + f"\n    bucket_inference_tifs: {buckets['bucket_inference_tifs']}"
+        + f"\n    bucket_labeled_eo: {buckets['bucket_labeled_eo']}"
+        + f"\n    bucket_inference_eo: {buckets['bucket_inference_eo']}"
         + f"\n    bucket_preds: {buckets['bucket_preds']}"
         + f"\n    bucket_preds_merged: {buckets['bucket_preds_merged']}"
     )

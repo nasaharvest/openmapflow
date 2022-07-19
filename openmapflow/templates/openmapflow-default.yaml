@@ -10,7 +10,7 @@ data_paths:
 gcloud:
   project_id: ''
   location: us-central1
-  bucket_labeled_tifs: <PROJECT>-labeled-tifs
-  bucket_inference_tifs: <PROJECT>-inference-tifs
+  bucket_labeled_eo: <PROJECT>-labeled-eo
+  bucket_inference_eo: <PROJECT>-inference-eo
   bucket_preds: <PROJECT>-preds
   bucket_preds_merged: <PROJECT>-preds-merged
