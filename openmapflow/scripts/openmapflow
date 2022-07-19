@@ -15,9 +15,9 @@ case $1 in
     "cp")
         cp -r "$(librarydir)"/"${@: -2:1}" "${@: -1:1}"
         ;;
-    "create-features")
+    "create-datasets")
         check_openmapflow_yaml
-        python3 -c "from datasets import datasets; from openmapflow.features import create_features; create_features(datasets)"
+        python3 -c "from datasets import datasets; from openmapflow.labeled_dataset import create_datasets; create_datasets(datasets)"
         ;;
     "datapath")
         check_openmapflow_yaml
@@ -51,7 +51,7 @@ case $1 in
         echo "                              OpenMapFlow CLI" 
         echo "---------------------------------------------------------------------------------"
         echo "openmapflow cp <source> <destination> - copy a file or directory from the library"
-        echo "openmapflow create-features - creates features for all datasets in datasets.py"
+        echo "openmapflow create-datasets - creates datasets for all datasets in datasets.py"
         echo "openmapflow datapath <DATAPATH> - outputs a relative path to the data directory"
         echo "openmapflow datasets - outputs a list of all datasets"
         echo "openmapflow deploy - deploys Google Cloud Architecture for project"

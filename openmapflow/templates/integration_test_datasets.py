@@ -21,7 +21,7 @@ from openmapflow.labeled_dataset import get_label_timesteps
 
 
 class IntegrationTestLabeledData(TestCase):
-    """Tests that the features look right"""
+    """Tests that the datasets look right"""
 
     dfs: pd.DataFrame
 
@@ -34,7 +34,7 @@ class IntegrationTestLabeledData(TestCase):
             dfs.append(df)
         cls.dfs = pd.concat(dfs)
 
-    def test_label_feature_subset_amounts(self):
+    def test_dataset_subset_amounts(self):
         all_subsets_correct_size = True
 
         for d in datasets:
@@ -59,52 +59,52 @@ class IntegrationTestLabeledData(TestCase):
         num_dupes = len(duplicates)
         self.assertTrue(num_dupes == 0, f"Found {num_dupes} duplicates")
 
-    def test_features_for_emptiness(self):
-        num_empty_features = len(self.dfs[self.dfs[EO_DATA].isnull()])
+    def test_eo_data_for_emptiness(self):
+        num_empty_eo_data = len(self.dfs[self.dfs[EO_DATA].isnull()])
         self.assertTrue(
-            num_empty_features == 0,
-            f"Found {num_empty_features} empty features, run create_all_features() to fix.",
+            num_empty_eo_data == 0,
+            f"Found {num_empty_eo_data} empty eo_data, run openmapflow create-datasets",
         )
 
-    def test_all_features_have_18_bands(self):
+    def test_all_eo_data_has_18_bands(self):
         is_empty = self.dfs[EO_DATA].isnull()
         band_amount = self.dfs[~is_empty][EO_DATA].apply(lambda f: f.shape[-1]).unique()
         self.assertEqual(band_amount.tolist(), [18], "Found {band_amount} bands")
 
-    def test_label_and_feature_ranges_match(self):
-        all_label_and_feature_ranges_match = True
+    def test_label_and_eo_data_ranges_match(self):
+        all_label_and_eo_data_ranges_match = True
         for d in datasets:
             df = self.dfs[self.dfs["name"] == d.dataset]
             label_month_amount = get_label_timesteps(df)
-            feature_month_amount = df[EO_DATA].apply(lambda f: f.shape[0])
+            eo_data_month_amount = df[EO_DATA].apply(lambda f: f.shape[0])
 
-            if (feature_month_amount == label_month_amount).all():
+            if (eo_data_month_amount == label_month_amount).all():
                 mark = "\u2714"
                 last_word = "match"
             else:
                 mark = "\u2716"
                 last_word = "mismatch"
-                all_label_and_feature_ranges_match = False
+                all_label_and_eo_data_ranges_match = False
 
             label_ranges = label_month_amount.value_counts().to_dict()
-            feature_ranges = feature_month_amount.value_counts().to_dict()
+            eo_data_ranges = eo_data_month_amount.value_counts().to_dict()
             print(
                 f"{mark} {d.dataset} label {label_ranges} and "
-                + f"feature {feature_ranges} ranges {last_word}"
+                + f"eo_data {eo_data_ranges} ranges {last_word}"
             )
         self.assertTrue(
-            all_label_and_feature_ranges_match,
+            all_label_and_eo_data_ranges_match,
             "Check logs for which subsets have different sizes.",
         )
 
-    def test_all_older_features_have_24_months(self):
+    def test_all_older_eo_data_has_24_months(self):
 
         current_cutoff_date = date.today().replace(day=1) + relativedelta(months=-3)
         two_years_before_cutoff = pd.Timestamp(
             current_cutoff_date + relativedelta(months=-24)
         )
 
-        all_older_features_have_24_months = True
+        all_older_eo_data_has_24_months = True
 
         for d in datasets:
             df = self.dfs[self.dfs["name"] == d.dataset]
@@ -119,22 +119,22 @@ class IntegrationTestLabeledData(TestCase):
             if month_amount.tolist() == [24]:
                 mark = "\u2714"
             else:
-                all_older_features_have_24_months = False
+                all_older_eo_data_has_24_months = False
                 mark = "\u2716"
             print(f"{mark} {d.dataset} \t\t{month_amount.tolist()}")
 
         self.assertTrue(
-            all_older_features_have_24_months,
-            "Not all older features have 24 months, check logs.",
+            all_older_eo_data_has_24_months,
+            "Not all older earth observation data has 24 months, check logs.",
         )
 
-    def test_features_for_closeness(self):
+    def test_label_eo_data_for_closeness(self):
         total_num_mismatched = 0
         for d in datasets:
             df = self.dfs[self.dfs["name"] == d.dataset]
 
             if len(df) == 0:
-                print(f"\\ {d.dataset}:\t\tNo features")
+                print(f"\\ {d.dataset}:\t\tNo data")
                 continue
 
             label_tif_mismatch = df[

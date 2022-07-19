@@ -88,18 +88,21 @@ After all configuration is set, the following project structure will be generate
 │       
 └─── data
     │   raw_labels/                     # User added labels
-    │   processed_labels/               # Labels standardized to common format
-    │   features/                       # Labels combined with satellite data
-    │   compressed_features.tar.gz      # Allows faster features downloads
-    │   models/                         # Models trained using features
+    │   datasets/                       # ML ready datasets (labels + earth observation data)
+    │   models/                         # Models trained using datasets
     |   raw_labels.dvc                  # Reference to a version of raw_labels/
-    |   processed_labels.dvc            # Reference to a version of processed_labels/
-    │   compressed_features.tar.gz.dvc  # Reference to a version of features/
+    |   datasets.dvc                    # Reference to a version of datasets/
     │   models.dvc                      # Reference to a version of models/
     
 ```
 
 This project contains all the code necessary for: Adding data ➞ Training a model ➞ Creating a map. 
+
+**Important:** When code is pushed to the repository a Github action will be run to verify project configuration, data integrity, and script functionality. This action will pull data using dvc and thereby needs access to remote storage (your Google Drive). To allow the Github action to access the data add a new repository secret ([instructions](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository)). 
+- In step 5 of the instructions, name the secret: `GDRIVE_CREDENTIALS_DATA`
+- In step 6, enter the value in .dvc/tmp/gdrive-user-creditnals.json (in your repository)
+
+After this the Github action should successfully run.
 
 
 ## Adding data [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/new_data.ipynb)
@@ -134,25 +137,20 @@ datasets = [
     ...
 ]
 ```
-Run feature creation:
+Run dataset creation:
 ```bash
 earthengine authenticate    # For getting new earth observation data
 gcloud auth login           # For getting cached earth observation data
 
-openmapflow create-features # Initiatiates or checks progress of features creation
+openmapflow create-dataset # Initiatiates or checks progress of dataset creation
 openmapflow datasets        # Shows the status of datasets
 
 dvc commit && dvc push      # Push new data to data version control
 
 git add .
-git commit -m'Created new features'
+git commit -m'Created new dataset'
 git push
 ```
-**Important:** When new data is pushed to the repository a Github action will be run to verify data integrity. This action will pull data using dvc and thereby needs access to remote storage (your Google Drive). To allow the Github action to access the data add a new repository secret ([instructions](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository)). 
-- In step 5 of the instructions, name the secret: `GDRIVE_CREDENTIALS_DATA`
-- In step 6, enter the value in .dvc/tmp/gdrive-user-creditnals.json (in your repository)
-
-After this the Github action should successfully run if the data is valid.
 
 
 ## Training a model [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/train.ipynb)

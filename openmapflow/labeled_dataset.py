@@ -231,20 +231,21 @@ class LabeledDataset:
 
     def summary(self, df=None):
         if df is None:
-            df = self.load_df(allow_processing=False, fail_if_missing_features=False)
+            df = self.load_df(allow_processing=False, fail_if_missing=False)
         text = f"{self.dataset} "
         timesteps = get_label_timesteps(df).unique()
         text += f"(Timesteps: {','.join([str(int(t)) for t in timesteps])})\n"
         text += "----------------------------------------------------------------------------\n"
-        train_val_test_counts = df[SUBSET].value_counts()
-        for subset, labels_in_subset in train_val_test_counts.items():
-            features_in_subset = df[df[SUBSET] == subset][EO_DATA].notnull().sum()
+        label_counts = df[SUBSET].value_counts()
+        eo_counts = df[df[EO_DATA].notnull()][SUBSET].value_counts()
+        for subset in df[SUBSET].unique():
+            labels_in_subset = label_counts.get(subset, 0)
+            features_in_subset = eo_counts.get(subset, 0)
             if labels_in_subset != features_in_subset:
                 text += (
                     f"\u2716 {subset}: {labels_in_subset} labels, "
                     + f"but {features_in_subset} features\n"
                 )
-
             else:
                 positive_class_percentage = (
                     df[df[SUBSET] == subset][CLASS_PROB] > 0.5
@@ -253,7 +254,7 @@ class LabeledDataset:
                     f"\u2714 {subset} amount: {labels_in_subset}, "
                     + f"positive class: {positive_class_percentage:.1%}\n"
                 )
-
+        print(text)
         return text
 
     def create_df(self):
@@ -309,7 +310,7 @@ class LabeledDataset:
     def load_df(
         self,
         allow_processing: bool = False,
-        fail_if_missing_features: bool = False,
+        fail_if_missing: bool = False,
     ) -> pd.DataFrame:
         if allow_processing:
             df = self.create_df()
@@ -331,33 +332,30 @@ class LabeledDataset:
 
         df[EO_DATA] = df[EO_DATA].apply(lambda x: np.array(eval(x)) if x else None)
 
-        if fail_if_missing_features and not df[EO_DATA].all():
-            raise ValueError(f"{self.dataset} has missing features")
+        if fail_if_missing and not df[EO_DATA].all():
+            raise ValueError(f"{self.dataset} has missing earth observation data")
         return df
 
-    def create_features(self, disable_gee_export: bool = False) -> str:
+    def create_dataset(self, disable_gee_export: bool = False) -> str:
         """
-        Features are the (X, y) pairs that are used to train and evaluate a machine learning model.
+        A dataset consists of (X, y) pairs that are used to train and evaluate a machine learning model.
         In this case,
         - X is the earth observation data for a lat lon coordinate over a 24 month time series
         - y is the binary class label for that coordinate
-        To create the features:
+        To create a dataset:
         1. Obtain the labels
-        2. Check if the features already exist
-        3. Use the label coordinates to match to the associated satellite data (X)
-        4. If the satellite data is missing, download it using Google Earth Engine
-        5. Create the features (X, y)
+        2. Check if the eath observation data already exists
+        3. Use the label coordinates to match to the associated eath observation data (X)
+        4. If the eath observation data is missing, download it using Google Earth Engine
+        5. Create the dataset
         """
-        print("------------------------------")
-        print(self.dataset)
-
         # -------------------------------------------------
         # STEP 1: Obtain the labels
         # -------------------------------------------------
         df = self.load_df(allow_processing=True)
 
         # -------------------------------------------------
-        # STEP 2: Check if features already exist
+        # STEP 2: Check if  already exist
         # -------------------------------------------------
         if df[EO_DATA].isnull().sum() == 0:
             return self.summary(df=df)
@@ -393,7 +391,6 @@ class LabeledDataset:
 
         if len(df_with_no_tifs) > 0:
             print(f"{len(df_with_no_tifs )} labels not matched")
-
             if not disable_gee_export:
                 df_with_no_tifs[START] = pd.to_datetime(df_with_no_tifs[START]).dt.date
                 df_with_no_tifs[END] = pd.to_datetime(df_with_no_tifs[END]).dt.date
@@ -405,7 +402,7 @@ class LabeledDataset:
                 df.loc[df_with_no_tifs.index, EO_STATUS] = EO_STATUS_EXPORTING
 
         # -------------------------------------------------
-        # STEP 5: Create the features (X, y)
+        # STEP 5: Create the dataset (X, y)
         # -------------------------------------------------
         if len(df_with_tifs_but_no_features) > 0:
             tif_bucket = storage.Client().bucket(BucketNames.LABELED_TIFS)
@@ -442,5 +439,16 @@ class LabeledDataset:
                     pbar=pbar,
                 )
 
+            df.drop(columns=[TIF_PATHS], inplace=True)
             df.to_csv(self.df_path, index=False)
         return self.summary(df=df)
+
+
+def create_datasets(datasets: List[LabeledDataset]):
+    report = "DATASET REPORT (autogenerated, do not edit directly)"
+    for d in datasets:
+        text = d.create_dataset(disable_gee_export=True)
+        report += "\n\n" + text
+
+    with (PROJECT_ROOT / dp.REPORT).open("w") as f:
+        f.write(report)
