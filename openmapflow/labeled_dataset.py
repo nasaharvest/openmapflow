@@ -247,7 +247,7 @@ class LabeledDataset:
         label_counts = df[SUBSET].value_counts()
         eo_counts = df[df[EO_DATA].notnull()][SUBSET].value_counts()
         text = ""
-        for subset in ["training", "testing", "validation"]:
+        for subset in ["training", "validation", "testing"]:
             if subset not in label_counts:
                 continue
             labels_in_subset = label_counts.get(subset, 0)
