@@ -35,11 +35,12 @@ EO_FILE = "eo_file"
 EO_STATUS = "eo_status"
 
 # -------------- EO data statuses ---------------------------------------------
-EO_STATUS_WAITING = "waiting_for_eo_data"
-EO_STATUS_DUPLICATE = "duplicate_eo_data"
-EO_STATUS_EXPORTING = "exporting_eo_data"
+EO_STATUS_WAITING = "eo_data_waiting"
+EO_STATUS_DUPLICATE = "eo_data_duplicate"
+EO_STATUS_EXPORTING = "eo_data_exporting"
 EO_STATUS_EXPORT_FAILED = "eo_data_export_failed"
 EO_STATUS_MISSING_VALUES = "eo_data_missing_values"
+EO_STATUS_SKIPPED = "eo_data_skipped"
 EO_STATUS_COMPLETE = "eo_data_complete"
 
 # -------------- Months -------------------------------------------------------

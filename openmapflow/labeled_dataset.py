@@ -470,7 +470,7 @@ class LabeledDataset:
 
             with tqdm(
                 total=len(df_with_eo_files),
-                desc="Extracting matched eo data",
+                desc="Extracting matched earth observation data",
             ) as pbar:
                 np.vectorize(set_df)(
                     i=df_with_eo_files.index,
