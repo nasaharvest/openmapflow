@@ -226,7 +226,7 @@ class LabeledDataset:
 
     def __post_init__(self):
         self.raw_dir = PROJECT_ROOT / dp.RAW_LABELS / self.dataset
-        self.df_path = PROJECT_ROOT / "data" / "features_csv" / (self.dataset + ".csv")
+        self.df_path = PROJECT_ROOT / dp.DATASETS / (self.dataset + ".csv")
         self._cached_labels_csv = None
 
     def summary(self, df=None):
