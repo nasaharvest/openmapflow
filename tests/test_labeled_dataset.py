@@ -56,7 +56,7 @@ class TestDataset(TestCase):
         mock_load_tif.side_effect = side_effect
         labelled_np, closest_lon, closest_lat, source_file = find_matching_point(
             start="2020-10-10",
-            tif_paths=tif_paths,
+            eo_paths=tif_paths,
             label_lon=8,
             label_lat=8,
             tif_bucket=mock_storage.Client().bucket,
