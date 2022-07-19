@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import torch
 import yaml
+from cropharvest.bands import BANDS_MAX
 from datasets import datasets
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
@@ -79,13 +80,14 @@ num_timesteps, num_bands = train_data[0][0].shape
 
 
 class Model(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, normalization_vals=BANDS_MAX):
         super().__init__()
         self.model = TransformerModel(c_in=num_bands, c_out=1)
+        self.normalization_vals = torch.tensor(normalization_vals)
 
     def forward(self, x):
         with torch.no_grad():
-            x = x * 1e-4
+            x = x / self.normalization_vals
             x = x.transpose(2, 1)
         x = self.model(x).squeeze(dim=1)
         x = torch.sigmoid(x)
