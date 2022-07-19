@@ -15,5 +15,5 @@ def create_features(datasets: List[LabeledDataset]):
         text = d.create_features(disable_gee_export=True)
         report += "\n\n" + text
 
-    with (PROJECT_ROOT / dp.DATASETS).open("w") as f:
+    with (PROJECT_ROOT / dp.REPORT).open("w") as f:
         f.write(report)
