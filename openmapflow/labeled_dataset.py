@@ -4,7 +4,7 @@ import warnings
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -210,6 +210,13 @@ def get_label_timesteps(labels):
     return (diff / np.timedelta64(1, "M")).round().astype(int)
 
 
+def to_np(x: str) -> Optional[np.ndarray]:
+    try:
+        return np.array(eval(x))
+    except TypeError:
+        return None
+
+
 @dataclass
 class LabeledDataset:
     """
@@ -234,23 +241,12 @@ class LabeledDataset:
         self.raw_dir = PROJECT_ROOT / dp.RAW_LABELS / self.dataset
         self.df_path = PROJECT_ROOT / dp.DATASETS / (self.dataset + ".csv")
         self._cached_labels_csv = None
+        self.eo_status = ""
 
-    def summary(self, df=None):
-        if df is None:
-            df = self.load_df(allow_processing=False, fail_if_missing=False)
-        else:
-            df = df[
-                (df[EO_STATUS] != EO_STATUS_MISSING_VALUES)
-                & (df[EO_STATUS] != EO_STATUS_EXPORT_FAILED)
-                & (df[EO_STATUS] != EO_STATUS_DUPLICATE)
-                & (df[CLASS_PROB] != 0.5)
-            ]
-        text = f"{self.dataset} "
-        timesteps = get_label_timesteps(df).unique()
-        text += f"(Timesteps: {','.join([str(int(t)) for t in timesteps])})\n"
-        text += "----------------------------------------------------------------------------\n"
+    def label_eo_counts(self, df: pd.DataFrame) -> str:
         label_counts = df[SUBSET].value_counts()
         eo_counts = df[df[EO_DATA].notnull()][SUBSET].value_counts()
+        text = ""
         for subset in ["training", "testing", "validation"]:
             if subset not in label_counts:
                 continue
@@ -269,8 +265,19 @@ class LabeledDataset:
                     f"\u2714 {subset} amount: {labels_in_subset}, "
                     + f"positive class: {positive_class_percentage:.1%}\n"
                 )
-        print(text)
         return text
+
+    def summary(self, df):
+        timesteps = get_label_timesteps(df).unique()
+        eo_status_str = str(self.eo_status).rsplit("\n", 1)[0]
+        return (
+            f"{self.dataset} (Timesteps: {','.join([str(int(t)) for t in timesteps])})\n"
+            + "----------------------------------------------------------------------------\n"
+            + eo_status_str
+            + "\n"
+            + self.label_eo_counts(df)
+            + "\n"
+        )
 
     def create_labels(self):
         """
@@ -326,6 +333,7 @@ class LabeledDataset:
         self,
         allow_processing: bool = False,
         fail_if_missing: bool = False,
+        to_numpy: bool = True,
     ) -> pd.DataFrame:
         if allow_processing:
             df = self.create_labels()
@@ -338,6 +346,7 @@ class LabeledDataset:
         else:
             raise FileNotFoundError(f"{self.df_path} does not exist")
 
+        self.eo_status = df[EO_STATUS].value_counts()
         df = df[
             (df[EO_STATUS] != EO_STATUS_MISSING_VALUES)
             & (df[EO_STATUS] != EO_STATUS_EXPORT_FAILED)
@@ -345,7 +354,8 @@ class LabeledDataset:
             & (df[CLASS_PROB] != 0.5)
         ].copy()
 
-        df[EO_DATA] = df[EO_DATA].apply(lambda x: np.array(eval(x)) if x else None)
+        if to_numpy:
+            df[EO_DATA] = df[EO_DATA].apply(to_np)
 
         if fail_if_missing and not df[EO_DATA].all():
             raise ValueError(f"{self.dataset} has missing earth observation data")
@@ -367,7 +377,7 @@ class LabeledDataset:
         # ---------------------------------------------------------------------
         # STEP 1: Obtain the labels
         # ---------------------------------------------------------------------
-        df = self.load_df(allow_processing=True)
+        df = self.load_df(allow_processing=True, to_numpy=False)
 
         # ---------------------------------------------------------------------
         # STEP 2: Check if earth observation data already available
@@ -375,6 +385,8 @@ class LabeledDataset:
         no_eo = df[EO_DATA].isnull()
         if no_eo.sum() == 0:
             return df
+
+        print(self.summary(df))
 
         # ---------------------------------------------------------------------
         # STEP 3: Match labels to earth observation files
@@ -390,12 +402,11 @@ class LabeledDataset:
         # STEP 4: If no matching earth observation file, download it
         # ---------------------------------------------------------------------
         already_getting_eo = df_with_no_eo_files[EO_STATUS] == EO_STATUS_EXPORTING
-
         if already_getting_eo.sum() > 0:
             confirm = (
                 input(
                     f"{already_getting_eo.sum()} labels were already set to {EO_STATUS_EXPORTING} ,"
-                    + " add to failed export list? y/[n]: "
+                    + " have they failed on EarthEngine? y/[n]: "
                 )
                 or "n"
             )
@@ -464,7 +475,7 @@ class LabeledDataset:
                 np.vectorize(set_df)(
                     i=df_with_eo_files.index,
                     start=df_with_eo_files[START],
-                    tif_paths=df_with_eo_files[MATCHING_EO_FILES],
+                    eo_paths=df_with_eo_files[MATCHING_EO_FILES],
                     lon=df_with_eo_files[LON],
                     lat=df_with_eo_files[LAT],
                     pbar=pbar,
@@ -472,6 +483,7 @@ class LabeledDataset:
 
             df.drop(columns=[MATCHING_EO_FILES], inplace=True)
             df.to_csv(self.df_path, index=False)
+        self.eo_status = df[EO_STATUS].value_counts()
         return df
 
 
@@ -479,7 +491,9 @@ def create_datasets(datasets: List[LabeledDataset]):
     report = "DATASET REPORT (autogenerated, do not edit directly)"
     for d in datasets:
         df = d.create_dataset()
-        report += "\n\n" + d.summary(df=df)
+        summary = d.summary(df)
+        print(summary)
+        report += "\n\n" + summary
 
     with (PROJECT_ROOT / dp.REPORT).open("w") as f:
         f.write(report)
