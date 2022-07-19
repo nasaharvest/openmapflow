@@ -1,9 +1,11 @@
 import ee
 import numpy as np
+import os
 import pandas as pd
 
 
 def colab_gee_gcloud_login(project_id: str, google):
+    os.environ["GOOGLE_CLOUD_PROJECT"] = project_id
     print("Logging into Google Cloud")
     google.colab.auth.authenticate_user()
     print("Logging into Earth Engine")
