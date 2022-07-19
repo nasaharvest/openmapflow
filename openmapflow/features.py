@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List
 
-
 from openmapflow.config import PROJECT_ROOT
 from openmapflow.config import DataPaths as dp
 

@@ -3,18 +3,8 @@ from unittest import TestCase
 from unittest.mock import patch
 
 import numpy as np
-import pandas as pd
 import xarray as xr
 
-from openmapflow.constants import (
-    CLASS_PROB,
-    END,
-    LAT,
-    LON,
-    START,
-    TIF_PATHS,
-)
-from openmapflow.data_instance import DataInstance
 from openmapflow.labeled_dataset import (
     distance,
     distance_point_from_center,

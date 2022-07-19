@@ -4,7 +4,7 @@ from unittest import TestCase
 import numpy as np
 import pandas as pd
 
-from openmapflow.constants import CLASS_PROB, END, LAT, LON, START, EO_DATA
+from openmapflow.constants import CLASS_PROB, END, EO_DATA, LAT, LON, START
 
 try:
     import torch  # noqa: F401

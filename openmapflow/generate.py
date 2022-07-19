@@ -1,13 +1,11 @@
 import argparse
 import os
 import shutil
-import tarfile
 from pathlib import Path
 from typing import Union
 
 from openmapflow.constants import (
     CONFIG_FILE,
-    DATA_DIR,
     TEMPLATE_DATASETS,
     TEMPLATE_DEPLOY_YML,
     TEMPLATE_EVALUATE,

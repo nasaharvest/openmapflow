@@ -22,10 +22,16 @@ from openmapflow.constants import (
     COUNTRY,
     DATASET,
     END,
+    EO_DATA,
+    EO_FILE,
+    EO_LAT,
+    EO_LON,
     EO_STATUS,
+    EO_STATUS_COMPLETE,
     EO_STATUS_DUPLICATE,
     EO_STATUS_EXPORT_FAILED,
     EO_STATUS_EXPORTING,
+    EO_STATUS_MISSING_VALUES,
     LABEL_DUR,
     LABELER_NAMES,
     LAT,
@@ -35,13 +41,6 @@ from openmapflow.constants import (
     START,
     SUBSET,
     TIF_PATHS,
-    EO_DATA,
-    EO_LON,
-    EO_LAT,
-    EO_FILE,
-    EO_STATUS,
-    EO_STATUS_MISSING_VALUES,
-    EO_STATUS_COMPLETE,
 )
 from openmapflow.raw_labels import RawLabels
 
@@ -382,7 +381,8 @@ class LabeledDataset:
         if len(already_exporting) > 0:
             confirm = (
                 input(
-                    f"{len(already_exporting)} labels were already set to {EO_STATUS_EXPORTING}, add to failed export list? y/[n]: "
+                    f"{len(already_exporting)} labels were already set to {EO_STATUS_EXPORTING} ,"
+                    + " add to failed export list? y/[n]: "
                 )
                 or "n"
             )

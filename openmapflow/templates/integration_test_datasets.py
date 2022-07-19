@@ -4,26 +4,26 @@ from datetime import date
 from unittest import TestCase
 
 import pandas as pd
-
 from datasets import datasets
 from dateutil.relativedelta import relativedelta
 
 from openmapflow.constants import (
-    LAT,
-    LON,
-    START,
-    SUBSET,
     EO_DATA,
     EO_FILE,
     EO_LAT,
     EO_LON,
+    LAT,
+    LON,
+    START,
+    SUBSET,
 )
-
 from openmapflow.labeled_dataset import get_label_timesteps
 
 
 class IntegrationTestLabeledData(TestCase):
     """Tests that the features look right"""
+
+    dfs: pd.DataFrame
 
     @classmethod
     def setUpClass(cls) -> None:

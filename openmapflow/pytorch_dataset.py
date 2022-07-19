@@ -14,7 +14,7 @@ from cropharvest.countries import BBox
 from dateutil.relativedelta import relativedelta
 from tqdm import tqdm
 
-from openmapflow.constants import CLASS_PROB, END, LAT, LON, MONTHS, START, EO_DATA
+from openmapflow.constants import CLASS_PROB, END, EO_DATA, LAT, LON, MONTHS, START
 
 IS_POSITIVE_CLASS = "is_positive_class"
 IS_LOCAL = "is_local"
