@@ -269,11 +269,9 @@ class RawLabels:
 
         # Setup columns for earth observation data
         df[EO_STATUS] = EO_STATUS_WAITING
-        df[EO_DATA] = None
+        for col in [EO_DATA, EO_LAT, EO_LON, EO_FILE]:
+            df[col] = None
         df[EO_DATA] = df[EO_DATA].astype(object)
-        df[EO_LAT] = None
-        df[EO_LON] = None
-        df[EO_FILE] = None
 
         return df[
             [
@@ -290,5 +288,6 @@ class RawLabels:
                 EO_LAT,
                 EO_LON,
                 EO_FILE,
+                EO_STATUS,
             ]
         ]

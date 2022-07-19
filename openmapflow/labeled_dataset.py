@@ -296,6 +296,7 @@ class LabeledDataset:
                 EO_LAT: "first",
                 EO_LON: "first",
                 EO_FILE: "first",
+                EO_STATUS: "first",
             }
         )
         df[COUNTRY] = self.country
@@ -430,7 +431,7 @@ class LabeledDataset:
 
             with tqdm(
                 total=len(df_with_tifs_but_no_features),
-                desc="Matching labels to tif paths",
+                desc="Extracting matched eo data",
             ) as pbar:
                 np.vectorize(set_df)(
                     i=df_with_tifs_but_no_features.index,
