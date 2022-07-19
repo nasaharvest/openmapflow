@@ -1,91 +1,52 @@
 import os
 import unittest
 from datetime import date
-from pathlib import Path
 from unittest import TestCase
 
-import numpy as np
 import pandas as pd
+
 from datasets import datasets
 from dateutil.relativedelta import relativedelta
 
 from openmapflow.constants import (
-    ALREADY_EXISTS,
-    END,
-    FEATURE_FILENAME,
-    FEATURE_PATH,
     LAT,
     LON,
     START,
     SUBSET,
+    EO_DATA,
+    EO_FILE,
+    EO_LAT,
+    EO_LON,
 )
-from openmapflow.data_instance import DataInstance
-from openmapflow.features import load_all_features_as_df, load_feature
+
 from openmapflow.labeled_dataset import get_label_timesteps
 
 
 class IntegrationTestLabeledData(TestCase):
     """Tests that the features look right"""
 
-    @staticmethod
-    def load_labels(is_print=False):
-        print("")
-        datasets_dict = {}
+    @classmethod
+    def setUpClass(cls) -> None:
+        dfs = []
         for d in datasets:
-            try:
-                datasets_dict[d.dataset] = d.load_labels()
-                if is_print:
-                    print(d.summary(datasets_dict[d.dataset], unexported_check=False))
-            except FileNotFoundError:
-                continue
-        return datasets_dict
-
-    def test_features_with_no_labels(self):
-        feature_name_list = []
-        for _, labels in self.load_labels().items():
-            feature_name_list += labels[FEATURE_FILENAME].tolist()
-
-        features_df = load_all_features_as_df()
-        features_df_stems = features_df.filename.apply(lambda p: p.stem)
-        features_with_no_label = features_df[~features_df_stems.isin(feature_name_list)]
-        amount = len(features_with_no_label)
-        self.assertTrue(amount == 0, f"Found {amount} features with no labels")
-
-    def test_each_pickle_file_is_data_instance(self):
-        each_pickle_file_is_data_instance = True
-        for name, labels in self.load_labels().items():
-            labels = labels[labels[ALREADY_EXISTS]].copy()
-            all_features = labels[FEATURE_PATH].apply(load_feature)
-            good_features = [
-                feat for feat in all_features if isinstance(feat, DataInstance)
-            ]
-
-            if len(good_features) == len(all_features):
-                mark = "\u2714"
-            else:
-                mark = "\u2716"
-                each_pickle_file_is_data_instance = False
-            print(
-                f"{mark} {name} has {len(good_features)} features out of {len(all_features)}."
-            )
-        self.assertTrue(
-            each_pickle_file_is_data_instance,
-            "Not all pickle files are data instances, check logs for details.",
-        )
+            df = d.load_df()
+            df["name"] = d.dataset
+            dfs.append(df)
+        cls.dfs = pd.concat(dfs)
 
     def test_label_feature_subset_amounts(self):
         all_subsets_correct_size = True
-        for _, labels in self.load_labels(is_print=True).items():
-            if not labels[ALREADY_EXISTS].all():
-                labels[ALREADY_EXISTS] = np.vectorize(lambda p: Path(p).exists())(
-                    labels[FEATURE_PATH]
-                )
-            train_val_test_counts = labels[SUBSET].value_counts()
-            for subset, labels_in_subset in train_val_test_counts.items():
-                features_in_subset = labels[labels[SUBSET] == subset][
-                    ALREADY_EXISTS
-                ].sum()
-                if labels_in_subset != features_in_subset:
+
+        for d in datasets:
+            df = self.dfs[self.dfs["name"] == d.dataset]
+            label_subset_counts = df[SUBSET].value_counts()
+            eo_data_subset_counts = df[df[EO_DATA].notnull()][SUBSET].value_counts()
+
+            print(d.summary(df))
+            for subset in df[SUBSET].unique():
+                label_subset_count = label_subset_counts.get(subset, 0)
+                eo_data_subset_count = eo_data_subset_counts.get(subset, 0)
+                if label_subset_count != eo_data_subset_count:
                     all_subsets_correct_size = False
 
         self.assertTrue(
@@ -93,53 +54,30 @@ class IntegrationTestLabeledData(TestCase):
             "Check logs for which subsets have different sizes.",
         )
 
-    def test_features_for_duplicates(self):
-        features_df = load_all_features_as_df()
-        cols_to_check = ["instance_lon", "instance_lat", "source_file"]
-        duplicates = features_df[features_df.duplicated(subset=cols_to_check)]
+    def test_for_duplicates(self):
+        duplicates = self.dfs[self.dfs.duplicated(subset=[EO_LAT, EO_LON, EO_FILE])]
         num_dupes = len(duplicates)
         self.assertTrue(num_dupes == 0, f"Found {num_dupes} duplicates")
 
     def test_features_for_emptiness(self):
-        features_df = load_all_features_as_df()
-        is_empty = features_df["labelled_array"].isnull()
-        num_empty_features = len(features_df[is_empty])
+        num_empty_features = len(self.dfs[self.dfs[EO_DATA].isnull()])
         self.assertTrue(
             num_empty_features == 0,
             f"Found {num_empty_features} empty features, run create_all_features() to fix.",
         )
 
     def test_all_features_have_18_bands(self):
-        features_df = load_all_features_as_df()
-        is_empty = features_df["labelled_array"].isnull()
-        band_amount = (
-            features_df[~is_empty]["labelled_array"]
-            .apply(lambda f: f.shape[-1])
-            .unique()
-        )
+        is_empty = self.dfs[EO_DATA].isnull()
+        band_amount = self.dfs[~is_empty][EO_DATA].apply(lambda f: f.shape[-1]).unique()
         self.assertEqual(band_amount.tolist(), [18], "Found {band_amount} bands")
-
-    def test_all_features_start_with_january_first(self):
-        features_df = load_all_features_as_df()
-        starts_with_jan_first = features_df.filename.str.contains("_01_01")
-        self.assertTrue(
-            starts_with_jan_first.all(), "Not all features start with January 1st"
-        )
 
     def test_label_and_feature_ranges_match(self):
         all_label_and_feature_ranges_match = True
-        for name, labels in self.load_labels().items():
-            labels = labels[labels[ALREADY_EXISTS]].copy()
-            if len(labels) == 0:
-                continue
-            features = labels[FEATURE_PATH].apply(load_feature)
-            features_df = pd.DataFrame([feat.__dict__ for feat in features])
-            feature_month_amount = features_df["labelled_array"].apply(
-                lambda f: f.shape[0]
-            )
-            label_month_amount = get_label_timesteps(labels).reset_index(drop=True)
-            label_ranges = label_month_amount.value_counts().to_dict()
-            feature_ranges = feature_month_amount.value_counts().to_dict()
+        for d in datasets:
+            df = self.dfs[self.dfs["name"] == d.dataset]
+            label_month_amount = get_label_timesteps(df)
+            feature_month_amount = df[EO_DATA].apply(lambda f: f.shape[0])
+
             if (feature_month_amount == label_month_amount).all():
                 mark = "\u2714"
                 last_word = "match"
@@ -147,35 +85,16 @@ class IntegrationTestLabeledData(TestCase):
                 mark = "\u2716"
                 last_word = "mismatch"
                 all_label_and_feature_ranges_match = False
-            # Code to delete:
-            # labels.reset_index(drop=True)[feature_month_amount != label_month_amount]
-            # [FEATURE_PATH].apply(lambda p: Path(p).unlink())
+
+            label_ranges = label_month_amount.value_counts().to_dict()
+            feature_ranges = feature_month_amount.value_counts().to_dict()
             print(
-                f"{mark} {name} label {label_ranges} and "
+                f"{mark} {d.dataset} label {label_ranges} and "
                 + f"feature {feature_ranges} ranges {last_word}"
             )
         self.assertTrue(
             all_label_and_feature_ranges_match,
             "Check logs for which subsets have different sizes.",
-        )
-
-    def test_labels_have_start_before_end_date(self):
-        all_labels_have_consistent_dates = True
-        for name, labels in self.load_labels().items():
-            consistent_dates = pd.to_datetime(labels[START]) < pd.to_datetime(
-                labels[END]
-            )
-            if consistent_dates.all():
-                mark = "\u2714"
-                last_word = "consistent dates"
-            else:
-                mark = "\u2716"
-                last_word = f"{(~consistent_dates).sum()} inconsistent dates"
-                all_labels_have_consistent_dates = False
-            print(f"{mark} {name} label has {last_word}")
-        self.assertTrue(
-            all_labels_have_consistent_dates,
-            "Check logs for which labels have inconsistent dates.",
         )
 
     def test_all_older_features_have_24_months(self):
@@ -187,18 +106,14 @@ class IntegrationTestLabeledData(TestCase):
 
         all_older_features_have_24_months = True
 
-        for name, labels in self.load_labels().items():
-            cutoff = pd.to_datetime(labels[START]) < two_years_before_cutoff
-            labels = labels[labels[ALREADY_EXISTS] & cutoff].copy()
-            if len(labels) == 0:
+        for d in datasets:
+            df = self.dfs[self.dfs["name"] == d.dataset]
+            cutoff = pd.to_datetime(df[START]) < two_years_before_cutoff
+            df = df[cutoff].copy()
+            if len(df) == 0:
                 continue
-            features = labels[FEATURE_PATH].apply(load_feature)
-            features_df = pd.DataFrame([feat.__dict__ for feat in features])
-            is_empty = features_df["labelled_array"].isnull()
             month_amount = (
-                features_df[~is_empty]["labelled_array"]
-                .apply(lambda f: f.shape[0])
-                .unique()
+                df[df[EO_DATA].notnull()][EO_DATA].apply(lambda f: f.shape[0]).unique()
             )
 
             if month_amount.tolist() == [24]:
@@ -206,7 +121,7 @@ class IntegrationTestLabeledData(TestCase):
             else:
                 all_older_features_have_24_months = False
                 mark = "\u2716"
-            print(f"{mark} {name} \t\t{month_amount.tolist()}")
+            print(f"{mark} {d.dataset} \t\t{month_amount.tolist()}")
 
         self.assertTrue(
             all_older_features_have_24_months,
@@ -215,28 +130,22 @@ class IntegrationTestLabeledData(TestCase):
 
     def test_features_for_closeness(self):
         total_num_mismatched = 0
-        for name, labels in self.load_labels().items():
-            labels = labels[labels[ALREADY_EXISTS]].copy()
+        for d in datasets:
+            df = self.dfs[self.dfs["name"] == d.dataset]
 
-            if len(labels) == 0:
-                print(f"\\ {name}:\t\tNo features")
+            if len(df) == 0:
+                print(f"\\ {d.dataset}:\t\tNo features")
                 continue
 
-            features = labels[FEATURE_PATH].apply(load_feature)
-
-            labels["instance_lon"] = features.apply(lambda f: f.instance_lon)
-            labels["instance_lat"] = features.apply(lambda f: f.instance_lat)
-
-            label_tif_mismatch = labels[
-                ((labels[LON] - labels["instance_lon"]) > 0.0001)
-                | ((labels[LAT] - labels["instance_lat"]) > 0.0001)
+            label_tif_mismatch = df[
+                ((df[LON] - df[EO_LON]) > 0.0001) | ((df[LAT] - df[EO_LAT]) > 0.0001)
             ]
             num_mismatched = len(label_tif_mismatch)
             if num_mismatched > 0:
                 mark = "\u2716"
             else:
                 mark = "\u2714"
-            print(f"{mark} {name}:\t\tMismatches: {num_mismatched}")
+            print(f"{mark} {d.dataset}:\t\tMismatches: {num_mismatched}")
             total_num_mismatched += num_mismatched
         self.assertTrue(
             total_num_mismatched == 0,
@@ -245,13 +154,8 @@ class IntegrationTestLabeledData(TestCase):
 
     def test_label_coordinate_duplication(self):
         """For now this test is just a status report"""
-        all_dfs = []
-        for name, labels in self.load_labels().items():
-            labels["name"] = name
-            all_dfs.append(labels)
 
-        big_df = pd.concat(all_dfs)
-        duplicates = big_df[big_df.duplicated(subset=[LON, LAT], keep=False)]
+        duplicates = self.dfs[self.dfs.duplicated(subset=[LON, LAT], keep=False)]
         duplicates["start_year"] = pd.to_datetime(duplicates[START]).dt.year.astype(str)
         df = duplicates.groupby([LON, LAT], as_index=False, sort=False).agg(
             {

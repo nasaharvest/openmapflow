@@ -3,15 +3,10 @@ project: <PROJECT>
 description: ''
 data_paths:
   raw_labels: raw_labels
-  processed_labels: processed_labels
-  features: features
-  compressed_features: compressed_features.tar.gz
   models: models
   metrics: metrics.yaml
-  datasets: datasets.txt
-  missing: missing.txt
-  duplicates: duplicates.txt
-  unexported: unexported.txt
+  datasets: datasets
+  report: report.txt
 gcloud:
   project_id: ''
   location: us-central1

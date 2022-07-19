@@ -18,13 +18,14 @@ from tqdm import tqdm
 from openmapflow.config import PROJECT_ROOT, BucketNames
 from openmapflow.config import DataPaths as dp
 from openmapflow.constants import (
-    ALREADY_EXISTS,
     CLASS_PROB,
     COUNTRY,
     DATASET,
     END,
-    FEATURE_FILENAME,
-    FEATURE_PATH,
+    EO_STATUS,
+    EO_STATUS_DUPLICATE,
+    EO_STATUS_EXPORT_FAILED,
+    EO_STATUS_EXPORTING,
     LABEL_DUR,
     LABELER_NAMES,
     LAT,
@@ -34,16 +35,17 @@ from openmapflow.constants import (
     START,
     SUBSET,
     TIF_PATHS,
+    EO_DATA,
+    EO_LON,
+    EO_LAT,
+    EO_FILE,
+    EO_STATUS,
+    EO_STATUS_MISSING_VALUES,
+    EO_STATUS_COMPLETE,
 )
-from openmapflow.features import create_feature
 from openmapflow.raw_labels import RawLabels
-from openmapflow.utils import try_txt_read
 
 temp_dir = tempfile.gettempdir()
-
-missing_data = try_txt_read(PROJECT_ROOT / dp.MISSING)
-unexported = try_txt_read(PROJECT_ROOT / dp.UNEXPORTED)
-duplicates_data = try_txt_read(PROJECT_ROOT / dp.DUPLICATES)
 
 
 def find_nearest(array, value: float) -> Tuple[float, int]:
@@ -100,7 +102,10 @@ def generate_bbox_from_paths() -> Dict[Path, BBox]:
 def get_tif_paths(path_to_bbox, lat, lon, start_date, end_date, pbar):
     candidate_paths = []
     for p, bbox in path_to_bbox.items():
-        if bbox.contains(lat, lon) and f"dates={start_date}_{end_date}" in p.stem:
+        if (
+            bbox.contains(lat=lat, lon=lon)
+            and f"dates={start_date}_{end_date}" in p.stem
+        ):
             candidate_paths.append(p)
     pbar.update(1)
     return candidate_paths
@@ -125,12 +130,12 @@ def match_labels_to_tifs(labels: pd.DataFrame) -> pd.Series:
     # Faster than going through bboxes
     with tqdm(total=len(labels), desc="Matching labels to tif paths") as pbar:
         tif_paths = np.vectorize(get_tif_paths, otypes=[np.ndarray])(
-            path_to_bbox,
-            labels[LAT],
-            labels[LON],
-            labels[START],
-            labels[END],
-            pbar,
+            path_to_bbox=path_to_bbox,
+            lat=labels[LAT],
+            lon=labels[LON],
+            start_date=labels[START],
+            end_date=labels[END],
+            pbar=pbar,
         )
     return tif_paths
 
@@ -150,7 +155,8 @@ def find_matching_point(
     for p in tif_paths:
         blob = tif_bucket.blob(str(p))
         local_path = Path(f"{temp_dir}/{p.name}")
-        blob.download_to_filename(str(local_path))
+        if not local_path.exists():
+            blob.download_to_filename(str(local_path))
         tif_slope_tuples.append(
             Engineer.load_tif(
                 str(local_path), start_date=start_date, num_timesteps=None
@@ -194,31 +200,6 @@ def find_matching_point(
     return labelled_np, closest_lon, closest_lat, source_file
 
 
-def create_pickled_labeled_dataset(labels: pd.DataFrame):
-    tif_bucket = storage.Client().bucket(BucketNames.LABELED_TIFS)
-    for label in tqdm(
-        labels.to_dict(orient="records"), desc="Creating pickled instances"
-    ):
-        (labelled_array, tif_lon, tif_lat, tif_file) = find_matching_point(
-            start=label[START],
-            tif_paths=label[TIF_PATHS],
-            label_lon=label[LON],
-            label_lat=label[LAT],
-            tif_bucket=tif_bucket,
-        )
-
-        if labelled_array is None:
-            missing_data_file = PROJECT_ROOT / dp.MISSING
-            if not missing_data_file.exists():
-                missing_data_file.touch()
-
-            with open(missing_data_file, "a") as f:
-                f.write("\n" + label[FEATURE_FILENAME])
-            continue
-
-        create_feature(label[FEATURE_PATH], labelled_array, tif_lon, tif_lat, tif_file)
-
-
 def get_label_timesteps(labels):
     diff = pd.to_datetime(labels[END]) - pd.to_datetime(labels[START])
     return (diff / np.timedelta64(1, "M")).round().astype(int)
@@ -230,7 +211,7 @@ class LabeledDataset:
     A labeled dataset represents a DataFrame where each row consists of:
     - A coordinate
     - A binary label for that coordinate (y)
-    - A path to earth observation data for that coordinate (X)
+    - The earth observation data for that coordinate (X)
     Together labels (y) and the associated earth observation data (X) can be used
     to train and evaluate a macine learning model a model.
 
@@ -246,33 +227,24 @@ class LabeledDataset:
 
     def __post_init__(self):
         self.raw_dir = PROJECT_ROOT / dp.RAW_LABELS / self.dataset
-        self.labels_path = PROJECT_ROOT / dp.PROCESSED_LABELS / (self.dataset + ".csv")
+        self.df_path = PROJECT_ROOT / "data" / "features_csv" / (self.dataset + ".csv")
         self._cached_labels_csv = None
 
-    def summary(self, df=None, unexported_check=True):
+    def summary(self, df=None):
         if df is None:
-            df = self.load_labels(
-                allow_processing=False, fail_if_missing_features=False
-            )
+            df = self.load_df(allow_processing=False, fail_if_missing_features=False)
         text = f"{self.dataset} "
         timesteps = get_label_timesteps(df).unique()
         text += f"(Timesteps: {','.join([str(int(t)) for t in timesteps])})\n"
         text += "----------------------------------------------------------------------------\n"
         train_val_test_counts = df[SUBSET].value_counts()
-        newly_unexported = []
         for subset, labels_in_subset in train_val_test_counts.items():
-            features_in_subset = df[df[SUBSET] == subset][ALREADY_EXISTS].sum()
+            features_in_subset = df[df[SUBSET] == subset][EO_DATA].notnull().sum()
             if labels_in_subset != features_in_subset:
                 text += (
                     f"\u2716 {subset}: {labels_in_subset} labels, "
                     + f"but {features_in_subset} features\n"
                 )
-                if not unexported_check:
-                    continue
-                labels_with_no_feature = df[
-                    (df[SUBSET] == subset) & ~df[ALREADY_EXISTS]
-                ]
-                newly_unexported += labels_with_no_feature[FEATURE_FILENAME].tolist()
 
             else:
                 positive_class_percentage = (
@@ -282,27 +254,17 @@ class LabeledDataset:
                     f"\u2714 {subset} amount: {labels_in_subset}, "
                     + f"positive class: {positive_class_percentage:.1%}\n"
                 )
-        if not unexported_check or len(newly_unexported) == 0:
-            return text
-
-        add_to_file = input(
-            f"Found {len(newly_unexported)} missing features. "
-            + "These may have failed on EarthEngine. Add to unexported list? (y/[n]): "
-        )
-        if add_to_file.lower() == "y":
-            with (PROJECT_ROOT / dp.UNEXPORTED).open("w") as f:
-                f.write("\n".join(unexported + newly_unexported))
 
         return text
 
-    def create_processed_labels(self):
+    def create_df(self):
         """
         Creates a single processed labels file from a list of raw labels.
         """
         df = pd.DataFrame({})
         already_processed = []
-        if self.labels_path.exists():
-            df = pd.read_csv(self.labels_path)
+        if self.df_path.exists():
+            df = pd.read_csv(self.df_path)
             already_processed = df[SOURCE].unique()
 
         new_labels: List[pd.DataFrame] = []
@@ -331,59 +293,47 @@ class LabeledDataset:
                 SUBSET: "first",
                 LABEL_DUR: join_if_exists,
                 LABELER_NAMES: join_if_exists,
+                EO_DATA: "first",
+                EO_LAT: "first",
+                EO_LON: "first",
+                EO_FILE: "first",
             }
         )
         df[COUNTRY] = self.country
         df[DATASET] = self.dataset
-        df[FEATURE_FILENAME] = (
-            "lat="
-            + df[LAT].round(8).astype(str)
-            + "_lon="
-            + df[LON].round(8).astype(str)
-            + "_date="
-            + df[START].astype(str)
-            + "_"
-            + df[END].astype(str)
-        )
 
         df = df.reset_index(drop=True)
-        df.to_csv(self.labels_path, index=False)
+        df.to_csv(self.df_path, index=False)
         return df
 
-    def load_labels(
+    def load_df(
         self,
         allow_processing: bool = False,
         fail_if_missing_features: bool = False,
     ) -> pd.DataFrame:
         if allow_processing:
-            labels = self.create_processed_labels()
-            self._cached_labels_csv = labels
+            df = self.create_df()
+            self._cached_df = df
         elif self._cached_labels_csv is not None:
-            labels = self._cached_labels_csv
-        elif self.labels_path.exists():
-            labels = pd.read_csv(self.labels_path)
-            self._cached_labels_csv = labels
+            df = self._cached_df
+        elif self.df_path.exists():
+            df = pd.read_csv(self.df_path)
+            self._cached_df = df
         else:
-            raise FileNotFoundError(f"{self.labels_path} does not exist")
-        labels = labels[labels[CLASS_PROB] != 0.5]
-        unexported_labels = labels[FEATURE_FILENAME].isin(unexported)
-        missing_data_labels = labels[FEATURE_FILENAME].isin(missing_data)
-        duplicate_labels = labels[FEATURE_FILENAME].isin(duplicates_data)
-        labels = labels[
-            ~unexported_labels & ~missing_data_labels & ~duplicate_labels
+            raise FileNotFoundError(f"{self.df_path} does not exist")
+
+        df = df[
+            (df[EO_STATUS] != EO_STATUS_MISSING_VALUES)
+            & (df[EO_STATUS] != EO_STATUS_EXPORT_FAILED)
+            & (df[EO_STATUS] != EO_STATUS_DUPLICATE)
+            & (df[CLASS_PROB] != 0.5)
         ].copy()
-        labels["feature_dir"] = str(dp.FEATURES)
-        labels[FEATURE_PATH] = (
-            labels["feature_dir"] + "/" + labels[FEATURE_FILENAME] + ".pkl"
-        )
-        labels[ALREADY_EXISTS] = np.vectorize(lambda p: Path(p).exists())(
-            labels[FEATURE_PATH]
-        )
-        if fail_if_missing_features and not labels[ALREADY_EXISTS].all():
-            raise FileNotFoundError(
-                f"{self.dataset} has missing features: {labels[FEATURE_FILENAME].to_list()}"
-            )
-        return labels
+
+        df[EO_DATA] = df[EO_DATA].apply(lambda x: np.array(eval(x)) if x else None)
+
+        if fail_if_missing_features and not df[EO_DATA].all():
+            raise ValueError(f"{self.dataset} has missing features")
+        return df
 
     def create_features(self, disable_gee_export: bool = False) -> str:
         """
@@ -404,50 +354,92 @@ class LabeledDataset:
         # -------------------------------------------------
         # STEP 1: Obtain the labels
         # -------------------------------------------------
-        labels = self.load_labels(allow_processing=True)
+        df = self.load_df(allow_processing=True)
 
         # -------------------------------------------------
         # STEP 2: Check if features already exist
         # -------------------------------------------------
-        labels_with_no_features = labels[~labels[ALREADY_EXISTS]].copy()
-        if len(labels_with_no_features) == 0:
-            return self.summary(df=labels)
+        if df[EO_DATA].isnull().sum() == 0:
+            return self.summary(df=df)
 
         # -------------------------------------------------
         # STEP 3: Match labels to tif files (X)
         # -------------------------------------------------
-        labels_with_no_features[TIF_PATHS] = match_labels_to_tifs(
-            labels_with_no_features
-        )
-        tifs_found = labels_with_no_features[TIF_PATHS].str.len() > 0
+        df[TIF_PATHS] = ""
+        tifs = match_labels_to_tifs(df[df[EO_DATA].isnull()])
+        df.loc[df[EO_DATA].isnull(), TIF_PATHS] = tifs
+        tifs_found = df[df[EO_DATA].isnull()][TIF_PATHS].str.len() > 0
 
-        labels_with_no_tifs = labels_with_no_features.loc[~tifs_found].copy()
-        labels_with_tifs_but_no_features = labels_with_no_features.loc[tifs_found]
+        df_with_no_tifs = df[df[EO_DATA].isnull()].loc[~tifs_found]
+        df_with_tifs_but_no_features = df[df[EO_DATA].isnull()].loc[tifs_found]
 
         # -------------------------------------------------
         # STEP 4: If no matching tif, download it
         # -------------------------------------------------
-        if len(labels_with_no_tifs) > 0:
-            print(f"{len(labels_with_no_tifs )} labels not matched")
+        already_exporting = df_with_no_tifs[
+            df_with_no_tifs[EO_STATUS] == EO_STATUS_EXPORTING
+        ]
+        if len(already_exporting) > 0:
+            confirm = (
+                input(
+                    f"{len(already_exporting)} labels were already set to {EO_STATUS_EXPORTING}, add to failed export list? y/[n]: "
+                )
+                or "n"
+            )
+            if confirm.lower() == "y":
+                df.loc[already_exporting.index, EO_STATUS] = EO_STATUS_EXPORT_FAILED
+                df_with_no_tifs = df_with_no_tifs.loc[~already_exporting.index]
+
+        if len(df_with_no_tifs) > 0:
+            print(f"{len(df_with_no_tifs )} labels not matched")
+
             if not disable_gee_export:
-                labels_with_no_tifs[START] = pd.to_datetime(
-                    labels_with_no_tifs[START]
-                ).dt.date
-                labels_with_no_tifs[END] = pd.to_datetime(
-                    labels_with_no_tifs[END]
-                ).dt.date
+                df_with_no_tifs[START] = pd.to_datetime(df_with_no_tifs[START]).dt.date
+                df_with_no_tifs[END] = pd.to_datetime(df_with_no_tifs[END]).dt.date
                 EarthEngineExporter(
                     check_ee=True,
                     check_gcp=True,
                     dest_bucket=BucketNames.LABELED_TIFS,
-                ).export_for_labels(labels=labels_with_no_tifs)
+                ).export_for_labels(labels=df_with_no_tifs)
+                df.loc[df_with_no_tifs.index, EO_STATUS] = EO_STATUS_EXPORTING
 
         # -------------------------------------------------
         # STEP 5: Create the features (X, y)
         # -------------------------------------------------
-        if len(labels_with_tifs_but_no_features) > 0:
-            create_pickled_labeled_dataset(labels=labels_with_tifs_but_no_features)
-            labels[ALREADY_EXISTS] = np.vectorize(lambda p: Path(p).exists())(
-                labels[FEATURE_PATH]
-            )
-        return self.summary(df=labels)
+        if len(df_with_tifs_but_no_features) > 0:
+            tif_bucket = storage.Client().bucket(BucketNames.LABELED_TIFS)
+
+            def set_df(i, start, tif_paths, lon, lat, pbar):
+                (eo_data, eo_lon, eo_lat, eo_file) = find_matching_point(
+                    start=start,
+                    tif_paths=tif_paths,
+                    label_lon=lon,
+                    label_lat=lat,
+                    tif_bucket=tif_bucket,
+                )
+                pbar.update(1)
+                if eo_data is None:
+                    df.at[i, EO_STATUS] = EO_STATUS_MISSING_VALUES
+                    return
+
+                df.at[i, EO_DATA] = eo_data.tolist()
+                df.at[i, EO_LAT] = eo_lat
+                df.at[i, EO_LON] = eo_lon
+                df.at[i, EO_FILE] = eo_file
+                df.at[i, EO_STATUS] = EO_STATUS_COMPLETE
+
+            with tqdm(
+                total=len(df_with_tifs_but_no_features),
+                desc="Matching labels to tif paths",
+            ) as pbar:
+                np.vectorize(set_df)(
+                    i=df_with_tifs_but_no_features.index,
+                    start=df_with_tifs_but_no_features[START],
+                    tif_paths=df_with_tifs_but_no_features[TIF_PATHS],
+                    lon=df_with_tifs_but_no_features[LON],
+                    lat=df_with_tifs_but_no_features[LAT],
+                    pbar=pbar,
+                )
+
+            df.to_csv(self.df_path, index=False)
+        return self.summary(df=df)

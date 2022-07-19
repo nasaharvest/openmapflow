@@ -53,13 +53,7 @@ class TestGenerate(TestCase):
 
             create_data_dirs(dp, overwrite=False)
 
-            for p in [
-                dp.RAW_LABELS,
-                dp.PROCESSED_LABELS,
-                dp.MODELS,
-                dp.FEATURES,
-                dp.COMPRESSED_FEATURES,
-            ]:
+            for p in [dp.RAW_LABELS, dp.DATASETS, dp.MODELS]:
                 self.assertTrue(Path(p).exists())
 
     @skipIf(os.name == "nt", "Tempdir doesn't work on windows")
@@ -215,9 +209,7 @@ class TestGenerate(TestCase):
                             "env": {
                                 "GDRIVE_CREDENTIALS_DATA": "${{ secrets.GDRIVE_CREDENTIALS_DATA }}"
                             },
-                            "run": "dvc pull $(openmapflow datapath PROCESSED_LABELS) -f"
-                            + "\ndvc pull $(openmapflow datapath COMPRESSED_FEATURES) -f"
-                            + "\ntar -xvzf $(openmapflow datapath COMPRESSED_FEATURES) -C data/"
+                            "run": "dvc pull $(openmapflow datapath DATASETS) -f"
                             + "\ndvc pull $(openmapflow datapath MODELS) -f\n",
                         },
                         {
@@ -272,8 +264,7 @@ class TestGenerate(TestCase):
         system_calls = [call[0][0] for call in mock_system.call_args_list]
         dvc_files = [
             dp.RAW_LABELS,
-            dp.PROCESSED_LABELS,
-            dp.COMPRESSED_FEATURES,
+            dp.DATASETS,
             dp.MODELS,
         ]
         self.assertIn("dvc init", system_calls)

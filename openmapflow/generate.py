@@ -79,13 +79,9 @@ def copy_template_files(PROJECT_ROOT: Path, overwrite: bool):
 
 def create_data_dirs(dp, overwrite: bool):
     """Creates data directories"""
-    for p in [dp.FEATURES, dp.RAW_LABELS, dp.PROCESSED_LABELS, dp.MODELS]:
+    for p in [dp.RAW_LABELS, dp.DATASETS, dp.MODELS]:
         if allow_write(p, overwrite):
             Path(p).mkdir(parents=True, exist_ok=True)
-
-    if allow_write(dp.COMPRESSED_FEATURES):
-        with tarfile.open(dp.COMPRESSED_FEATURES, "w:gz") as tar:
-            tar.add(dp.FEATURES, arcname=Path(dp.FEATURES).name)
 
 
 def fill_in_and_write_action(
@@ -188,11 +184,8 @@ def setup_dvc(PROJECT_ROOT: Path, is_subdir: bool, dp):
     else:
         _print_and_run("dvc init")
 
-    dvc_files = [dp.RAW_LABELS, dp.PROCESSED_LABELS, dp.COMPRESSED_FEATURES, dp.MODELS]
+    dvc_files = [dp.RAW_LABELS, dp.DATASETS, dp.MODELS]
     _print_and_run("dvc add " + " ".join(dvc_files))
-
-    with open(DATA_DIR + ".gitignore", "a") as f:
-        f.write("/features")
 
     print("dvc stores data in remote storage (s3, gcs, gdrive, etc)")
     print("https://dvc.org/doc/command-reference/remote/add#supported-storage-types")

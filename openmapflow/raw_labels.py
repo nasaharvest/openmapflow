@@ -15,6 +15,12 @@ from pyproj import Transformer
 from openmapflow.constants import (
     CLASS_PROB,
     END,
+    EO_DATA,
+    EO_FILE,
+    EO_LAT,
+    EO_LON,
+    EO_STATUS,
+    EO_STATUS_WAITING,
     LABEL_DUR,
     LABELER_NAMES,
     LAT,
@@ -260,6 +266,29 @@ class RawLabels:
         df = df.dropna(subset=[LON, LAT, CLASS_PROB])
         df = df.round({LON: 8, LAT: 8})
         df = _train_val_test_split(df, self.train_val_test)
+
+        # Setup columns for earth observation data
+        df[EO_STATUS] = EO_STATUS_WAITING
+        df[EO_DATA] = None
+        df[EO_DATA] = df[EO_DATA].astype(object)
+        df[EO_LAT] = None
+        df[EO_LON] = None
+        df[EO_FILE] = None
+
         return df[
-            [SOURCE, CLASS_PROB, START, END, LON, LAT, SUBSET, LABELER_NAMES, LABEL_DUR]
+            [
+                SOURCE,
+                CLASS_PROB,
+                START,
+                END,
+                LON,
+                LAT,
+                SUBSET,
+                LABELER_NAMES,
+                LABEL_DUR,
+                EO_DATA,
+                EO_LAT,
+                EO_LON,
+                EO_FILE,
+            ]
         ]

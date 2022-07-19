@@ -4,8 +4,7 @@ from unittest import TestCase
 import numpy as np
 import pandas as pd
 
-from openmapflow.constants import CLASS_PROB, END, FEATURE_PATH, LAT, LON, START
-from openmapflow.features import create_feature
+from openmapflow.constants import CLASS_PROB, END, LAT, LON, START, EO_DATA
 
 try:
     import torch  # noqa: F401
@@ -31,23 +30,15 @@ class TestPyTorchDataset(TestCase):
             return
 
         cls.tif_values = np.zeros((24, 18))
-        feature_path = tempdir + "/test.pkl"
-        create_feature(
-            feature_path=feature_path,
-            tif_lat=0.0,
-            tif_lon=0.0,
-            tif_values=cls.tif_values,
-            tif_file="",
-        )
 
         cls.df = pd.DataFrame(
             {
                 CLASS_PROB: [0.0, 1.0],
                 START: ["2019-01-01", "2019-01-01"],
                 END: ["2021-12-31", "2021-12-31"],
-                FEATURE_PATH: [feature_path, feature_path],
                 LAT: [0.0, 1.0],
                 LON: [0.0, 1.0],
+                EO_DATA: [cls.tif_values, cls.tif_values],
             }
         )
 

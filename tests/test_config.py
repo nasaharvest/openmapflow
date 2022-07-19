@@ -13,16 +13,11 @@ class TestConfig(TestCase):
             "project": "fake-project",
             "description": "",
             "data_paths": {
+                "datasets": "datasets",
                 "raw_labels": "raw_labels",
-                "processed_labels": "processed_labels",
-                "features": "features",
-                "compressed_features": "compressed_features.tar.gz",
                 "models": "models",
                 "metrics": "metrics.yaml",
-                "datasets": "datasets.txt",
-                "missing": "missing.txt",
-                "duplicates": "duplicates.txt",
-                "unexported": "unexported.txt",
+                "report": "report.txt",
             },
             "gcloud": {
                 "project_id": "",
@@ -39,15 +34,10 @@ class TestConfig(TestCase):
         actual_data_path_str = DataPaths.get()
         expected_data_path_str = (
             "RAW_LABELS: data/raw_labels"
-            + "\nPROCESSED_LABELS: data/processed_labels"
-            + "\nFEATURES: data/features"
-            + "\nCOMPRESSED_FEATURES: data/compressed_features.tar.gz"
+            + "\nDATASETS: data/datasets"
             + "\nMODELS: data/models"
             + "\nMETRICS: data/metrics.yaml"
-            + "\nDATASETS: data/datasets.txt"
-            + "\nMISSING: data/missing.txt"
-            + "\nDUPLICATES: data/duplicates.txt"
-            + "\nUNEXPORTED: data/unexported.txt"
+            + "\nREPORT: data/report.txt"
         )
         self.assertEqual(actual_data_path_str, expected_data_path_str)
 

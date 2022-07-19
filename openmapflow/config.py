@@ -54,15 +54,10 @@ DOCKER_TAG = f"{GCLOUD_LOCATION}-docker.pkg.dev/{GCLOUD_PROJECT_ID}/{PROJECT}/{P
 
 class DataPaths:
     RAW_LABELS = DATA_DIR + CONFIG_YML["data_paths"]["raw_labels"]
-    PROCESSED_LABELS = DATA_DIR + CONFIG_YML["data_paths"]["processed_labels"]
-    FEATURES = DATA_DIR + CONFIG_YML["data_paths"]["features"]
-    COMPRESSED_FEATURES = DATA_DIR + CONFIG_YML["data_paths"]["compressed_features"]
+    DATASETS = DATA_DIR + CONFIG_YML["data_paths"]["datasets"]
     MODELS = DATA_DIR + CONFIG_YML["data_paths"]["models"]
     METRICS = DATA_DIR + CONFIG_YML["data_paths"]["metrics"]
-    DATASETS = DATA_DIR + CONFIG_YML["data_paths"]["datasets"]
-    MISSING = DATA_DIR + CONFIG_YML["data_paths"]["missing"]
-    DUPLICATES = DATA_DIR + CONFIG_YML["data_paths"]["duplicates"]
-    UNEXPORTED = DATA_DIR + CONFIG_YML["data_paths"]["unexported"]
+    REPORT = DATA_DIR + CONFIG_YML["data_paths"]["report"]
 
     @classmethod
     def get(cls, key: str = "") -> str:
