@@ -5,26 +5,26 @@ from unittest.mock import patch
 import numpy as np
 import pandas as pd
 import xarray as xr
-
 from cropharvest.countries import BBox
-from openmapflow.constants import START, END
+
+from openmapflow.constants import END, START
 from openmapflow.labeled_dataset import (
     _distance,
     _distance_point_from_center,
     _find_matching_point,
     _find_nearest,
-    bbox_from_str,
     _generate_bbox_from_paths,
     _get_tif_paths,
+    bbox_from_str,
     get_label_timesteps,
 )
 
 paths = [
-    "tifs/min_lat=-0.0001_min_lon=30.4263_max_lat=0.0014_max_lon=30.4277_dates=2020-01-01_2021-10-31_all.tif",
-    "tifs/min_lat=-0.0001_min_lon=30.4263_max_lat=0.0014_max_lon=30.4277_dates=2020-01-01_2021-12-31_all.tif",
-    "tifs/min_lat=-0.0007_min_lon=28.5108_max_lat=0.0007_max_lon=28.5123_dates=2019-01-01_2020-12-31_all.tif",
-    "tifs/min_lat=-0.0007_min_lon=28.5109_max_lat=0.0007_max_lon=28.5123_dates=2019-01-01_2020-12-31_all.tif",
-    "tifs/min_lat=-0.0008_min_lon=28.5109_max_lat=0.0007_max_lon=28.5123_dates=2019-01-01_2020-12-31_all.tif",
+    "tifs/min_lat=-0.0001_min_lon=30.4263_max_lat=0.0014_max_lon=30.4277_dates=2020-01-01_2021-10-31_all.tif",  # noqa: E501
+    "tifs/min_lat=-0.0001_min_lon=30.4263_max_lat=0.0014_max_lon=30.4277_dates=2020-01-01_2021-12-31_all.tif",  # noqa: E501
+    "tifs/min_lat=-0.0007_min_lon=28.5108_max_lat=0.0007_max_lon=28.5123_dates=2019-01-01_2020-12-31_all.tif",  # noqa: E501
+    "tifs/min_lat=-0.0007_min_lon=28.5109_max_lat=0.0007_max_lon=28.5123_dates=2019-01-01_2020-12-31_all.tif",  # noqa: E501
+    "tifs/min_lat=-0.0008_min_lon=28.5109_max_lat=0.0007_max_lon=28.5123_dates=2019-01-01_2020-12-31_all.tif",  # noqa: E501
 ]
 path_to_bbox = {
     Path(paths[0]): BBox(
@@ -123,7 +123,7 @@ class TestDataset(TestCase):
         self.assertEqual(_distance_point_from_center(2, 1, tif), 1.0)
 
     def test_bbox_from_str_regular(self):
-        uri = "tifs/min_lat=-0.0001_min_lon=30.4263_max_lat=0.0014_max_lon=30.4277_dates=2020-01-01_2021-10-31_all.tif"
+        uri = paths[0]
         actual_bbox = bbox_from_str(uri)
         expected_bbox = BBox(
             min_lat=-0.0001, max_lat=0.0014, min_lon=30.4263, max_lon=30.4277, name=uri
@@ -131,7 +131,10 @@ class TestDataset(TestCase):
         self.assertEqual(actual_bbox, expected_bbox)
 
     def test_bbox_from_str_single_decimal(self):
-        uri = "tifs/min_lat=0.0_min_lon=30.3_max_lat=0.1_max_lon=30.4_dates=2020-01-01_2021-10-31_all.tif"
+        uri = (
+            "tifs/min_lat=0.0_min_lon=30.3_max_lat=0.1_max_lon=30.4"
+            + "_dates=2020-01-01_2021-10-31_all.tif"
+        )
         actual_bbox = bbox_from_str(uri)
         expected_bbox = BBox(
             min_lat=0.0, max_lat=0.1, min_lon=30.3, max_lon=30.4, name=uri
