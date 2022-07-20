@@ -28,6 +28,10 @@ class IntegrationTestLabeledData(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         dfs = []
+        if len(datasets) == 0:
+            print("WARNING: No datasets found. Skipping all tests.")
+            raise unittest.SkipTest()
+
         for d in datasets:
             df = d.load_df()
             df["name"] = d.dataset
@@ -41,8 +45,6 @@ class IntegrationTestLabeledData(TestCase):
             df = self.dfs[self.dfs["name"] == d.dataset]
             label_subset_counts = df[SUBSET].value_counts()
             eo_data_subset_counts = df[df[EO_DATA].notnull()][SUBSET].value_counts()
-
-            print(d.summary(df))
             for subset in df[SUBSET].unique():
                 label_subset_count = label_subset_counts.get(subset, 0)
                 eo_data_subset_count = eo_data_subset_counts.get(subset, 0)
@@ -51,7 +53,7 @@ class IntegrationTestLabeledData(TestCase):
 
         self.assertTrue(
             all_subsets_correct_size,
-            "Check logs for which subsets have different sizes.",
+            "Check report.txt for which subsets have different sizes.",
         )
 
     def test_for_duplicates(self):
@@ -69,7 +71,7 @@ class IntegrationTestLabeledData(TestCase):
     def test_all_eo_data_has_18_bands(self):
         is_empty = self.dfs[EO_DATA].isnull()
         band_amount = self.dfs[~is_empty][EO_DATA].apply(lambda f: f.shape[-1]).unique()
-        self.assertEqual(band_amount.tolist(), [18], "Found {band_amount} bands")
+        self.assertEqual(band_amount.tolist(), [18], f"Found {band_amount} bands")
 
     def test_label_and_eo_data_ranges_match(self):
         all_label_and_eo_data_ranges_match = True

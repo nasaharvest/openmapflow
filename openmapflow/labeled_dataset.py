@@ -48,13 +48,13 @@ from openmapflow.raw_labels import RawLabels
 temp_dir = tempfile.gettempdir()
 
 
-def find_nearest(array, value: float) -> Tuple[float, int]:
+def _find_nearest(array, value: float) -> Tuple[float, int]:
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return array[idx], idx
 
 
-def distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+def _distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """
     haversince formula, inspired by:
     https://stackoverflow.com/questions/41336756/find-the-closest-latitude-and-longitude/41337005
@@ -68,16 +68,20 @@ def distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return 12742 * np.arcsin(np.sqrt(a))
 
 
-def distance_point_from_center(lat_idx: int, lon_idx: int, tif) -> int:
+def _distance_point_from_center(lat_idx: int, lon_idx: int, tif) -> int:
     x_dist = np.abs((len(tif.x) - 1) / 2 - lon_idx)
     y_dist = np.abs((len(tif.y) - 1) / 2 - lat_idx)
     return x_dist + y_dist
 
 
 def bbox_from_str(s: str) -> BBox:
-    """
-    Generate bbox from str
-    """
+    """Generate bbox from str"""
+    if not (
+        s.find("min_lat") < s.find("min_lon") < s.find("max_lat") < s.find("max_lon")
+    ):
+        raise ValueError(
+            f"Bbox string must go min_lat={{}}_min_lon={{}}_max_lat={{}}_max_lon={{}}, got {s}"
+        )
     decimals_in_p = re.findall(r"=-?\d*\.?\d*", Path(s).name)
     coords = [float(d[1:]) for d in decimals_in_p[0:4]]
     bbox = BBox(
@@ -91,15 +95,22 @@ def bbox_from_str(s: str) -> BBox:
 
 
 @memoized
-def generate_bbox_from_paths() -> Dict[Path, BBox]:
-    cloud_eo_uris = [uri for uri in get_cloud_tif_list(BucketNames.LABELED_EO)]
+def _generate_bbox_from_paths() -> Dict[Path, BBox]:
+    cloud_eo_uris = get_cloud_tif_list(BucketNames.LABELED_EO)
     return {
         Path(uri): bbox_from_str(uri)
         for uri in tqdm(cloud_eo_uris, desc="Generating BBoxes from paths")
     }
 
 
-def get_tif_paths(path_to_bbox, lat, lon, start_date, end_date, pbar):
+def _get_tif_paths(
+    path_to_bbox: Dict,
+    lat: float,
+    lon: float,
+    start_date: str,
+    end_date: str,
+    pbar=None,
+):
     candidate_paths = []
     for p, bbox in path_to_bbox.items():
         if (
@@ -107,11 +118,12 @@ def get_tif_paths(path_to_bbox, lat, lon, start_date, end_date, pbar):
             and f"dates={start_date}_{end_date}" in p.stem
         ):
             candidate_paths.append(p)
-    pbar.update(1)
+    if pbar:
+        pbar.update(1)
     return candidate_paths
 
 
-def match_labels_to_eo_files(labels: pd.DataFrame) -> pd.Series:
+def _match_labels_to_eo_files(labels: pd.DataFrame) -> pd.Series:
     # Add a bounday to get additional tifs
     bbox_for_labels = BBox(
         min_lon=labels[LON].min() - 1.0,
@@ -122,7 +134,7 @@ def match_labels_to_eo_files(labels: pd.DataFrame) -> pd.Series:
     # Get all eo file paths and bboxes
     path_to_bbox = {
         p: bbox
-        for p, bbox in generate_bbox_from_paths().items()
+        for p, bbox in _generate_bbox_from_paths().items()
         if bbox_for_labels.contains_bbox(bbox)
     }
 
@@ -130,7 +142,7 @@ def match_labels_to_eo_files(labels: pd.DataFrame) -> pd.Series:
     with tqdm(
         total=len(labels), desc="Matching labels to earth observation paths"
     ) as pbar:
-        eo_file_paths = np.vectorize(get_tif_paths, otypes=[np.ndarray])(
+        eo_file_paths = np.vectorize(_get_tif_paths, otypes=[np.ndarray])(
             path_to_bbox=path_to_bbox,
             lat=labels[LAT],
             lon=labels[LON],
@@ -141,7 +153,7 @@ def match_labels_to_eo_files(labels: pd.DataFrame) -> pd.Series:
     return eo_file_paths
 
 
-def find_matching_point(
+def _find_matching_point(
     start: str, eo_paths: List[Path], label_lon: float, label_lat: float, tif_bucket
 ) -> Tuple[np.ndarray, float, float, str]:
     """
@@ -171,10 +183,10 @@ def find_matching_point(
         min_distance_from_center = np.inf
         for i, tif_slope_tuple in enumerate(tif_slope_tuples):
             tif, slope = tif_slope_tuple
-            lon, lon_idx = find_nearest(tif.x, label_lon)
-            lat, lat_idx = find_nearest(tif.y, label_lat)
-            distance_from_point = distance(label_lat, label_lon, lat, lon)
-            distance_from_center = distance_point_from_center(lat_idx, lon_idx, tif)
+            lon, lon_idx = _find_nearest(tif.x, label_lon)
+            lat, lat_idx = _find_nearest(tif.y, label_lat)
+            distance_from_point = _distance(label_lat, label_lon, lat, lon)
+            distance_from_center = _distance_point_from_center(lat_idx, lon_idx, tif)
             if (distance_from_point < min_distance_from_point) or (
                 distance_from_point == min_distance_from_point
                 and distance_from_center < min_distance_from_center
@@ -188,8 +200,8 @@ def find_matching_point(
                 eo_file = eo_paths[i].name
     else:
         tif, slope = tif_slope_tuples[0]
-        closest_lon = find_nearest(tif.x, label_lon)[0]
-        closest_lat = find_nearest(tif.y, label_lat)[0]
+        closest_lon = _find_nearest(tif.x, label_lon)[0]
+        closest_lat = _find_nearest(tif.y, label_lat)[0]
         eo_data = tif.sel(x=closest_lon).sel(y=closest_lat).values
         average_slope = slope
         eo_file = eo_paths[0].name
@@ -203,18 +215,54 @@ def find_matching_point(
     return eo_data, closest_lon, closest_lat, eo_file
 
 
-def get_label_timesteps(labels):
-    assert START in labels.columns
-    assert END in labels.columns
+def get_label_timesteps(labels: pd.DataFrame):
+    if START not in labels.columns or END not in labels.columns:
+        raise ValueError("Labels must have start and end columns")
+
     diff = pd.to_datetime(labels[END]) - pd.to_datetime(labels[START])
     return (diff / np.timedelta64(1, "M")).round().astype(int)
 
 
-def to_np(x: str) -> Optional[np.ndarray]:
+def _to_np(x: str) -> Optional[np.ndarray]:
     try:
         return np.array(eval(x))
     except TypeError:
         return None
+
+
+def _clean_df_condition(df: pd.DataFrame) -> pd.Series:
+    return (
+        (df[EO_STATUS] != EO_STATUS_MISSING_VALUES)
+        & (df[EO_STATUS] != EO_STATUS_EXPORT_FAILED)
+        & (df[EO_STATUS] != EO_STATUS_DUPLICATE)
+        & (df[CLASS_PROB] != 0.5)
+    )
+
+
+def _label_eo_counts(df: pd.DataFrame) -> str:
+    df = df[_clean_df_condition(df)]
+    label_counts = df[SUBSET].value_counts()
+    eo_counts = df[df[EO_DATA].notnull()][SUBSET].value_counts()
+    text = ""
+    for subset in ["training", "validation", "testing"]:
+        if subset not in label_counts:
+            continue
+        labels_in_subset = label_counts.get(subset, 0)
+        features_in_subset = eo_counts.get(subset, 0)
+        if labels_in_subset != features_in_subset:
+            text += (
+                f"\u2716 {subset}: {labels_in_subset} labels, "
+                + f"but {features_in_subset} features\n"
+            )
+        else:
+            positive_class_percentage = (
+                df[df[SUBSET] == subset][CLASS_PROB] > 0.5
+            ).sum() / labels_in_subset
+            text += (
+                f"\u2714 {subset} amount: {labels_in_subset}, "
+                + f"positive class: {positive_class_percentage:.1%}\n"
+            )
+    return text
 
 
 @dataclass
@@ -240,46 +288,20 @@ class LabeledDataset:
     def __post_init__(self):
         self.raw_dir = PROJECT_ROOT / dp.RAW_LABELS / self.dataset
         self.df_path = PROJECT_ROOT / dp.DATASETS / (self.dataset + ".csv")
-        self._cached_labels_csv = None
-        self.eo_status = ""
 
-    def label_eo_counts(self, df: pd.DataFrame) -> str:
-        label_counts = df[SUBSET].value_counts()
-        eo_counts = df[df[EO_DATA].notnull()][SUBSET].value_counts()
-        text = ""
-        for subset in ["training", "validation", "testing"]:
-            if subset not in label_counts:
-                continue
-            labels_in_subset = label_counts.get(subset, 0)
-            features_in_subset = eo_counts.get(subset, 0)
-            if labels_in_subset != features_in_subset:
-                text += (
-                    f"\u2716 {subset}: {labels_in_subset} labels, "
-                    + f"but {features_in_subset} features\n"
-                )
-            else:
-                positive_class_percentage = (
-                    df[df[SUBSET] == subset][CLASS_PROB] > 0.5
-                ).sum() / labels_in_subset
-                text += (
-                    f"\u2714 {subset} amount: {labels_in_subset}, "
-                    + f"positive class: {positive_class_percentage:.1%}\n"
-                )
-        return text
-
-    def summary(self, df):
+    def _summary(self, df: pd.DataFrame) -> str:
         timesteps = get_label_timesteps(df).unique()
-        eo_status_str = str(self.eo_status).rsplit("\n", 1)[0]
+        eo_status_str = str(df[EO_STATUS].value_counts()).rsplit("\n", 1)[0]
         return (
             f"{self.dataset} (Timesteps: {','.join([str(int(t)) for t in timesteps])})\n"
             + "----------------------------------------------------------------------------\n"
             + eo_status_str
             + "\n"
-            + self.label_eo_counts(df)
+            + _label_eo_counts(df)
             + "\n"
         )
 
-    def create_labels(self):
+    def _create_df_if_not_exist(self):
         """
         Creates a single processed labels file from a list of raw labels.
         """
@@ -329,39 +351,36 @@ class LabeledDataset:
         df.to_csv(self.df_path, index=False)
         return df
 
-    def load_df(
-        self,
-        allow_processing: bool = False,
-        fail_if_missing: bool = False,
-        to_numpy: bool = True,
-    ) -> pd.DataFrame:
-        if allow_processing:
-            df = self.create_labels()
-            self._cached_df = df
-        elif self._cached_labels_csv is not None:
-            df = self._cached_df
-        elif self.df_path.exists():
-            df = pd.read_csv(self.df_path)
-            self._cached_df = df
-        else:
-            raise FileNotFoundError(f"{self.df_path} does not exist")
-
-        self.eo_status = df[EO_STATUS].value_counts()
-        df = df[
-            (df[EO_STATUS] != EO_STATUS_MISSING_VALUES)
-            & (df[EO_STATUS] != EO_STATUS_EXPORT_FAILED)
-            & (df[EO_STATUS] != EO_STATUS_DUPLICATE)
-            & (df[CLASS_PROB] != 0.5)
-        ].copy()
-
-        if to_numpy:
-            df[EO_DATA] = df[EO_DATA].apply(to_np)
-
-        if fail_if_missing and not df[EO_DATA].all():
-            raise ValueError(f"{self.dataset} has missing earth observation data")
+    def _duplicates_check(self, df: pd.DataFrame):
+        clean_df = df[_clean_df_condition(df)]
+        duplicates = clean_df.duplicated(subset=[EO_LAT, EO_LON, EO_FILE])
+        if duplicates.sum() > 0:
+            print(f"Found {duplicates.sum()} duplicates")
+            duplicates_index = clean_df.index[duplicates]
+            df.loc[duplicates_index, EO_STATUS] = EO_STATUS_DUPLICATE
+            df.loc[duplicates_index, EO_LAT] = None
+            df.loc[duplicates_index, EO_LON] = None
+            df.loc[duplicates_index, EO_FILE] = None
+            df.to_csv(self.df_path, index=False)
         return df
 
-    def create_dataset(self, disable_gee_export: bool = False) -> pd.DataFrame:
+    def load_df(self) -> pd.DataFrame:
+        """Load dataset (labels + earth observation data) as a DataFrame"""
+        if not self.df_path.exists():
+            raise FileNotFoundError(
+                f"{self.df_path} does not exist, run openmapflow create-datasets"
+            )
+        df = pd.read_csv(self.df_path)
+        df = df[_clean_df_condition(df)].copy()
+        if df[EO_DATA].isnull().any():
+            raise ValueError(
+                f"{self.dataset} has missing earth observation data, "
+                + "run openmapflow create-datasets"
+            )
+        df[EO_DATA] = df[EO_DATA].apply(_to_np)
+        return df
+
+    def create_dataset(self, disable_gee_export: bool = False) -> str:
         """
         A dataset consists of (X, y) pairs that are used to train and evaluate
         a machine learning model. In this case,
@@ -377,22 +396,23 @@ class LabeledDataset:
         # ---------------------------------------------------------------------
         # STEP 1: Obtain the labels
         # ---------------------------------------------------------------------
-        df = self.load_df(allow_processing=True, to_numpy=False)
+        df = self._create_df_if_not_exist()
 
         # ---------------------------------------------------------------------
         # STEP 2: Check if earth observation data already available
         # ---------------------------------------------------------------------
-        no_eo = df[EO_DATA].isnull()
+        no_eo = _clean_df_condition(df) & (df[EO_DATA].isnull())
         if no_eo.sum() == 0:
-            return df
+            df = self._duplicates_check(df)
+            return self._summary(df)
 
-        print(self.summary(df))
+        print(self._summary(df))
 
         # ---------------------------------------------------------------------
         # STEP 3: Match labels to earth observation files
         # ---------------------------------------------------------------------
         df[MATCHING_EO_FILES] = ""
-        df.loc[no_eo, MATCHING_EO_FILES] = match_labels_to_eo_files(df[no_eo])
+        df.loc[no_eo, MATCHING_EO_FILES] = _match_labels_to_eo_files(df[no_eo])
 
         eo_files_found = df[no_eo][MATCHING_EO_FILES].str.len() > 0
         df_with_no_eo_files = df[no_eo].loc[~eo_files_found]
@@ -437,7 +457,7 @@ class LabeledDataset:
             tif_bucket = storage.Client().bucket(BucketNames.LABELED_EO)
 
             def set_df(i, start, eo_paths, lon, lat, pbar):
-                (eo_data, eo_lon, eo_lat, eo_file) = find_matching_point(
+                (eo_data, eo_lon, eo_lat, eo_file) = _find_matching_point(
                     start=start,
                     eo_paths=eo_paths,
                     label_lon=lon,
@@ -483,15 +503,13 @@ class LabeledDataset:
 
             df.drop(columns=[MATCHING_EO_FILES], inplace=True)
             df.to_csv(self.df_path, index=False)
-        self.eo_status = df[EO_STATUS].value_counts()
-        return df
+        return self._summary(df)
 
 
 def create_datasets(datasets: List[LabeledDataset]):
     report = "DATASET REPORT (autogenerated, do not edit directly)"
     for d in datasets:
-        df = d.create_dataset()
-        summary = d.summary(df)
+        summary = d.create_dataset()
         print(summary)
         report += "\n\n" + summary
 
