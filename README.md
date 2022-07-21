@@ -130,6 +130,16 @@ from openmapflow.datasets import geowiki_landcover_2017, togo_crop_2019
 
 datasets = [geowiki_landcover_2017, togo_crop_2019]
 ```
+Download and push datasets
+```bash
+openmapflow create-dataset  # Download datasets
+dvc commit && dvc push      # Push data to version control
+
+git add .
+git commit -m'Created new dataset'
+git push
+```
+
 #### Adding custom data [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/new_data.ipynb)
 
 **Prerequisites:**
