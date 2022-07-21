@@ -36,7 +36,6 @@ class TestCLI(TestCase):
         self.assertIn("__init__.py", output)
         self.assertIn("config.py", output)
         self.assertIn("constants.py", output)
-        self.assertIn("data_instance.py", output)
         self.assertIn("generate.py", output)
         self.assertIn("inference_utils.py", output)
         self.assertIn("inference_widgets.py", output)
