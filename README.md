@@ -142,6 +142,8 @@ git push
 
 #### Adding custom data [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/new_data.ipynb)
 
+Data can be added by either following the below documentation OR running the above Colab notebook.
+
 **Prerequisites:**
 - [ ] [Generated OpenMapFlow project](#generating-a-project-)
 - [ ] [EarthEngine account](https://earthengine.google.com/signup) - for accessing Earth Engine and pulling satellite data
@@ -189,14 +191,15 @@ git push
 
 ## Training a model [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/train.ipynb)
 
+A model can be trained by either following the below documentation OR running the above Colab notebook.
+
 **Prerequisites:**
 - [ ] [Generated OpenMapFlow project](#generating-a-project-)
 - [ ] [Added labeled data](#adding-data-)
 
 ```bash
 # Pull in latest data
-dvc pull    
-tar -xzf $(openmapflow datapath COMPRESSED_FEATURES) -C data
+dvc pull
 
 # Set model name, train model, record test metrics
 export MODEL_NAME=<YOUR MODEL NAME>              
@@ -222,7 +225,7 @@ Now after merging the pull request, the model will be deployed to Google Cloud.
 - [ ] [Added labeled data](#adding-data-)
 - [ ] [Trained model](#training-a-model-)
 
-Only available through Colab. Cloud Architecture must be deployed using the deploy.yaml Github Action.
+Only available through above Colab notebook. Cloud Architecture must be deployed using the deploy.yaml Github Action.
 
 
 
