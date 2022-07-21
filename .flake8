@@ -1,3 +1,3 @@
 [flake8]
-exclude = venv,build,dist
+exclude = venv,build,dist,openmapflow/datasets.py
 max-line-length = 100
