@@ -3,11 +3,15 @@ File for storing references to datasets.
 """
 from typing import List
 
-from openmapflow.labeled_dataset import LabeledDataset, create_datasets
+from openmapflow.labeled_dataset import (
+    CustomLabeledDataset,
+    LabeledDataset,
+    create_datasets,
+)
 from openmapflow.raw_labels import RawLabels
 
 datasets: List[LabeledDataset] = [
-    LabeledDataset(
+    CustomLabeledDataset(
         dataset="Kenya_non_crop_2019",
         country="Kenya",
         raw_labels=(
@@ -45,7 +49,7 @@ datasets: List[LabeledDataset] = [
             ),
         ),
     ),
-    LabeledDataset(
+    CustomLabeledDataset(
         dataset="ref_african_crops_kenya_01_labels",
         country="Kenya",
         raw_labels=tuple(
