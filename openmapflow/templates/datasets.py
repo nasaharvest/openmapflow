@@ -11,7 +11,7 @@ from openmapflow.labeled_dataset import LabeledDataset, create_datasets
 
 datasets: List[LabeledDataset] = [
     # --------------------------------------------------------------------------
-    # Example CustomLabeledDataset
+    # Example ExistingLabeledDataset
     # --------------------------------------------------------------------------
     # geowiki_landcover_2017,
     #
