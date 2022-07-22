@@ -528,6 +528,7 @@ class ExistingLabeledDataset(LabeledDataset):
 
     def create_dataset(self):
         if not self.df_path.exists():
+            self.df_path.parent.mkdir(parents=True, exist_ok=True)
             with open(self.df_path, "wb") as fh:
                 with urlopen(Request(self.download_url)) as response:
                     total = response.length // self.chunk_size

@@ -217,6 +217,8 @@ with tqdm(range(num_epochs), desc="Epoch") as tqdm_epoch:
             model_path = model_path_from_name(model_name=model_name)
             if model_path.exists():
                 model_path.unlink()
+            else:
+                model_path.parent.mkdir(parents=True, exist_ok=True)
             sm.save(str(model_path))
 
 print(f"MODEL_NAME={model_name}")
