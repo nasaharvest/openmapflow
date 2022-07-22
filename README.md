@@ -118,7 +118,29 @@ gcloud auth login
 gsutil mb -l <YOUR_OPENMAPFLOW_YAML_GCLOUD_LOCATION> gs://<YOUR_OPENMAPFLOW_YAML_BUCKET_LABELED_EO>
 ```
 
-## Adding data [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/new_data.ipynb)
+## Adding data
+
+#### Adding already existing data
+**Prerequisites:**
+- [ ] [Generated OpenMapFlow project](#generating-a-project-)
+
+Add reference to already existing dataset in your datasets.py:
+```python
+from openmapflow.datasets import geowiki_landcover_2017, togo_crop_2019
+
+datasets = [geowiki_landcover_2017, togo_crop_2019]
+```
+Download and push datasets
+```bash
+openmapflow create-dataset  # Download datasets
+dvc commit && dvc push      # Push data to version control
+
+git add .
+git commit -m'Created new dataset'
+git push
+```
+
+#### Adding custom data [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/new_data.ipynb)
 
 Data can be added by either following the below documentation OR running the above Colab notebook.
 
@@ -133,10 +155,10 @@ export RAW_LABEL_DIR=$(openmapflow datapath RAW_LABELS)
 mkdir RAW_LABEL_DIR/<my dataset name>
 cp -r <path to my raw data files> RAW_LABEL_DIR/<my dataset name>
 ```
-Add reference to data using a `LabeledDataset` object in datasets.py, example:
+Add reference to data using a `CustomLabeledDataset` object in datasets.py, example:
 ```python
 datasets = [
-    LabeledDataset(
+    CustomLabeledDataset(
         dataset="example_dataset",
         country="Togo",
         raw_labels=(

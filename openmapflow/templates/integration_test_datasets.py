@@ -30,7 +30,7 @@ class IntegrationTestLabeledData(TestCase):
         dfs = []
         if len(datasets) == 0:
             print("WARNING: No datasets found. Skipping all tests.")
-            raise unittest.SkipTest()
+            raise unittest.SkipTest("No datasets found. Skipping all tests.")
 
         for d in datasets:
             df = d.load_df()

@@ -4,11 +4,19 @@ import unittest
 from random import randrange
 from unittest import TestCase
 
+from datasets import datasets
+
 from openmapflow.config import PROJECT_ROOT, DataPaths
 from openmapflow.constants import TEMPLATE_EVALUATE, TEMPLATE_TRAIN
 
 
 class TestExampleProjectsGenerated(TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        if len(datasets) == 0:
+            print("WARNING: No datasets found. Skipping all tests.")
+            raise unittest.SkipTest("No datasets found. Skipping all tests.")
+
     def test_train_and_evaluate(self):
         """Runs the train and evaluate scripts for the given project."""
 

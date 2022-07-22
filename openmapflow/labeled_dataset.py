@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+from urllib.request import Request, urlopen
 
 import numpy as np
 import pandas as pd
@@ -283,13 +284,14 @@ class LabeledDataset:
 
     dataset: str = ""
     country: str = ""
-    raw_labels: Tuple[RawLabels, ...] = ()
+    label_type: str = "binary"
+    license: str = ""
+    source: str = ""
 
     def __post_init__(self):
-        self.raw_dir = PROJECT_ROOT / dp.RAW_LABELS / self.dataset
         self.df_path = PROJECT_ROOT / dp.DATASETS / (self.dataset + ".csv")
 
-    def _summary(self, df: pd.DataFrame) -> str:
+    def summary(self, df: pd.DataFrame) -> str:
         timesteps = get_label_timesteps(df).unique()
         eo_status_str = str(df[EO_STATUS].value_counts()).rsplit("\n", 1)[0]
         return (
@@ -300,6 +302,36 @@ class LabeledDataset:
             + _label_eo_counts(df)
             + "\n"
         )
+
+    def load_df(self, skip_to_np=False) -> pd.DataFrame:
+        """Load dataset (labels + earth observation data) as a DataFrame"""
+        if not self.df_path.exists():
+            raise FileNotFoundError(
+                f"{self.df_path} does not exist, run openmapflow create-datasets"
+            )
+        df = pd.read_csv(self.df_path)
+        df = df[_clean_df_condition(df)].copy()
+        if df[EO_DATA].isnull().any():
+            raise ValueError(
+                f"{self.dataset} has missing earth observation data, "
+                + "run openmapflow create-datasets"
+            )
+        if not skip_to_np:
+            df[EO_DATA] = df[EO_DATA].apply(_to_np)
+        return df
+
+    def create_dataset(self):
+        raise NotImplementedError
+
+
+@dataclass
+class CustomLabeledDataset(LabeledDataset):
+
+    raw_labels: Tuple[RawLabels, ...] = ()
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.raw_dir = PROJECT_ROOT / dp.RAW_LABELS / self.dataset
 
     def _create_df_if_not_exist(self):
         """
@@ -364,23 +396,7 @@ class LabeledDataset:
             df.to_csv(self.df_path, index=False)
         return df
 
-    def load_df(self) -> pd.DataFrame:
-        """Load dataset (labels + earth observation data) as a DataFrame"""
-        if not self.df_path.exists():
-            raise FileNotFoundError(
-                f"{self.df_path} does not exist, run openmapflow create-datasets"
-            )
-        df = pd.read_csv(self.df_path)
-        df = df[_clean_df_condition(df)].copy()
-        if df[EO_DATA].isnull().any():
-            raise ValueError(
-                f"{self.dataset} has missing earth observation data, "
-                + "run openmapflow create-datasets"
-            )
-        df[EO_DATA] = df[EO_DATA].apply(_to_np)
-        return df
-
-    def create_dataset(self, disable_gee_export: bool = False) -> str:
+    def create_dataset(self) -> str:
         """
         A dataset consists of (X, y) pairs that are used to train and evaluate
         a machine learning model. In this case,
@@ -404,9 +420,9 @@ class LabeledDataset:
         no_eo = _clean_df_condition(df) & (df[EO_DATA].isnull())
         if no_eo.sum() == 0:
             df = self._duplicates_check(df)
-            return self._summary(df)
+            return self.summary(df)
 
-        print(self._summary(df))
+        print(self.summary(df))
 
         # ---------------------------------------------------------------------
         # STEP 3: Match labels to earth observation files
@@ -436,19 +452,14 @@ class LabeledDataset:
 
         if len(df_with_no_eo_files) > 0:
             print(f"{len(df_with_no_eo_files)} labels not matched")
-            if not disable_gee_export:
-                df_with_no_eo_files[START] = pd.to_datetime(
-                    df_with_no_eo_files[START]
-                ).dt.date
-                df_with_no_eo_files[END] = pd.to_datetime(
-                    df_with_no_eo_files[END]
-                ).dt.date
-                EarthEngineExporter(
-                    check_ee=True,
-                    check_gcp=True,
-                    dest_bucket=BucketNames.LABELED_EO,
-                ).export_for_labels(labels=df_with_no_eo_files)
-                df.loc[df_with_no_eo_files.index, EO_STATUS] = EO_STATUS_EXPORTING
+            df_with_no_eo_files[START] = pd.to_datetime(
+                df_with_no_eo_files[START]
+            ).dt.date
+            df_with_no_eo_files[END] = pd.to_datetime(df_with_no_eo_files[END]).dt.date
+            EarthEngineExporter(
+                check_ee=True, check_gcp=True, dest_bucket=BucketNames.LABELED_EO
+            ).export_for_labels(labels=df_with_no_eo_files)
+            df.loc[df_with_no_eo_files.index, EO_STATUS] = EO_STATUS_EXPORTING
 
         # ---------------------------------------------------------------------
         # STEP 5: Create the dataset (earth observation data, label)
@@ -503,7 +514,33 @@ class LabeledDataset:
 
             df.drop(columns=[MATCHING_EO_FILES], inplace=True)
             df.to_csv(self.df_path, index=False)
-        return self._summary(df)
+        return self.summary(df)
+
+
+@dataclass
+class ExistingLabeledDataset(LabeledDataset):
+
+    download_url: str = ""
+    chunk_size: int = 1024
+
+    def __post_init__(self):
+        super().__post_init__()
+
+    def create_dataset(self):
+        if not self.df_path.exists():
+            self.df_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.df_path, "wb") as fh:
+                with urlopen(Request(self.download_url)) as response:
+                    total = response.length // self.chunk_size
+                    with tqdm(total=total, desc=f"Downloading {self.dataset}") as pbar:
+                        for chunk in iter(lambda: response.read(self.chunk_size), ""):
+                            if not chunk:
+                                break
+                            pbar.update(1)
+                            fh.write(chunk)
+
+        df = pd.read_csv(self.df_path)
+        return self.summary(df)
 
 
 def create_datasets(datasets: List[LabeledDataset]):
