@@ -37,7 +37,7 @@ Rapid map creation with machine learning and earth observation data.
     * [Creating a map](#creating-a-map-)
 * [Accessing existing labeled datasets](#accessing-existing-datasets-)
 
-## Tutorial [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/tutorial.ipynb)
+# Tutorial [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/tutorial.ipynb)
 Colab notebook tutorial demonstrating data exploration, model training, and inference over small region. ([video](https://youtu.be/UHEUB4RSAi4))
 
 **Prerequisites:**
@@ -45,7 +45,7 @@ Colab notebook tutorial demonstrating data exploration, model training, and infe
 - [Forked OpenMapFlow repository](https://github.com/nasaharvest/openmapflow/fork)
 - Basic Python knowledge 
 
-## Creating a map from scratch 
+# Creating a map from scratch 
 
 To create your own maps with OpenMapFlow, you need to 
 1. [Generate your own OpenMapFlow project](#generating-a-project-), this will allow you to:
@@ -228,7 +228,7 @@ Now after merging the pull request, the model will be deployed to Google Cloud.
 
 Only available through above Colab notebook. Cloud Architecture must be deployed using the deploy.yaml Github Action.
 
-## Accessing existing datasets
+# Accessing existing datasets
 ```python
 from openmapflow.datasets import togo_crop_2019
 df = togo_crop_2019.load_df()
