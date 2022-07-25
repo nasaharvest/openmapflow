@@ -75,7 +75,7 @@ def get_ee_task_amount(prefix: Optional[str] = None):
     """
     ee_prefix = None
     if prefix is not None:
-        ee_prefix = prefix.replace("/", "-").replace("=", "-")
+        ee_prefix = prefix.replace("/", "-").replace("=", "-").replace(".", "-")
     amount = 0
     task_list = ee.data.getTaskList()
     for t in tqdm(task_list):
