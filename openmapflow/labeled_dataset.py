@@ -303,12 +303,10 @@ class LabeledDataset:
             + "\n"
         )
 
-    def load_df(self, skip_to_np=False) -> pd.DataFrame:
+    def load_df(self, skip_to_np: bool = False) -> pd.DataFrame:
         """Load dataset (labels + earth observation data) as a DataFrame"""
         if not self.df_path.exists():
-            raise FileNotFoundError(
-                f"{self.df_path} does not exist, run openmapflow create-datasets"
-            )
+            print(self.create_dataset())
         df = pd.read_csv(self.df_path)
         df = df[_clean_df_condition(df)].copy()
         if df[EO_DATA].isnull().any():
