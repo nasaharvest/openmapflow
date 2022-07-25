@@ -11,9 +11,9 @@ from openmapflow.constants import (
     TEMPLATE_DATASETS,
     TEMPLATE_DEPLOY_YML,
     TEMPLATE_EVALUATE,
+    TEMPLATE_GITIGNORE,
     TEMPLATE_TEST_YML,
     TEMPLATE_TRAIN,
-    TEMPLATE_GITIGNORE,
 )
 from openmapflow.generate import (
     allow_write,
