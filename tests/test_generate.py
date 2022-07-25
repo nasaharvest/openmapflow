@@ -13,6 +13,7 @@ from openmapflow.constants import (
     TEMPLATE_EVALUATE,
     TEMPLATE_TEST_YML,
     TEMPLATE_TRAIN,
+    TEMPLATE_GITIGNORE,
 )
 from openmapflow.generate import (
     allow_write,
@@ -39,7 +40,12 @@ class TestGenerate(TestCase):
     def test_copy_template_files(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             copy_template_files(Path(tmpdir), overwrite=False)
-            for p in [TEMPLATE_DATASETS, TEMPLATE_TRAIN, TEMPLATE_EVALUATE]:
+            for p in [
+                TEMPLATE_DATASETS,
+                TEMPLATE_TRAIN,
+                TEMPLATE_EVALUATE,
+                TEMPLATE_GITIGNORE,
+            ]:
                 self.assertTrue((Path(tmpdir) / p.name).exists())
 
     @skipIf(os.name == "nt", "Tempdir doesn't work on windows")
