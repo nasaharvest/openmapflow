@@ -12,6 +12,7 @@ from openmapflow.constants import (
     TEMPLATE_DEPLOY_YML,
     TEMPLATE_EVALUATE,
     TEMPLATE_GITIGNORE,
+    TEMPLATE_README,
     TEMPLATE_TEST_YML,
     TEMPLATE_TRAIN,
 )
@@ -45,6 +46,7 @@ class TestGenerate(TestCase):
                 TEMPLATE_TRAIN,
                 TEMPLATE_EVALUATE,
                 TEMPLATE_GITIGNORE,
+                TEMPLATE_README,
             ]:
                 self.assertTrue(
                     (Path(tmpdir) / p.name).exists(), f"{p.name} not copied"

@@ -10,6 +10,7 @@ from openmapflow.constants import (
     TEMPLATE_DEPLOY_YML,
     TEMPLATE_EVALUATE,
     TEMPLATE_GITIGNORE,
+    TEMPLATE_README,
     TEMPLATE_REQUIREMENTS,
     TEMPLATE_TEST_YML,
     TEMPLATE_TRAIN,
@@ -72,6 +73,7 @@ def copy_template_files(PROJECT_ROOT: Path, overwrite: bool):
         TEMPLATE_EVALUATE,
         TEMPLATE_REQUIREMENTS,
         TEMPLATE_GITIGNORE,
+        TEMPLATE_README,
     ]:
         if allow_write(PROJECT_ROOT / p.name, overwrite):
             shutil.copy(str(p), str(PROJECT_ROOT / p.name))
