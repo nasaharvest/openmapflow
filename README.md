@@ -120,7 +120,7 @@ gsutil mb -l <YOUR_OPENMAPFLOW_YAML_GCLOUD_LOCATION> gs://<YOUR_OPENMAPFLOW_YAML
 
 ## Adding data
 
-#### Adding already existing data
+### Adding already existing data
 **Prerequisites:**
 - [ ] [Generated OpenMapFlow project](#generating-a-project-)
 
@@ -140,7 +140,7 @@ git commit -m'Created new dataset'
 git push
 ```
 
-#### Adding custom data [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/new_data.ipynb)
+### Adding custom data [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/new_data.ipynb)
 
 Data can be added by either following the below documentation OR running the above Colab notebook.
 
