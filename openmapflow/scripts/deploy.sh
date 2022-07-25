@@ -28,8 +28,8 @@ echo "3/8 Enable Google Cloud APIs: Artifact Registry, Cloud Run, Cloud Function
 gcloud services enable artifactregistry.googleapis.com
 gcloud services enable cloudbuild.googleapis.com
 gcloud services enable cloudfunctions.googleapis.com
+gcloud services enable earthengine.googleapis.com
 gcloud services enable run.googleapis.com
-
 
 
 echo "4/8 Create Google Cloud Buckets if they don't exist"
