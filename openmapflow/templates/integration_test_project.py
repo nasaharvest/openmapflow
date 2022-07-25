@@ -30,7 +30,7 @@ class TestProjectConfig(unittest.TestCase):
             has_issues = True
             print(
                 f"\u2716 openmapflow.yaml version: {CONFIG_YML['version']} "
-                + "does not match package version: {VERSION}"
+                + f"does not match package version: {VERSION}"
             )
 
         if not path_exists(Path(dp.RAW_LABELS + ".dvc")):

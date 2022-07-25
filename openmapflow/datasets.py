@@ -25,3 +25,5 @@ togo_crop_2019 = ExistingLabeledDataset(
         + "Knowledge Discovery Workshops, 2020."
     ),
 )
+
+datasets = [geowiki_landcover_2017, togo_crop_2019]

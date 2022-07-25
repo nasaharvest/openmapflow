@@ -25,18 +25,19 @@ Rapid map creation with machine learning and earth observation data.
 
 [cb]: https://colab.research.google.com/assets/colab-badge.svg
 
-**Examples:** [Cropland](https://github.com/nasaharvest/openmapflow/tree/main/crop-mask-example), [Buildings](https://github.com/nasaharvest/openmapflow/tree/main/buildings-example), [Maize](https://github.com/nasaharvest/openmapflow/tree/main/maize-example)
+**Example projects:** [Cropland](https://github.com/nasaharvest/openmapflow/tree/main/crop-mask-example), [Buildings](https://github.com/nasaharvest/openmapflow/tree/main/buildings-example), [Maize](https://github.com/nasaharvest/openmapflow/tree/main/maize-example)
 
 ![3maps-gif](assets/3maps.gif)
 
 * [Tutorial](#tutorial-)
-* [How it works](#how-it-works)
-* [Generating a project](#generating-a-project-)
-* [Adding data](#adding-data-)
-* [Training a model](#training-a-model-)
-* [Creating a map](#creating-a-map-)
+* [Creating a map from scratch](#creating-a-map-from-scratch)
+    * [Generating a project](#generating-a-project-)
+    * [Adding data](#adding-data-)
+    * [Training a model](#training-a-model-)
+    * [Creating a map](#creating-a-map-)
+* [Accessing existing datasets](#accessing-existing-datasets)
 
-## Tutorial [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/tutorial.ipynb)
+# Tutorial [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/tutorial.ipynb)
 Colab notebook tutorial demonstrating data exploration, model training, and inference over small region. ([video](https://youtu.be/UHEUB4RSAi4))
 
 **Prerequisites:**
@@ -44,7 +45,7 @@ Colab notebook tutorial demonstrating data exploration, model training, and infe
 - [Forked OpenMapFlow repository](https://github.com/nasaharvest/openmapflow/fork)
 - Basic Python knowledge 
 
-## How it works 
+# Creating a map from scratch 
 
 To create your own maps with OpenMapFlow, you need to 
 1. [Generate your own OpenMapFlow project](#generating-a-project-), this will allow you to:
@@ -120,7 +121,7 @@ gsutil mb -l <YOUR_OPENMAPFLOW_YAML_GCLOUD_LOCATION> gs://<YOUR_OPENMAPFLOW_YAML
 
 ## Adding data
 
-#### Adding already existing data
+### Adding already existing data
 **Prerequisites:**
 - [ ] [Generated OpenMapFlow project](#generating-a-project-)
 
@@ -140,7 +141,7 @@ git commit -m'Created new dataset'
 git push
 ```
 
-#### Adding custom data [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/new_data.ipynb)
+### Adding custom data [![cb]](https://colab.research.google.com/github/nasaharvest/openmapflow/blob/main/openmapflow/notebooks/new_data.ipynb)
 
 Data can be added by either following the below documentation OR running the above Colab notebook.
 
@@ -227,8 +228,10 @@ Now after merging the pull request, the model will be deployed to Google Cloud.
 
 Only available through above Colab notebook. Cloud Architecture must be deployed using the deploy.yaml Github Action.
 
-
-
-
-
-
+# Accessing existing datasets
+```python
+from openmapflow.datasets import togo_crop_2019
+df = togo_crop_2019.load_df()
+x = togo_crop_2019.iloc[0]["eo_data"]
+y = togo_crop_2019.iloc[0]["class_prob"]
+```
