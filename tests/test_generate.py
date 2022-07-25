@@ -46,7 +46,9 @@ class TestGenerate(TestCase):
                 TEMPLATE_EVALUATE,
                 TEMPLATE_GITIGNORE,
             ]:
-                self.assertTrue((Path(tmpdir) / p.name).exists())
+                self.assertTrue(
+                    (Path(tmpdir) / p.name).exists(), f"{p.name} not copied"
+                )
 
     @skipIf(os.name == "nt", "Tempdir doesn't work on windows")
     def test_create_data_dirs(self):
