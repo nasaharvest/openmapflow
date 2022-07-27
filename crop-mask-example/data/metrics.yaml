@@ -1,3 +1,12 @@
+Abena:
+  local_testing_original_size: 309
+  local_testing_positive_class_percentage: 0.3463
+  test_metrics:
+    accuracy: 0.754
+    f1: 0.7206
+    precision: 0.5939
+    recall: 0.9159
+    roc_auc: 0.8526
 CVPR_BGB:
   local_testing_original_size: 309
   local_testing_positive_class_percentage: 0.3463
