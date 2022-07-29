@@ -1,0 +1,13 @@
+name: deployment
+
+on:
+  push:
+    branches: [ main ]
+    paths: 'openmapflow/scripts'
+
+jobs:
+  profile_deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run deployment script
+        run: openmapflow deploy

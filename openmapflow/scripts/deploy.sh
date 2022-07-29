@@ -4,7 +4,24 @@
 
 set -e # Exit when any command fails
 
+##This function profiles the time taken to run each command in the deployment script
+function traceTick(){
+  local CURR_TIME=$(python -c "import time; print(int(time.time()*1000))")
+  if [ -z "$LAST_TIME" ]
+  then
+    START_TIME=$CURR_TIME
+    LAST_TIME=$CURR_TIME
+  fi
+
+  local DELTA=$(($CURR_TIME - $LAST_TIME))
+  local TOTAL_DELTA=$(($CURR_TIME - $START_TIME))
+  LAST_TIME=$CURR_TIME
+
+  printf "\n Total time elapsed(ms):%-6s Time between current and previous commands(ms):%-6s %s\n" $TOTAL_DELTA $DELTA "$1"
+}
+
 echo "1/8 Setting OpenMapFlow environment variables"
+traceTick
 export $(
         python -c \
         "from openmapflow.config import deploy_env_variables; \
@@ -15,6 +32,7 @@ env | grep OPENMAPFLOW
 
 
 echo "2/8 Ensuring latest models are available for deployment"
+traceTick
 dvc pull "$OPENMAPFLOW_MODELS_DIR".dvc -f
 
 export OPENMAPFLOW_MODELS=$(
@@ -25,6 +43,7 @@ export OPENMAPFLOW_MODELS=$(
 echo "MODELS: $OPENMAPFLOW_MODELS"
 
 echo "3/8 Enable Google Cloud APIs: Artifact Registry, Cloud Run, Cloud Functions"
+traceTick
 gcloud services enable artifactregistry.googleapis.com
 gcloud services enable cloudbuild.googleapis.com
 gcloud services enable cloudfunctions.googleapis.com
@@ -33,6 +52,7 @@ gcloud services enable run.googleapis.com
 
 
 echo "4/8 Create Google Cloud Buckets if they don't exist"
+traceTick
 for BUCKET in $OPENMAPFLOW_GCLOUD_BUCKET_LABELED_EO \
         $OPENMAPFLOW_GCLOUD_BUCKET_INFERENCE_EO \
         $OPENMAPFLOW_GCLOUD_BUCKET_PREDS \
@@ -47,6 +67,7 @@ done
 
 
 echo "5/8 Checking if Artifact Registry needs to be created for storing OpenMapFlow docker images"
+traceTick
 if [ -z "$(gcloud artifacts repositories list --format='get(name)' --filter "$OPENMAPFLOW_PROJECT")" ]; then
         gcloud artifacts repositories create "$OPENMAPFLOW_PROJECT" \
         --location "$OPENMAPFLOW_GCLOUD_LOCATION" \
@@ -54,6 +75,7 @@ if [ -z "$(gcloud artifacts repositories list --format='get(name)' --filter "$OP
 fi
 
 echo "6/8 Build and push inference docker image to Google Cloud artifact registry"
+traceTick
 gcloud auth configure-docker "${OPENMAPFLOW_GCLOUD_LOCATION}"-docker.pkg.dev
 docker build . \
         -f "$OPENMAPFLOW_LIBRARY_DIR"/Dockerfile \
@@ -66,6 +88,7 @@ docker push "$OPENMAPFLOW_DOCKER_TAG"
 
 
 echo "7/8 Deploy inference docker image to Google Cloud Run"
+traceTick
 echo "Deploying prediction server on port 8080"
 gcloud run deploy "$OPENMAPFLOW_PROJECT" --image "$OPENMAPFLOW_DOCKER_TAG":latest \
         --cpu=4 \
