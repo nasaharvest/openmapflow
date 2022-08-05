@@ -47,7 +47,6 @@ args = parser.parse_args().__dict__
 start_month: str = args["start_month"]
 batch_size: int = args["batch_size"]
 upsample_minority_ratio: float = args["upsample_minority_ratio"]
-wandb_enabled: bool = args["wandb"]
 num_epochs: int = args["epochs"]
 lr: int = args["lr"]
 model_name: str = args["model_name"]
