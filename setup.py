@@ -49,6 +49,7 @@ setup(
             "earthengine-api",
             "geopandas",
             "google-cloud-storage",
+            "ipython",
             "rasterio",
             "xarray",
             "tsai",

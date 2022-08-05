@@ -102,7 +102,6 @@ def fill_in_and_write_action(
         sub_prefix: Prefix to add to action name
         sub_paths: Paths to trigger action by
         sub_cd: Command to cd into project root
-        sub_requirements: Location of requirements.txt
     """
     with src_yml_path.open("r") as f:
         content = f.read()

@@ -88,7 +88,6 @@ class TestGenerate(TestCase):
                     sub_prefix="project-prefix",
                     sub_paths="path/project/data",
                     sub_cd="path/project",
-                    sub_requirements="pip install -r requirements.txt",
                 )
 
                 with dest.open("r") as f:
@@ -97,11 +96,9 @@ class TestGenerate(TestCase):
             yaml.safe_load(project_action)  # Verify it's valid YAML
 
             self.assertIn("<PREFIX>", template_action)
-            self.assertIn("<REQUIREMENTS>", template_action)
             self.assertIn("<CD>", template_action)
             self.assertNotIn("<PREFIX>", project_action)
             self.assertNotIn("<PATHS>", project_action)
-            self.assertNotIn("<REQUIREMENTS>", project_action)
             self.assertNotIn("<CD>", project_action)
             self.assertIn("project-prefix", project_action)
             self.assertIn("pip install -r requirements.txt", project_action)

@@ -5,7 +5,7 @@ try:
 
     SKIP_TEST = False
 except ModuleNotFoundError as e:
-    print(e.msg)
+    print(e)
     SKIP_TEST = True
 
 
