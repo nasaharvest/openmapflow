@@ -27,14 +27,12 @@ parser = ArgumentParser()
 parser.add_argument("--model_name", type=str)
 parser.add_argument("--start_month", type=str, default="February")
 parser.add_argument("--batch_size", type=int, default=64)
-parser.add_argument("--wandb_url", type=str, default="")
 parser.add_argument("--skip_yaml", dest="skip_yaml", action="store_true")
 parser.set_defaults(skip_yaml=False)
 
 args = parser.parse_args().__dict__
 start_month: str = args["start_month"]
 batch_size: int = args["batch_size"]
-wandb_url: str = args["wandb_url"]
 model_name: str = args["model_name"]
 skip_yaml = bool = args["skip_yaml"]
 model_path = model_path_from_name(model_name=model_name)
@@ -78,9 +76,6 @@ if not skip_yaml and (PROJECT_ROOT / DataPaths.METRICS).exists():
         all_metrics = yaml.safe_load(f)
 
 all_metrics[model_name] = {"test_metrics": metrics, **test_data.dataset_info}
-if wandb_url:
-    all_metrics[model_name]["params"] = wandb_url
-
 print(yaml.dump(all_metrics[model_name], allow_unicode=True, default_flow_style=False))
 
 if not skip_yaml:
