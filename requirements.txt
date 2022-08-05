@@ -3,3 +3,4 @@ black
 isort
 flake8
 mypy==0.812
+torchserve
