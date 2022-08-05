@@ -14,7 +14,7 @@ TEMPLATE_GITIGNORE = TEMPLATES_DIR / ".gitignore"
 TEMPLATE_README = TEMPLATES_DIR / "README.md"
 TEMPLATE_DEPLOY_YML = TEMPLATES_DIR / "github-deploy.yaml"
 TEMPLATE_TEST_YML = TEMPLATES_DIR / "github-test.yaml"
-VERSION = "0.1.2"
+VERSION = "0.1.3"
 
 # -------------- Dataframe column names --------------------------------------
 SOURCE = "source"

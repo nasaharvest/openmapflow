@@ -5,9 +5,10 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
-from cropharvest.inference import Inference
 from google.cloud import storage
 from ts.torch_handler.base_handler import BaseHandler
+
+from openmapflow.inference import Inference
 
 
 def get_bucket_name(uri: str) -> str:

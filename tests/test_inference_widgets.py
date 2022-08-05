@@ -1,9 +1,18 @@
 from unittest import TestCase
 
-from openmapflow.inference_widgets import InferenceBBox
+try:
+    from openmapflow.inference_widgets import InferenceBBox
+
+    SKIP_TEST = False
+except ModuleNotFoundError as e:
+    print(e.msg)
+    SKIP_TEST = True
 
 
 class TestInferenceWidgets(TestCase):
+    def setUp(self) -> None:
+        self.skipTest("Dependencies not installed see warning.")
+
     def test_inference_bbox(self):
         ibbox = InferenceBBox(min_lat=0, min_lon=0, max_lat=1, max_lon=1)
         self.assertAlmostEqual(ibbox.area, 12308.463846396064)

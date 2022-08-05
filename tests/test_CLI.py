@@ -61,9 +61,9 @@ class TestCLI(TestCase):
     @skipIf(os.name == "nt", "Not yet available on Windows")
     def test_help(self):
         actual_output = check_output(["openmapflow", "help"]).decode().rstrip()
-        expected_output = """---------------------------------------------------------------------------------
-                              OpenMapFlow CLI
----------------------------------------------------------------------------------
+        long_line = "-" * 81
+        expected_output = f"""{long_line}
+                              OpenMapFlow CLI\n{long_line}
 openmapflow cp <source> <destination> - copy a file or directory from the library
 openmapflow create-datasets - creates datasets for all datasets in datasets.py
 openmapflow datapath <DATAPATH> - outputs a relative path to the data directory

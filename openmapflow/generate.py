@@ -16,6 +16,7 @@ from openmapflow.constants import (
     TEMPLATE_TRAIN,
     VERSION,
 )
+from openmapflow.utils import confirmation
 
 
 def allow_write(p: Union[Path, str], overwrite: bool = False) -> bool:
@@ -181,6 +182,10 @@ def setup_dvc(PROJECT_ROOT: Path, is_subdir: bool, dp):
         print(f"  {PROJECT_ROOT}/.dvc already exists. Skipping.")
         return
 
+    if not confirmation("Install dvc for data version control?"):
+        return
+
+    _print_and_run("pip install dvc[gs]")
     if is_subdir:
         _print_and_run("dvc init --subdir")
     else:

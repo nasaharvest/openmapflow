@@ -1,4 +1,4 @@
-from openmapflow.labeled_dataset import ExistingLabeledDataset
+from openmapflow.labeled_dataset_existing import ExistingLabeledDataset
 
 geowiki_landcover_2017 = ExistingLabeledDataset(
     dataset="geowiki_landcover_2017",

@@ -3,17 +3,21 @@ import re
 from collections import defaultdict
 from glob import glob
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
-import ee
 import requests
-from cropharvest.countries import BBox
 from google.cloud import storage
-from tqdm.notebook import tqdm
 
+from openmapflow.bbox import BBox
 from openmapflow.config import GCLOUD_LOCATION, GCLOUD_PROJECT_ID, PROJECT
 from openmapflow.config import BucketNames as bn
-from openmapflow.labeled_dataset import bbox_from_str
+from openmapflow.ee_exporter import get_ee_task_amount
+
+try:
+    import google.colab  # noqa
+    from tqdm.notebook import tqdm
+except ModuleNotFoundError:
+    from tqdm import tqdm
 
 
 def get_available_models(models_url: str) -> List[str]:
@@ -30,7 +34,6 @@ the following commands and rerun this cell:
 """
         )
         return []
-
     return [item["modelName"] for item in response.json()["models"]]
 
 
@@ -61,30 +64,8 @@ def get_available_bboxes(
             p = match.group()
             if p not in previous_matches:
                 previous_matches.append(p)
-                available_bboxes.append(bbox_from_str(f"gs://{bucket_name}/{p}"))
+                available_bboxes.append(BBox.from_str(f"gs://{bucket_name}/{p}"))
     return available_bboxes
-
-
-def get_ee_task_amount(prefix: Optional[str] = None):
-    """
-    Gets amount of active tasks in Earth Engine.
-    Args:
-        prefix: Prefix to filter tasks.
-    Returns:
-        Amount of active tasks.
-    """
-    ee_prefix = None
-    if prefix is not None:
-        ee_prefix = prefix.replace("/", "-").replace("=", "-").replace(".", "-")
-    amount = 0
-    task_list = ee.data.getTaskList()
-    for t in tqdm(task_list):
-        valid_state = t["state"] in ["READY", "RUNNING"]
-        if valid_state and (
-            ee_prefix is None or t["description"].startswith(ee_prefix)
-        ):
-            amount += 1
-    return amount
 
 
 def get_gcs_file_amount(
