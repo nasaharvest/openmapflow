@@ -94,6 +94,7 @@ def make_combine_bands_function(bands):
 
 
 def ee_safe_str(s: str):
+    """Earth Engine descriptions only allow certain characters"""
     return s.replace(".", "-").replace("=", "-").replace("/", "-")[:100]
 
 
