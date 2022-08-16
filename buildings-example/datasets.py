@@ -39,6 +39,27 @@ datasets: List[LabeledDataset] = [
             ),
         ),
     ),
+    CustomLabeledDataset(
+        dataset="Uganda_park_2020",
+        country="Uganda",
+        raw_labels=(
+            [
+                RawLabels(
+                    filename=filename,
+                    class_prob=0.0,
+                    sample_from_polygon=True,
+                    x_y_from_centroid=True,
+                    train_val_test=(0.8, 0.1, 0.1),
+                    start_year=2020,
+                )
+                for filename in [
+                    "WDPA_WDOECM_Aug2021_Public_UGA_shp_0.zip",
+                    "WDPA_WDOECM_Aug2021_Public_UGA_shp_1.zip",
+                    "WDPA_WDOECM_Aug2021_Public_UGA_shp_2.zip",
+                ]
+            ]
+        ),
+    ),
 ]
 
 if __name__ == "__main__":

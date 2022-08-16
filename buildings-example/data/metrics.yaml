@@ -1,9 +1,9 @@
 Uganda_buildings_2020_February:
-  local_testing_original_size: 1516
-  local_testing_positive_class_percentage: 0.5594
+  local_testing_original_size: 1768
+  local_testing_positive_class_percentage: 0.4712
   test_metrics:
-    accuracy: 0.9888
-    f1: 0.9899
-    precision: 0.9952
-    recall: 0.9847
-    roc_auc: 0.9998
+    accuracy: 0.9695
+    f1: 0.9678
+    precision: 0.9609
+    recall: 0.9748
+    roc_auc: 0.9961

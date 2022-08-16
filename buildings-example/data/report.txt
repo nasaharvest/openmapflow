@@ -4,9 +4,9 @@ Uganda_buildings_2020 (Timesteps: 24)
 ----------------------------------------------------------------------------
 eo_data_complete     8117
 eo_data_duplicate       4
-✔ training amount: 6445, positive class: 100.0%
-✔ validation amount: 824, positive class: 100.0%
-✔ testing amount: 848, positive class: 100.0%
+✔ training amount: 6508, positive class: 100.0%
+✔ validation amount: 776, positive class: 100.0%
+✔ testing amount: 833, positive class: 100.0%
 
 
 
@@ -18,4 +18,13 @@ eo_data_missing_values      132
 ✔ training amount: 12582, positive class: 0.0%
 ✔ validation amount: 743, positive class: 0.0%
 ✔ testing amount: 668, positive class: 0.0%
+
+
+
+Uganda_park_2020 (Timesteps: 24)
+----------------------------------------------------------------------------
+eo_data_complete    1455
+✔ training amount: 900, positive class: 0.0%
+✔ validation amount: 288, positive class: 0.0%
+✔ testing amount: 267, positive class: 0.0%
 
