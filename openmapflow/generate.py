@@ -9,7 +9,6 @@ from openmapflow.constants import (
     TEMPLATE_DATASETS,
     TEMPLATE_DEPLOY_YML,
     TEMPLATE_EVALUATE,
-    TEMPLATE_GITIGNORE,
     TEMPLATE_README,
     TEMPLATE_REQUIREMENTS,
     TEMPLATE_TEST_YML,
@@ -178,7 +177,7 @@ def setup_dvc(PROJECT_ROOT: Path, is_subdir: bool, dp):
     if not confirmation("Install dvc for data version control?"):
         return
 
-    _print_and_run("pip install dvc[gs]")
+    _print_and_run("pip install dvc[gdrive]")
     if is_subdir:
         _print_and_run("dvc init --subdir")
     else:
