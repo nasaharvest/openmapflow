@@ -73,7 +73,6 @@ def copy_template_files(PROJECT_ROOT: Path, overwrite: bool):
         TEMPLATE_TRAIN,
         TEMPLATE_EVALUATE,
         TEMPLATE_REQUIREMENTS,
-        TEMPLATE_GITIGNORE,
         TEMPLATE_README,
     ]:
         if allow_write(PROJECT_ROOT / p.name, overwrite):
