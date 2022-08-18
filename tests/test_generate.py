@@ -11,7 +11,6 @@ from openmapflow.constants import (
     TEMPLATE_DATASETS,
     TEMPLATE_DEPLOY_YML,
     TEMPLATE_EVALUATE,
-    TEMPLATE_GITIGNORE,
     TEMPLATE_README,
     TEMPLATE_TEST_YML,
     TEMPLATE_TRAIN,
@@ -45,7 +44,6 @@ class TestGenerate(TestCase):
                 TEMPLATE_DATASETS,
                 TEMPLATE_TRAIN,
                 TEMPLATE_EVALUATE,
-                TEMPLATE_GITIGNORE,
                 TEMPLATE_README,
             ]:
                 self.assertTrue(

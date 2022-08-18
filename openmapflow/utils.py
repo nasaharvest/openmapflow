@@ -10,27 +10,27 @@ from pandas.compat._optional import import_optional_dependency
 
 try:
     import google.colab  # noqa
-    from tqdm.notebook import tqdm
+    from tqdm.notebook import tqdm  # noqa
 
     IN_COLAB = True
 except ImportError:
-    from tqdm import tqdm
+    from tqdm import tqdm  # noqa
 
     IN_COLAB = False
 
 
 def colab_gee_gcloud_login(project_id: str):
-    google = import_optional_dependency("google")
+    google_package = import_optional_dependency("google")
     ee = import_optional_dependency("ee")
     os.environ["GOOGLE_CLOUD_PROJECT"] = project_id
     print("Logging into Google Cloud")
-    google.colab.auth.authenticate_user()
+    google_package.colab.auth.authenticate_user()
     print("Logging into Earth Engine")
     SCOPES = [
         "https://www.googleapis.com/auth/cloud-platform",
         "https://www.googleapis.com/auth/earthengine",
     ]
-    CREDENTIALS, _ = google.auth.default(default_scopes=SCOPES)
+    CREDENTIALS, _ = google_package.auth.default(default_scopes=SCOPES)
     ee.Initialize(CREDENTIALS, project=project_id)
 
 
