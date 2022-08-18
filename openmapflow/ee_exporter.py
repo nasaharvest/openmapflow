@@ -130,7 +130,7 @@ class EarthEngineExporter:
                 ee.Initialize()
         except Exception:
             print(
-                "This code doesn't work unless you have authenticated your earthengine account"
+                "This code may not work if you have not authenticated your earthengine account"
             )
         self.check_ee = check_ee
         self.ee_task_list = get_ee_task_list() if self.check_ee else []
@@ -275,7 +275,7 @@ class EarthEngineExporter:
             assert expected_column in labels
 
         exports_started = 0
-        print(f"Exporting {len(labels)} labels")
+        print(f"Exporting {len(labels)} labels: ")
 
         for _, row in tqdm(labels.iterrows(), desc="Exporting", total=len(labels)):
             ee_bbox = EEBoundingBox.from_centre(
