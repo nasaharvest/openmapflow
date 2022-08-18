@@ -335,6 +335,9 @@ class CustomLabeledDataset(LabeledDataset):
             storage = import_optional_dependency("google.cloud.storage")
             tif_bucket = storage.Client().bucket(BucketNames.LABELED_EO)
 
+            df[EO_DATA] = df[EO_DATA].astype(object)
+            df[EO_FILE] = df[EO_DATA].astype(str)
+
             def set_df(i, start, eo_paths, lon, lat, pbar):
                 (eo_data, eo_lon, eo_lat, eo_file) = _find_matching_point(
                     start=start,

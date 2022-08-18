@@ -182,8 +182,6 @@ def _set_eo_columns(df) -> pd.DataFrame:
     df.loc[df[CLASS_PROB] == 0.5, EO_STATUS] = EO_STATUS_SKIPPED
     for col in [EO_DATA, EO_LAT, EO_LON, EO_FILE]:
         df[col] = None
-    df[EO_DATA] = df[EO_DATA].astype(object)
-    df[EO_FILE] = df[EO_DATA].astype(str)
     return df
 
 
