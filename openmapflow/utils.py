@@ -8,6 +8,16 @@ import numpy as np
 import pandas as pd
 from pandas.compat._optional import import_optional_dependency
 
+try:
+    import google.colab  # noqa
+    from tqdm.notebook import tqdm
+
+    IN_COLAB = True
+except ImportError:
+    from tqdm import tqdm
+
+    IN_COLAB = False
+
 
 def colab_gee_gcloud_login(project_id: str):
     google = import_optional_dependency("google")

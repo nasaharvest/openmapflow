@@ -16,13 +16,13 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 from torch.utils.data import DataLoader
-from tqdm import tqdm
 from tsai.models.TransformerModel import TransformerModel
 
 from openmapflow.bands import BANDS_MAX
 from openmapflow.constants import SUBSET
 from openmapflow.pytorch_dataset import PyTorchDataset
 from openmapflow.train_utils import generate_model_name, model_path_from_name
+from openmapflow.utils import tqdm
 
 try:
     import google.colab  # noqa

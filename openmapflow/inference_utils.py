@@ -12,12 +12,7 @@ from openmapflow.bbox import BBox
 from openmapflow.config import GCLOUD_LOCATION, GCLOUD_PROJECT_ID, PROJECT
 from openmapflow.config import BucketNames as bn
 from openmapflow.ee_exporter import get_ee_task_amount
-
-try:
-    import google.colab  # noqa
-    from tqdm.notebook import tqdm
-except ModuleNotFoundError:
-    from tqdm import tqdm
+from openmapflow.utils import tqdm
 
 
 def get_available_models(models_url: str) -> List[str]:

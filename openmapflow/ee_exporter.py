@@ -4,12 +4,11 @@ from typing import Dict, List, Optional, Union
 
 import pandas as pd
 from pandas.compat._optional import import_optional_dependency
-from tqdm import tqdm
 
 from openmapflow.bands import DAYS_PER_TIMESTEP, DYNAMIC_BANDS
 from openmapflow.bbox import BBox
 from openmapflow.constants import END, LAT, LON, START
-from openmapflow.utils import memoized
+from openmapflow.utils import memoized, tqdm
 
 try:
     import ee

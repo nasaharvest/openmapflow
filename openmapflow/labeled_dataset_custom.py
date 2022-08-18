@@ -8,7 +8,6 @@ from typing import Dict, List, Tuple
 import numpy as np
 import pandas as pd
 from pandas.compat._optional import import_optional_dependency
-from tqdm import tqdm
 
 from openmapflow.bbox import BBox
 from openmapflow.config import PROJECT_ROOT, BucketNames
@@ -42,7 +41,7 @@ from openmapflow.ee_exporter import EarthEngineExporter, get_cloud_tif_list
 from openmapflow.engineer import calculate_ndvi, fillna, load_tif, remove_bands
 from openmapflow.labeled_dataset import LabeledDataset, clean_df_condition
 from openmapflow.raw_labels import RawLabels
-from openmapflow.utils import memoized
+from openmapflow.utils import memoized, tqdm
 
 temp_dir = tempfile.gettempdir()
 

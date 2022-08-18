@@ -6,7 +6,7 @@ from typing import List
 # from openmapflow.datasets import geowiki_landcover_2017
 from openmapflow.labeled_dataset import LabeledDataset, create_datasets
 
-# from openmapflow.labeled_dataset import CustomLabeledDataset
+# from openmapflow.labeled_dataset_custom import CustomLabeledDataset
 # from openmapflow.raw_labels import RawLabels
 
 datasets: List[LabeledDataset] = [

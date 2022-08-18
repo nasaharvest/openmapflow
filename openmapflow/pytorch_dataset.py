@@ -6,10 +6,10 @@ import torch
 from dateutil.relativedelta import relativedelta
 from torch import Tensor
 from torch.utils.data import Dataset
-from tqdm import tqdm
 
 from openmapflow.bbox import BBox
 from openmapflow.constants import CLASS_PROB, END, EO_DATA, LAT, LON, MONTHS, START
+from openmapflow.utils import tqdm
 
 IS_POSITIVE_CLASS = "is_positive_class"
 IS_LOCAL = "is_local"
