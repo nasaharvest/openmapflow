@@ -9,12 +9,12 @@ import pandas as pd
 from pandas.compat._optional import import_optional_dependency
 
 try:
-    import google.colab  # noqa
-    from tqdm.notebook import tqdm  # noqa
+    import google.colab  # noqa F401
+    from tqdm.notebook import tqdm  # noqa F401
 
     IN_COLAB = True
 except ImportError:
-    from tqdm import tqdm  # noqa
+    from tqdm import tqdm  # noqa F401
 
     IN_COLAB = False
 
