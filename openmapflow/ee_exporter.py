@@ -277,7 +277,7 @@ class EarthEngineExporter:
         exports_started = 0
         print(f"Exporting {len(labels)} labels")
 
-        for _, row in tqdm(labels.iterrows(), desc="Exporting"):
+        for _, row in tqdm(labels.iterrows(), desc="Exporting", total=len(labels)):
             ee_bbox = EEBoundingBox.from_centre(
                 mid_lat=row[LAT],
                 mid_lon=row[LON],
