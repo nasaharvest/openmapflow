@@ -1,16 +1,14 @@
+import random
 import zipfile
 from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Callable, Optional, Tuple, Union
 
-import geopandas as gpd
 import numpy as np
 import pandas as pd
-from cropharvest.utils import set_seed
 from dateutil.relativedelta import relativedelta
-from fiona.errors import DriverError
-from pyproj import Transformer
+from pandas.compat._optional import import_optional_dependency
 
 from openmapflow.constants import (
     CLASS_PROB,
@@ -39,6 +37,8 @@ min_date = date(2015, 7, 1)
 # https://www.ecmwf.int/en/forecasts/datasets/reanalysis-datasets/era5
 max_date = date.today().replace(day=1) + relativedelta(months=-3)
 
+SEED = 42
+
 
 def _train_val_test_split(
     df: pd.DataFrame, train_val_test: Tuple[float, float, float]
@@ -53,22 +53,6 @@ def _train_val_test_split(
     return df
 
 
-def _get_points(polygon, samples: int) -> gpd.GeoSeries:
-    # find the bounds of your geodataframe
-    x_min, y_min, x_max, y_max = polygon.bounds
-
-    # generate random data within the bounds
-    x = np.random.uniform(x_min, x_max, samples)
-    y = np.random.uniform(y_min, y_max, samples)
-
-    # convert them to a points GeoSeries
-    gdf_points = gpd.GeoSeries(gpd.points_from_xy(x, y))
-    # only keep those points within polygons
-    gdf_points = gdf_points[gdf_points.within(polygon)]
-
-    return gdf_points
-
-
 def _read_in_file(file_path) -> pd.DataFrame:
     print(f"Reading in {file_path}")
     if file_path.suffix == ".txt":
@@ -78,15 +62,15 @@ def _read_in_file(file_path) -> pd.DataFrame:
             return pd.read_csv(file_path)
         except UnicodeDecodeError:
             return pd.read_csv(file_path, engine="python")
-    elif file_path.suffix == ".zip":
+    else:
+        gpd = import_optional_dependency("geopandas")
+        fiona = import_optional_dependency("fiona")
         try:
             return gpd.read_file(file_path)
-        except DriverError:
+        except fiona.errors.DriverError:
             with zipfile.ZipFile(file_path, "r") as zip_ref:
                 zip_ref.extractall(file_path.parent)
             return gpd.read_file(file_path.parent / file_path.stem)
-    else:
-        return gpd.read_file(file_path)
 
 
 def _set_class_prob(
@@ -149,8 +133,18 @@ def _set_lat_lon(
         return df
 
     if sample_from_polygon:
+        gpd = import_optional_dependency("geopandas")
         df = df[df.geometry != None]  # noqa: E711
         df["samples"] = (df.geometry.area / 0.001).astype(int)
+
+        def _get_points(polygon, samples: int):
+            x_min, y_min, x_max, y_max = polygon.bounds
+            x = np.random.uniform(x_min, x_max, samples)
+            y = np.random.uniform(y_min, y_max, samples)
+            gdf_points = gpd.GeoSeries(gpd.points_from_xy(x, y))
+            gdf_points = gdf_points[gdf_points.within(polygon)]
+            return gdf_points
+
         list_of_points = np.vectorize(_get_points)(df.geometry, df.samples)
         df = gpd.GeoDataFrame(geometry=pd.concat(list_of_points, ignore_index=True))
 
@@ -160,7 +154,10 @@ def _set_lat_lon(
         y = df.geometry.centroid.y.values
 
         if transform_crs_from:
-            transformer = Transformer.from_crs(crs_from=transform_crs_from, crs_to=4326)
+            pyproj = import_optional_dependency("pyproj")
+            transformer = pyproj.Transformer.from_crs(
+                crs_from=transform_crs_from, crs_to=4326
+            )
             y, x = transformer.transform(xx=x, yy=y)
 
         df[LON] = x
@@ -185,8 +182,6 @@ def _set_eo_columns(df) -> pd.DataFrame:
     df.loc[df[CLASS_PROB] == 0.5, EO_STATUS] = EO_STATUS_SKIPPED
     for col in [EO_DATA, EO_LAT, EO_LON, EO_FILE]:
         df[col] = None
-    df[EO_DATA] = df[EO_DATA].astype(object)
-    df[EO_FILE] = df[EO_DATA].astype(str)
     return df
 
 
@@ -256,7 +251,8 @@ class RawLabels:
     labeler_name: Optional[str] = None
 
     def __post_init__(self):
-        set_seed()
+        np.random.seed(SEED)
+        random.seed(SEED)
         if sum(self.train_val_test) != 1.0:
             raise ValueError("train_val_test must sum to 1.0")
 

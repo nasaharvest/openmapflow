@@ -3,24 +3,31 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from functools import partial
 
-import pyproj
-import shapely.ops as ops
-from cropharvest.countries import BBox
-from cropharvest.eo import EarthEngineExporter
-from ipyleaflet import Map, Rectangle, basemap_to_tiles, basemaps
-from ipywidgets import (
-    HTML,
-    Box,
-    DatePicker,
-    Dropdown,
-    FloatText,
-    Layout,
-    RadioButtons,
-    Select,
-    ToggleButtons,
-    VBox,
-)
-from shapely.geometry.polygon import Polygon
+from openmapflow.bbox import BBox
+
+try:
+    import pyproj
+    import shapely.ops as ops
+    from ipyleaflet import Map, Rectangle, basemap_to_tiles, basemaps
+    from ipywidgets import (
+        HTML,
+        Box,
+        DatePicker,
+        Dropdown,
+        FloatText,
+        Layout,
+        RadioButtons,
+        Select,
+        ToggleButtons,
+        VBox,
+    )
+    from shapely.geometry.polygon import Polygon
+except ModuleNotFoundError:
+    raise ModuleNotFoundError(
+        "ipyleaflet, pyproj, shapely, or ipywidgets not found, please install with"
+        + "`pip install ipyleaflet pyproj shapely ipywidgets`"
+    )
+
 
 bbox_keys = ["min_lat", "min_lon", "max_lat", "max_lon"]
 
@@ -191,8 +198,8 @@ class InferenceWidget:
         return any(map_key in b.name for b in self.available_bboxes)
 
     def get_map_key(self):
-        version = EarthEngineExporter.make_identifier(
-            self.bbox, str(self.start_widget.value), str(self.end_widget.value)
+        version = self.bbox.get_identifier(
+            str(self.start_widget.value), str(self.end_widget.value)
         )
         map_key = f"{self.model_picker.value}/{version}"
         if self.are_tifs_in_right_spot(map_key):

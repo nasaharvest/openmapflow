@@ -21,9 +21,9 @@ jobs:
     - name: Set up python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8
+        python-version: 3.7
     - name: Install dependencies
-      run: cd .. && pip install -r requirements.txt
+      run: pip install -r requirements.txt
 
     - name: dvc pull data
       env:

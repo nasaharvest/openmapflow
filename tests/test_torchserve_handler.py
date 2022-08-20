@@ -1,6 +1,5 @@
 import contextlib
 import tempfile
-from datetime import datetime
 from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
@@ -14,7 +13,6 @@ except ImportError:
 
 if TORCHSERVE_INSTALLED:
     from docker.torchserve_handler import (
-        Inference,
         download_file,
         get_bucket_name,
         get_path,
@@ -39,23 +37,6 @@ class TestTorchserveHandler(TestCase):
     def setUp(self) -> None:
         if not TORCHSERVE_INSTALLED:
             self.skipTest("Torchserve is not installed")
-
-    def test_start_date_from_str_expected(self):
-        actual_start_date = Inference.start_date_from_str(
-            "98-togo_2019-02-06_2020-02-01"
-        )
-        expected_start_date = datetime(2019, 2, 6, 0, 0)
-        self.assertEqual(actual_start_date, expected_start_date)
-
-    def test_start_date_from_str_none(self):
-        self.assertRaises(ValueError, Inference.start_date_from_str, "98-togo")
-
-    def test_start_date_from_str_more_than_2(self):
-        actual_start_date = Inference.start_date_from_str(
-            "98-togo_2019-02-06_2020-02-01_2019-02-06_2020-02-01"
-        )
-        expected_start_date = datetime(2019, 2, 6, 0, 0)
-        self.assertEqual(actual_start_date, expected_start_date)
 
     def test_get_bucket_name(self):
         self.assertEqual(get_bucket_name("gs://bucket1/path/to/file"), "bucket1")

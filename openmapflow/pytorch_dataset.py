@@ -1,20 +1,15 @@
-import numpy as np
-import pandas as pd
-
-try:
-    import torch
-    from torch import Tensor
-    from torch.utils.data import Dataset
-except ImportError:
-    print("PyTorch must be installed to use the PyTorch dataset.")
-
 from typing import Dict, List, Optional, Tuple, Union, cast
 
-from cropharvest.countries import BBox
+import numpy as np
+import pandas as pd
+import torch
 from dateutil.relativedelta import relativedelta
-from tqdm import tqdm
+from torch import Tensor
+from torch.utils.data import Dataset
 
+from openmapflow.bbox import BBox
 from openmapflow.constants import CLASS_PROB, END, EO_DATA, LAT, LON, MONTHS, START
+from openmapflow.utils import tqdm
 
 IS_POSITIVE_CLASS = "is_positive_class"
 IS_LOCAL = "is_local"

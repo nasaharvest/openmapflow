@@ -9,13 +9,13 @@ from openmapflow.constants import (
     TEMPLATE_DATASETS,
     TEMPLATE_DEPLOY_YML,
     TEMPLATE_EVALUATE,
-    TEMPLATE_GITIGNORE,
     TEMPLATE_README,
     TEMPLATE_REQUIREMENTS,
     TEMPLATE_TEST_YML,
     TEMPLATE_TRAIN,
     VERSION,
 )
+from openmapflow.utils import confirmation
 
 
 def allow_write(p: Union[Path, str], overwrite: bool = False) -> bool:
@@ -72,7 +72,6 @@ def copy_template_files(PROJECT_ROOT: Path, overwrite: bool):
         TEMPLATE_TRAIN,
         TEMPLATE_EVALUATE,
         TEMPLATE_REQUIREMENTS,
-        TEMPLATE_GITIGNORE,
         TEMPLATE_README,
     ]:
         if allow_write(PROJECT_ROOT / p.name, overwrite):
@@ -92,7 +91,6 @@ def fill_in_and_write_action(
     sub_prefix: str,
     sub_paths: str,
     sub_cd: str,
-    sub_requirements: str,
 ):
     """
     Fills in template action and writes to file
@@ -102,14 +100,12 @@ def fill_in_and_write_action(
         sub_prefix: Prefix to add to action name
         sub_paths: Paths to trigger action by
         sub_cd: Command to cd into project root
-        sub_requirements: Location of requirements.txt
     """
     with src_yml_path.open("r") as f:
         content = f.read()
     content = content.replace("<PREFIX>", sub_prefix)
     content = content.replace("<PATHS>", sub_paths)
     content = content.replace("<CD>", sub_cd)
-    content = content.replace("<REQUIREMENTS>", sub_requirements)
 
     dest_yml_path.parent.mkdir(parents=True, exist_ok=True)
     with dest_yml_path.open("w") as f:
@@ -141,7 +137,6 @@ def create_github_actions(
     """
     dest_deploy_yml_path = git_root / f".github/workflows/{PROJECT}-deploy.yaml"
     dest_test_yml_path = git_root / f".github/workflows/{PROJECT}-test.yaml"
-    pip_install = "pip install -r requirements.txt"
     if allow_write(dest_deploy_yml_path, overwrite):
         fill_in_and_write_action(
             src_yml_path=TEMPLATE_DEPLOY_YML,
@@ -149,7 +144,6 @@ def create_github_actions(
             sub_prefix=PROJECT.split("-")[0],
             sub_paths=f"{f'{PROJECT}/' if is_subdir else ''}{dp.MODELS}.dvc",
             sub_cd=PROJECT if is_subdir else ".",
-            sub_requirements=f"cd .. && {pip_install}" if is_subdir else pip_install,
         )
 
     if allow_write(dest_test_yml_path, overwrite):
@@ -159,7 +153,6 @@ def create_github_actions(
             sub_prefix=PROJECT.split("-")[0],
             sub_paths="",
             sub_cd=PROJECT if is_subdir else ".",
-            sub_requirements=f"cd .. && {pip_install}" if is_subdir else pip_install,
         )
 
 
@@ -181,6 +174,10 @@ def setup_dvc(PROJECT_ROOT: Path, is_subdir: bool, dp):
         print(f"  {PROJECT_ROOT}/.dvc already exists. Skipping.")
         return
 
+    if not confirmation("Install dvc for data version control?"):
+        return
+
+    _print_and_run("pip install dvc[gdrive]")
     if is_subdir:
         _print_and_run("dvc init --subdir")
     else:
