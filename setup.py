@@ -39,6 +39,7 @@ setup(
     install_requires=["numpy", "pandas==1.3.5", "pyyaml>=6.0", "requests", "tqdm"],
     extras_require={
         "data": [
+            "cmocean",
             "earthengine-api",
             "geopandas",
             "google-cloud-storage",
@@ -47,6 +48,7 @@ setup(
             "xarray",
         ],
         "all": [
+            "cmocean",
             "earthengine-api",
             "geopandas",
             "google-cloud-storage",
