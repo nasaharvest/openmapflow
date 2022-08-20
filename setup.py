@@ -52,7 +52,7 @@ setup(
             "ipython",
             "rasterio",
             "xarray",
-            "fastcore<1.5.21",
+            "fastcore<1.5.20",
             "tsai",
         ],
     },
