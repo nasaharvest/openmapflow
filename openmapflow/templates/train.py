@@ -4,29 +4,25 @@ Example model training script
 import warnings
 from argparse import ArgumentParser
 
-import matplotlib.pyplot as plt
 import pandas as pd
 import torch
 import yaml
-from cropharvest.bands import BANDS_MAX
 from datasets import datasets
 from sklearn.metrics import (
-    ConfusionMatrixDisplay,
     accuracy_score,
-    confusion_matrix,
     f1_score,
     precision_score,
     recall_score,
     roc_auc_score,
 )
 from torch.utils.data import DataLoader
-from tqdm import tqdm
 from tsai.models.TransformerModel import TransformerModel
 
-from openmapflow.config import PROJECT
+from openmapflow.bands import BANDS_MAX
 from openmapflow.constants import SUBSET
 from openmapflow.pytorch_dataset import PyTorchDataset
 from openmapflow.train_utils import generate_model_name, model_path_from_name
+from openmapflow.utils import tqdm
 
 try:
     import google.colab  # noqa
@@ -46,20 +42,14 @@ parser.add_argument("--batch_size", type=int, default=64)
 parser.add_argument("--upsample_minority_ratio", type=float, default=0.5)
 parser.add_argument("--lr", type=float, default=0.001)
 parser.add_argument("--epochs", type=int, default=10)
-parser.add_argument("--wandb", dest="wandb", action="store_true")
-parser.set_defaults(wandb=False)
 
 args = parser.parse_args().__dict__
 start_month: str = args["start_month"]
 batch_size: int = args["batch_size"]
 upsample_minority_ratio: float = args["upsample_minority_ratio"]
-wandb_enabled: bool = args["wandb"]
 num_epochs: int = args["epochs"]
 lr: int = args["lr"]
 model_name: str = args["model_name"]
-
-if wandb_enabled:
-    import wandb
 
 # ------------ Dataloaders -------------------------------------
 df = pd.concat([d.load_df() for d in tqdm(datasets, desc="Loading datasets")])
@@ -104,21 +94,6 @@ criterion = torch.nn.BCELoss()
 
 if model_name == "":
     model_name = generate_model_name(val_df=val_df, start_month=start_month)
-
-training_config = {
-    "model_name": model_name,
-    "model": model.__class__,
-    "batch_size": batch_size,
-    "num_epochs": num_epochs,
-    "lr": lr,
-    "optimizer": optimizer.__class__.__name__,
-    "loss": criterion.__class__.__name__,
-    **train_data.dataset_info,
-    **val_data.dataset_info,
-}
-
-if wandb_enabled:
-    run = wandb.init(project=PROJECT, config=training_config)
 
 lowest_validation_loss = None
 metrics = {}
@@ -190,26 +165,7 @@ with tqdm(range(num_epochs), desc="Epoch") as tqdm_epoch:
                 "roc_auc": roc_auc_score(y_true, y_score),
             }
             metrics = {k: round(float(v), 4) for k, v in metrics.items()}
-
         tqdm_epoch.set_postfix(loss=val_loss)
-
-        if wandb_enabled:
-            cm = confusion_matrix(y_true, y_pred)
-            ConfusionMatrixDisplay(cm, display_labels=["Negative", "Positive"]).plot()
-            to_log = {
-                "train_loss": train_loss,
-                "val_loss": val_loss,
-                "val_loss_min": lowest_validation_loss,
-                "epoch": epoch,
-                "accuracy": accuracy_score(y_true, y_pred),
-                "f1": f1_score(y_true, y_pred),
-                "precision": precision_score(y_true, y_pred),
-                "recall": recall_score(y_true, y_pred),
-                "roc_auc": roc_auc_score(y_true, y_score),
-                "confusion_matrix": wandb.Image(plt),
-            }
-            wandb.log(to_log)
-            plt.close("all")
 
         # ------------------------ Model saving --------------------------
         if lowest_validation_loss == val_loss:
@@ -223,7 +179,3 @@ with tqdm(range(num_epochs), desc="Epoch") as tqdm_epoch:
 
 print(f"MODEL_NAME={model_name}")
 print(yaml.dump(metrics, allow_unicode=True, default_flow_style=False))
-
-if wandb_enabled and run:
-    run.finish()
-    print(f"Wandb url: {run.url}")

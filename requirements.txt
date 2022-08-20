@@ -1,7 +1,6 @@
--e .
+-e .[all]
 black
 isort
 flake8
-matplotlib
 mypy==0.812
-tsai
+torchserve

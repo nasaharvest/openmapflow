@@ -2,19 +2,23 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 
-from cropharvest.countries import BBox
+from openmapflow.bbox import BBox
 
-from openmapflow.inference_utils import (
-    find_missing_predictions,
-    gdal_cmd,
-    get_available_bboxes,
-    get_available_models,
-    get_ee_task_amount,
-    get_gcs_file_amount,
-    get_gcs_file_dict_and_amount,
-    get_status,
-    make_new_predictions,
-)
+try:
+    from openmapflow.inference_utils import (
+        find_missing_predictions,
+        gdal_cmd,
+        get_available_bboxes,
+        get_available_models,
+        get_gcs_file_amount,
+        get_gcs_file_dict_and_amount,
+        get_status,
+        make_new_predictions,
+    )
+
+    SKIP_TEST = False
+except ImportError:
+    SKIP_TEST = True
 
 
 class MockBlob:
@@ -37,6 +41,10 @@ class TestInferenceUtils(TestCase):
             25.0448,
             name=f"gs://{cls.fake_bucket}/{cls.namibia_bbox_name}",
         )
+
+    def setUp(self) -> None:
+        if SKIP_TEST:
+            self.skipTest("google-cloud-storage is not installed")
 
     @patch("openmapflow.inference_utils.requests")
     def test_get_available_models_200(self, mock_requests):
@@ -98,33 +106,6 @@ class TestInferenceUtils(TestCase):
         mock_storage_client.list_blobs.return_value = [MockBlob(namibia_bbox_name_ints)]
         actual_bbox = get_available_bboxes(buckets_to_check=[self.fake_bucket])[0]
         self.assertEqual(actual_bbox, namibia_expected_bbox)
-
-    @patch("openmapflow.inference_utils.ee")
-    def test_get_ee_task_amount_one(self, mock_ee):
-        mock_ee.data.getTaskList.return_value = [{"state": "READY"}]
-        self.assertEqual(get_ee_task_amount(), 1)
-
-    @patch("openmapflow.inference_utils.ee")
-    def test_get_ee_task_amount_many(self, mock_ee):
-        mock_ee.data.getTaskList.return_value = [
-            {"state": "READY"},
-            {"state": "RUNNING"},
-        ] * 10
-        self.assertEqual(get_ee_task_amount(), 20)
-
-    @patch("openmapflow.inference_utils.ee")
-    def test_get_ee_task_amount_completed(self, mock_ee):
-        mock_ee.data.getTaskList.return_value = [{"state": "COMPLETED"}] * 10
-        self.assertEqual(get_ee_task_amount(), 0)
-
-    @patch("openmapflow.inference_utils.ee")
-    def test_get_ee_task_amount_prefix(self, mock_ee):
-        mock_ee.data.getTaskList.return_value = [
-            {"state": "READY", "description": "special_prefix_suffix_ending"}
-        ] * 10
-        self.assertEqual(get_ee_task_amount(), 10)
-        self.assertEqual(get_ee_task_amount("special_prefix"), 10)
-        self.assertEqual(get_ee_task_amount("other_prefix"), 0)
 
     @patch("openmapflow.inference_utils.storage")
     def test_get_gcs_file_amount(self, mock_storage):
@@ -190,7 +171,7 @@ class TestInferenceUtils(TestCase):
         self.assertEqual(actual_amount, 1)
         self.assertEqual(actual_files_dict["parent1"], ["file1"])
 
-    @patch("openmapflow.inference_utils.ee")
+    @patch("openmapflow.ee_exporter.ee")
     @patch("openmapflow.inference_utils.storage")
     def test_get_status(self, mock_storage, mock_ee):
         mock_storage_client = mock_storage.Client()
@@ -200,7 +181,7 @@ class TestInferenceUtils(TestCase):
         ] * 10
         self.assertEqual(get_status("fake_prefix"), (10, 100, 100))
 
-    @patch("openmapflow.inference_utils.ee")
+    @patch("openmapflow.ee_exporter.ee")
     @patch("openmapflow.inference_utils.storage")
     def test_get_status_special_chars(self, mock_storage, mock_ee):
         mock_storage_client = mock_storage.Client()
@@ -210,7 +191,7 @@ class TestInferenceUtils(TestCase):
         ] * 10
         self.assertEqual(get_status("fake_prefix_lon=10"), (10, 100, 100))
 
-    @patch("openmapflow.inference_utils.ee")
+    @patch("openmapflow.ee_exporter.ee")
     @patch("openmapflow.inference_utils.storage")
     def test_get_status_prefix(self, mock_storage, mock_ee):
         mock_storage_client = mock_storage.Client()

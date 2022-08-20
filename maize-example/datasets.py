@@ -3,11 +3,8 @@ File for storing references to datasets.
 """
 from typing import List
 
-from openmapflow.labeled_dataset import (
-    CustomLabeledDataset,
-    LabeledDataset,
-    create_datasets,
-)
+from openmapflow.labeled_dataset import LabeledDataset, create_datasets
+from openmapflow.labeled_dataset_custom import CustomLabeledDataset
 from openmapflow.raw_labels import RawLabels
 
 datasets: List[LabeledDataset] = [

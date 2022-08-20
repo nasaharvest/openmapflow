@@ -7,14 +7,11 @@ import pandas as pd
 from openmapflow.constants import CLASS_PROB, END, EO_DATA, LAT, LON, START
 
 try:
-    import torch  # noqa: F401
-
-    TORCH_INSTALLED = True
-except ImportError:
-    TORCH_INSTALLED = False
-
-if TORCH_INSTALLED:
     from openmapflow.pytorch_dataset import PyTorchDataset, _upsample_df
+
+    SKIP_TEST = False
+except ImportError:
+    SKIP_TEST = True
 
 tempdir = tempfile.gettempdir()
 
@@ -26,7 +23,7 @@ class TestPyTorchDataset(TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        if not TORCH_INSTALLED:
+        if SKIP_TEST:
             return
 
         cls.tif_values = np.zeros((24, 18))
@@ -43,8 +40,8 @@ class TestPyTorchDataset(TestCase):
         )
 
     def setUp(self) -> None:
-        if not TORCH_INSTALLED:
-            self.skipTest("Torchserve is not installed")
+        if SKIP_TEST:
+            self.skipTest("pytorch is not installed")
 
     def test_df_empty_arg(self):
         df = pd.DataFrame({})
