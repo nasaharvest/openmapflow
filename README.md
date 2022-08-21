@@ -25,9 +25,10 @@ Rapid map creation with machine learning and earth observation data.
 
 [cb]: https://colab.research.google.com/assets/colab-badge.svg
 
+<img src="assets/quick-map3.gif" width=80%/>
+
 **Example projects:** [Cropland](https://github.com/nasaharvest/openmapflow/tree/main/crop-mask-example), [Buildings](https://github.com/nasaharvest/openmapflow/tree/main/buildings-example), [Maize](https://github.com/nasaharvest/openmapflow/tree/main/maize-example)
 
-![3maps-gif](assets/3maps.gif)
 
 * [Tutorial](#tutorial-)
 * [Creating a map from scratch](#creating-a-map-from-scratch)
