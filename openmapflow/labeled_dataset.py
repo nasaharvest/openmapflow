@@ -107,7 +107,9 @@ class LabeledDataset:
             + "\n"
         )
 
-    def load_df(self, skip_to_np: bool = False, check_eo_data: bool = True) -> pd.DataFrame:
+    def load_df(
+        self, skip_to_np: bool = False, check_eo_data: bool = True
+    ) -> pd.DataFrame:
         """Load dataset (labels + earth observation data) as a DataFrame"""
         if not self.df_path.exists():
             print(self.create_dataset())
