@@ -169,6 +169,8 @@ with tqdm(range(num_epochs), desc="Epoch") as tqdm_epoch:
 
         # ------------------------ Model saving --------------------------
         if lowest_validation_loss == val_loss:
+            # Some models in tsai need to be modified to be TorchScriptable
+            # https://github.com/timeseriesAI/tsai/issues/561
             sm = torch.jit.script(model)
             model_path = model_path_from_name(model_name=model_name)
             if model_path.exists():

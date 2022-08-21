@@ -107,13 +107,15 @@ class LabeledDataset:
             + "\n"
         )
 
-    def load_df(self, skip_to_np: bool = False) -> pd.DataFrame:
+    def load_df(
+        self, skip_to_np: bool = False, check_eo_data: bool = True
+    ) -> pd.DataFrame:
         """Load dataset (labels + earth observation data) as a DataFrame"""
         if not self.df_path.exists():
             print(self.create_dataset())
         df = pd.read_csv(self.df_path)
         df = df[clean_df_condition(df)].copy()
-        if df[EO_DATA].isnull().any():
+        if check_eo_data and df[EO_DATA].isnull().any():
             raise ValueError(
                 f"{self.dataset} has missing earth observation data, "
                 + "run openmapflow create-datasets"

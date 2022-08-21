@@ -41,7 +41,7 @@ from openmapflow.ee_exporter import EarthEngineExporter, get_cloud_tif_list
 from openmapflow.engineer import calculate_ndvi, fillna, load_tif, remove_bands
 from openmapflow.labeled_dataset import LabeledDataset, clean_df_condition
 from openmapflow.raw_labels import RawLabels
-from openmapflow.utils import memoized, tqdm
+from openmapflow.utils import tqdm
 
 temp_dir = tempfile.gettempdir()
 
@@ -72,7 +72,6 @@ def _distance_point_from_center(lat_idx: int, lon_idx: int, tif) -> int:
     return x_dist + y_dist
 
 
-@memoized
 def _generate_bbox_from_paths() -> Dict[Path, BBox]:
     cloud_eo_uris = get_cloud_tif_list(BucketNames.LABELED_EO)
     return {
@@ -369,12 +368,13 @@ class CustomLabeledDataset(LabeledDataset):
                     df.at[i, EO_LON] = eo_lon
                     df.at[i, EO_FILE] = eo_file
                     df.at[i, EO_STATUS] = EO_STATUS_COMPLETE
+                return True
 
             with tqdm(
                 total=len(df_with_eo_files),
                 desc="Extracting matched earth observation data",
             ) as pbar:
-                np.vectorize(set_df)(
+                np.vectorize(set_df, otypes="b")(
                     i=df_with_eo_files.index,
                     start=df_with_eo_files[START],
                     eo_paths=df_with_eo_files[MATCHING_EO_FILES],
