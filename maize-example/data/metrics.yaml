@@ -8,3 +8,12 @@ Kenya_maize_2019_February:
     precision: 0.5522
     recall: 0.7551
     roc_auc: 0.953
+maize-test:
+  local_testing_original_size: 449
+  local_testing_positive_class_percentage: 0.0891
+  test_metrics:
+    accuracy: 0.8107
+    f1: 0.4295
+    precision: 0.2936
+    recall: 0.8
+    roc_auc: 0.8713
