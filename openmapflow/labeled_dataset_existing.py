@@ -13,7 +13,6 @@ class ExistingLabeledDataset(LabeledDataset):
     source_code_url: str = ""
     download_url: str = ""
     chunk_size: int = 1024
-    
 
     def __post_init__(self):
         super().__post_init__()
