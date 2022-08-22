@@ -10,6 +10,7 @@ from openmapflow.labeled_dataset import LabeledDataset
 @dataclass
 class ExistingLabeledDataset(LabeledDataset):
 
+    source_code_url: str = ""
     download_url: str = ""
     chunk_size: int = 1024
 
