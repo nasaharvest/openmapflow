@@ -10,6 +10,7 @@ geowiki_landcover_2017 = ExistingLabeledDataset(
     license="CC BY-3.0",
     country="global",
     download_url="https://storage.googleapis.com/harvest-public-assets/openmapflow/datasets/crop/geowiki_landcover_2017.csv",
+    source_code_url="https://github.com/nasaharvest/crop-mask/blob/master/datasets.py",
 )
 
 togo_crop_2019 = ExistingLabeledDataset(
@@ -24,6 +25,17 @@ togo_crop_2019 = ExistingLabeledDataset(
         + "crop maps in data sparse regions. In ACM SIGKDD Conference on Data Mining and "
         + "Knowledge Discovery Workshops, 2020."
     ),
+    source_code_url="https://github.com/nasaharvest/crop-mask/blob/master/datasets.py",
 )
 
-datasets = [geowiki_landcover_2017, togo_crop_2019]
+kenya_crop_2018_2019 = ExistingLabeledDataset(
+    country="Kenya",
+    dataset="Kenya_2018_2019",
+    label_type="binary",
+    license="CC BY-4.0",
+    download_url="https://storage.googleapis.com/harvest-public-assets/openmapflow/datasets/crop/Kenya_2018_2019.csv",
+    source_code_url="https://github.com/nasaharvest/crop-mask/blob/master/datasets.py",
+)
+
+
+datasets = [geowiki_landcover_2017, togo_crop_2019, kenya_crop_2018_2019]
