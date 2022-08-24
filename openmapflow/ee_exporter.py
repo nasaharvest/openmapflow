@@ -8,7 +8,7 @@ from pandas.compat._optional import import_optional_dependency
 from openmapflow.bands import DAYS_PER_TIMESTEP, DYNAMIC_BANDS
 from openmapflow.bbox import BBox
 from openmapflow.constants import END, LAT, LON, START
-from openmapflow.utils import memoized, tqdm
+from openmapflow.utils import tqdm
 
 try:
     import ee
@@ -27,7 +27,6 @@ except ImportError:
     warnings.warn("ee_exporter requires earthengine-api, `pip install earthengine-api`")
 
 
-@memoized
 def get_ee_task_list(key: str = "description") -> List[str]:
     """Gets a list of all active tasks in the EE task list."""
     task_list = ee.data.getTaskList()
@@ -58,7 +57,6 @@ def get_ee_task_amount(prefix: Optional[str] = None):
     return amount
 
 
-@memoized
 def get_cloud_tif_list(dest_bucket: str, prefix: str = "tifs") -> List[str]:
     """Gets a list of all cloud-free TIFs in a bucket."""
     storage = import_optional_dependency("google.cloud.storage")
