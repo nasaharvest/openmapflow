@@ -1,4 +1,4 @@
-version: 0.1.6rc1
+version: 0.1.6rc2
 project: crop-mask-example
 description: OpenMapFlow crop mask example
 gcloud:
