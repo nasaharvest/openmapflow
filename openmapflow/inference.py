@@ -90,9 +90,7 @@ class Inference:
         """Runs inference on a single tif file."""
         if start_date is None:
             start_date = self.start_date_from_str(local_path)
-        x_np, flat_lat, flat_lon = process_test_file(
-            local_path, start_date, num_timesteps=12
-        )
+        x_np, flat_lat, flat_lon = process_test_file(local_path, start_date)
 
         if self.normalizing_dict is not None:
             x_np = (x_np - self.normalizing_dict["mean"]) / self.normalizing_dict["std"]
