@@ -24,14 +24,21 @@ class TestProjectConfig(unittest.TestCase):
         if not path_exists(PROJECT_ROOT / CONFIG_FILE):
             has_issues = True
 
-        if CONFIG_YML["version"] == VERSION:
-            print(f"\u2714 openmapflow.yaml version matches package version: {VERSION}")
-        else:
+        config_yml_version = CONFIG_YML["version"].split(".")
+        package_version = VERSION.split(".") 
+
+        if config_yml_version[0] != package_version[0]:
             has_issues = True
             print(
-                f"\u2716 openmapflow.yaml version: {CONFIG_YML['version']} "
-                + f"does not match package version: {VERSION}"
+                f"\u2716 openmapflow.yaml major version: {CONFIG_YML['version']} "
+                + f"does not match package major version: {VERSION}"
             )
+        elif config_yml_version[1] != package_version[1]:
+            print(f"WARNING: openmapflow.yaml minor version: {CONFIG_YML['version']} does not match package minor version {VERSION}")
+        elif config_yml_version[2] != package_version[2]:
+            print(f"WARNING: openmapflow.yaml patch version: {CONFIG_YML['version']} does not match package patch version {VERSION}")
+        else:
+            print(f"\u2714 openmapflow.yaml version matches package version: {VERSION}")
 
         if not path_exists(Path(dp.RAW_LABELS + ".dvc")):
             has_issues = True
