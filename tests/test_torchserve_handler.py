@@ -12,7 +12,7 @@ except ImportError:
     TORCHSERVE_INSTALLED = False
 
 if TORCHSERVE_INSTALLED:
-    from docker.torchserve_handler import (
+    from openmapflow.torchserve_handler import (
         download_file,
         get_bucket_name,
         get_path,
