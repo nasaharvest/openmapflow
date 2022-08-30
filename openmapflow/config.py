@@ -10,7 +10,7 @@ from openmapflow.constants import (
     DATA_DIR,
     DEFAULT_CONFIG_PATH,
     LIBRARY_DIR,
-    VERSION
+    VERSION,
 )
 
 

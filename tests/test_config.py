@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from openmapflow.config import DataPaths, deploy_env_variables, load_default_config
-from openmapflow.constants import LIBRARY_DIR
+from openmapflow.constants import LIBRARY_DIR, VERSION
 
 
 class TestConfig(TestCase):
@@ -57,6 +57,7 @@ class TestConfig(TestCase):
             + "OPENMAPFLOW_GCLOUD_BUCKET_INFERENCE_EO=openmapflow-inference-eo "
             + "OPENMAPFLOW_GCLOUD_BUCKET_PREDS=openmapflow-preds "
             + "OPENMAPFLOW_GCLOUD_BUCKET_PREDS_MERGED=openmapflow-preds-merged "
-            + "OPENMAPFLOW_DOCKER_TAG=us-central1-docker.pkg.dev//openmapflow/openmapflow"
+            + "OPENMAPFLOW_DOCKER_TAG=us-central1-docker.pkg.dev//openmapflow/openmapflow "
+            + f"OPENMAPFLOW_VERSION={VERSION}"
         )
         self.assertEqual(actual_env_variables, expected_env_variables)

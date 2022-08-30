@@ -25,7 +25,7 @@ class TestProjectConfig(unittest.TestCase):
             has_issues = True
 
         config_yml_version = CONFIG_YML["version"].split(".")
-        package_version = VERSION.split(".") 
+        package_version = VERSION.split(".")
 
         if config_yml_version[0] != package_version[0]:
             has_issues = True
@@ -34,9 +34,15 @@ class TestProjectConfig(unittest.TestCase):
                 + f"does not match package major version: {VERSION}"
             )
         elif config_yml_version[1] != package_version[1]:
-            print(f"WARNING: openmapflow.yaml minor version: {CONFIG_YML['version']} does not match package minor version {VERSION}")
+            print(
+                f"WARNING: openmapflow.yaml minor version: {CONFIG_YML['version']} "
+                + f"does not match package minor version {VERSION}"
+            )
         elif config_yml_version[2] != package_version[2]:
-            print(f"WARNING: openmapflow.yaml patch version: {CONFIG_YML['version']} does not match package patch version {VERSION}")
+            print(
+                f"WARNING: openmapflow.yaml patch version: {CONFIG_YML['version']} "
+                + f"does not match package patch version {VERSION}"
+            )
         else:
             print(f"\u2714 openmapflow.yaml version matches package version: {VERSION}")
 
