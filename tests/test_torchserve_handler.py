@@ -59,19 +59,19 @@ class TestTorchserveHandler(TestCase):
             "file2",
         )
 
-    @patch("docker.torchserve_handler.storage")
+    @patch("openmapflow.torchserve_handler.storage")
     def test_download_file_failure(self, mock_storage):
         self.assertRaises(
             FileExistsError, download_file, "gs://fake-bucket/fake-file.tif"
         )
 
-    @patch("docker.torchserve_handler.storage")
+    @patch("openmapflow.torchserve_handler.storage")
     def test_download_file_default(self, mock_storage):
         with create_and_delete_temp_file("fake-file.tif") as expected_local_path:
             actual_local_path = download_file("gs://fake-bucket/fake-file.tif")
             self.assertEqual(expected_local_path, actual_local_path)
 
-    @patch("docker.torchserve_handler.storage")
+    @patch("openmapflow.torchserve_handler.storage")
     def test_download_file_nested(self, mock_storage):
         with create_and_delete_temp_file("fake-file.tif") as expected_local_path:
             actual_local_path = download_file(
@@ -79,7 +79,7 @@ class TestTorchserveHandler(TestCase):
             )
             self.assertEqual(expected_local_path, actual_local_path)
 
-    @patch("docker.torchserve_handler.storage")
+    @patch("openmapflow.torchserve_handler.storage")
     def test_download_file_gcloud_calls(self, mock_storage):
         bucket = "fake-bucket"
         filename = "fake-file.tif"
@@ -94,7 +94,7 @@ class TestTorchserveHandler(TestCase):
         mock_storage_bucket.blob(filename).exists.assert_called_once()
         mock_storage_bucket.blob(filename).download_to_filename.assert_called_once()
 
-    @patch("docker.torchserve_handler.storage")
+    @patch("openmapflow.torchserve_handler.storage")
     def test_upload_file(self, mock_storage):
         bucket = "fake-bucket"
         filename = "fake-file.tif"
@@ -105,7 +105,7 @@ class TestTorchserveHandler(TestCase):
             )
             self.assertEqual(actual_upload_path, f"gs://{bucket}/{filename}")
 
-    @patch("docker.torchserve_handler.storage")
+    @patch("openmapflow.torchserve_handler.storage")
     def test_upload_file_nested(self, mock_storage):
         bucket = "fake-bucket"
         filename = "fake-file.tif"
@@ -118,7 +118,7 @@ class TestTorchserveHandler(TestCase):
                 actual_upload_path, f"gs://{bucket}/dir1/dir2/dir3/{filename}"
             )
 
-    @patch("docker.torchserve_handler.storage")
+    @patch("openmapflow.torchserve_handler.storage")
     def test_upload_file_gcloud_calls(self, mock_storage):
         bucket = "fake-bucket"
         filename = "fake-file.tif"
