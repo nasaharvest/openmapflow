@@ -78,12 +78,10 @@ class BucketNames:
     PREDS_MERGED = CONFIG_YML["gcloud"]["bucket_preds_merged"]
 
 
-def get_model_names_as_str(most_recent: int = 3) -> str:
+def get_model_names_as_str() -> str:
     """Get the names of the most recent models as a string."""
-    model_files = [p for p in Path(PROJECT_ROOT / DataPaths.MODELS).glob("*.pt")]
-    model_files.sort(key=os.path.getmtime)
-    latest_models = [Path(m).stem for m in model_files[-most_recent:]]
-    return " ".join(latest_models)
+    models = [Path(p).stem for p in Path(PROJECT_ROOT / DataPaths.MODELS).glob("*.pt")]
+    return " ".join(models)
 
 
 def deploy_env_variables(empty_check: bool = True) -> str:
