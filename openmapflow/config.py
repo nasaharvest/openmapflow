@@ -1,4 +1,3 @@
-import os
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Dict
