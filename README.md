@@ -15,7 +15,6 @@
 
 # OpenMapFlow 🌍
 [![CI Status](https://github.com/nasaharvest/openmapflow/actions/workflows/ci.yaml/badge.svg)](https://github.com/nasaharvest/openmapflow/actions/workflows/ci.yaml)
-[![Docker Status](https://github.com/nasaharvest/openmapflow/actions/workflows/docker.yaml/badge.svg)](https://github.com/nasaharvest/openmapflow/actions/workflows/docker.yaml)
 [![tb1]][ta1] [![db1]][da1]
 [![tb2]][ta2] [![db2]][da2]
 [![tb3]][ta3] [![db3]][da3]
