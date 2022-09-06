@@ -17,11 +17,14 @@ env | grep OPENMAPFLOW
 echo "2/8 Ensuring latest models are available for deployment"
 dvc pull "$OPENMAPFLOW_MODELS_DIR".dvc -f
 
-export OPENMAPFLOW_MODELS=$(
-        python -c \
-        "from openmapflow.config import get_model_names_as_str; \
-        print(get_model_names_as_str())"
-)
+if [[ -z "$OPENMAPFLOW_MODELS" ]]; then
+        export OPENMAPFLOW_MODELS=$(
+                python -c \
+                "from openmapflow.config import get_model_names_as_str; \
+                print(get_model_names_as_str())"
+        )
+fi
+
 echo "MODELS: $OPENMAPFLOW_MODELS"
 
 echo "3/8 Enable Google Cloud APIs: Artifact Registry, Cloud Run, Cloud Functions"
