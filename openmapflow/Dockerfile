@@ -1,5 +1,12 @@
 # syntax = docker/dockerfile:experimental
-FROM ivanzvonkov/openmapflow:0.1.6rc3
+FROM pytorch/torchserve:0.5.3-cpu
+USER root
+RUN pip3 install --upgrade pip
+ARG VERSION
+RUN pip install openmapflow[data]==${VERSION}
+RUN cp $(openmapflow dir)/torchserve_handler.py /home/model-server/handler.py
+RUN cp $(openmapflow dir)/scripts/torchserve_start.sh /usr/local/bin/start.sh
+RUN chmod 777 /usr/local/bin/start.sh
 
 # Ensures that everytime models.dvc is updated
 # This following docker steps are rerun

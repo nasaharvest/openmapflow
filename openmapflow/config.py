@@ -9,6 +9,7 @@ from openmapflow.constants import (
     DATA_DIR,
     DEFAULT_CONFIG_PATH,
     LIBRARY_DIR,
+    VERSION,
 )
 
 
@@ -96,6 +97,7 @@ def deploy_env_variables(empty_check: bool = True) -> str:
         "GCLOUD_BUCKET_PREDS": BucketNames.PREDS,
         "GCLOUD_BUCKET_PREDS_MERGED": BucketNames.PREDS_MERGED,
         "DOCKER_TAG": DOCKER_TAG,
+        "VERSION": VERSION,
     }
     if empty_check:
         for k, v in deploy_env_dict.items():

@@ -63,6 +63,7 @@ docker build . \
         --build-arg MODELS="$OPENMAPFLOW_MODELS" \
         --build-arg MODELS_DIR="$OPENMAPFLOW_MODELS_DIR" \
         --build-arg DEST_BUCKET="$OPENMAPFLOW_GCLOUD_BUCKET_PREDS" \
+        --build-arg VERSION="$OPENMAPFLOW_VERSION" \
         -t "$OPENMAPFLOW_DOCKER_TAG"
 
 docker push "$OPENMAPFLOW_DOCKER_TAG"

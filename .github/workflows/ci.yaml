@@ -30,7 +30,6 @@ jobs:
     - name: mypy
       run: |
         python -m mypy openmapflow
-        python -m mypy docker
         python -m mypy tests
         python -m mypy buildings-example/*.py
         python -m mypy crop-mask-example/*.py
