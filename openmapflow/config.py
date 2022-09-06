@@ -78,7 +78,7 @@ class BucketNames:
 
 
 def get_model_names_as_str() -> str:
-    """Get the names of the most recent models as a string."""
+    """Get the names of all models as a string."""
     models = [Path(p).stem for p in Path(PROJECT_ROOT / DataPaths.MODELS).glob("*.pt")]
     return " ".join(models)
 
