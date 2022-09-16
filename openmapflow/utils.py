@@ -2,7 +2,7 @@ import collections
 import functools
 import os
 from datetime import date
-from typing import Union
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -89,3 +89,10 @@ class memoized(object):
     def __get__(self, obj, objtype):
         """Support instance methods."""
         return functools.partial(self.__call__, obj)
+
+
+def str_to_np(x: str) -> Optional[np.ndarray]:
+    try:
+        return np.array(eval(x))
+    except TypeError:
+        return None

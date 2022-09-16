@@ -33,7 +33,7 @@ class IntegrationTestLabeledData(TestCase):
             raise unittest.SkipTest("No datasets found. Skipping all tests.")
 
         for d in datasets:
-            df = d.load_df()
+            df = d.load_df(to_np=True)
             df["name"] = d.name
             dfs.append(df)
         cls.dfs = pd.concat(dfs)
