@@ -9,6 +9,9 @@ from pandas.compat._optional import import_optional_dependency
 def train_val_test_split(
     index: pd.RangeIndex, val: float = 0.0, test: float = 0.0
 ) -> pd.DataFrame:
+    """Splits a series into train, val and test"""
+    if val + test > 1:
+        raise ValueError("val and test cannot be greater than 1")
     random_float = np.random.rand(len(index))
     subset_col = pd.Series(index=index, data="testing")
     subset_col[(val + test) <= random_float] = "training"
@@ -17,6 +20,7 @@ def train_val_test_split(
 
 
 def read_zip(file_path: Path) -> pd.DataFrame:
+    """Reads in a zip file and returns a dataframe"""
     gpd = import_optional_dependency("geopandas")
     fiona = import_optional_dependency("fiona")
     try:
@@ -28,7 +32,8 @@ def read_zip(file_path: Path) -> pd.DataFrame:
 
 
 def get_lat_lon_from_centroid(geometry: pd.Series, src_crs: int = 4326):
-    if (geometry == None).any():
+    """Gets the lat lon from the centroid of a geometry series"""
+    if (geometry == None).any():  # noqa
         raise ValueError("Geometry column cannot contain null values")
     x = geometry.centroid.x.values
     y = geometry.centroid.y.values
@@ -39,6 +44,7 @@ def get_lat_lon_from_centroid(geometry: pd.Series, src_crs: int = 4326):
 
 
 def sample_lat_lon_from_gdf(df: pd.DataFrame):
+    """TODO: test"""
     gpd = import_optional_dependency("geopandas")
     df["samples"] = (df.geometry.area / 0.001).astype(int)
 

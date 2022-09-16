@@ -57,6 +57,6 @@ def get_x_y(
     i = MONTHS.index(start_month)
 
     def to_numpy(x):
-        return np.array(eval(x))[i : i + input_months, :]
+        return np.array(eval(x))[i : i + input_months, :]  # noqa
 
     return df[EO_DATA].progress_apply(to_numpy).to_list(), df[label_col].to_list()

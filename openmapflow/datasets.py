@@ -1,8 +1,11 @@
 import pandas as pd
 
+from openmapflow.constants import CLASS_PROB
 from openmapflow.labeled_dataset import LabeledDataset
 
 gcloud_url = "https://storage.googleapis.com/harvest-public-assets/openmapflow/datasets"
+
+label_col = CLASS_PROB
 
 
 class GeowikiLandcover2017(LabeledDataset):
