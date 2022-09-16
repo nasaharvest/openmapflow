@@ -36,7 +36,7 @@ from openmapflow.constants import (
 )
 from openmapflow.ee_exporter import EarthEngineExporter, get_cloud_tif_list
 from openmapflow.engineer import calculate_ndvi, fillna, load_tif, remove_bands
-from openmapflow.utils import tqdm
+from openmapflow.utils import tqdm, str_to_np
 
 SEED = 42
 temp_dir = tempfile.gettempdir()
@@ -251,6 +251,9 @@ def verify_df(df: pd.DataFrame) -> pd.DataFrame:
     def column_values_are_in(col: str, values: List[str]) -> bool:
         return check(df[col].isin(values).all(), f"{col} values are in {values}")
 
+    if not check(isinstance(df, pd.DataFrame), "load_labels() returns a DataFrame"):
+        return False
+
     lat_col_checks = False
     if column_exists(LAT):
         if column_has_no_NaNs(LAT):
@@ -355,7 +358,7 @@ class LabeledDataset:
             df.to_csv(self.df_path, index=False)
         return df
 
-    def load_df(self, check_eo_data: bool = True) -> pd.DataFrame:
+    def load_df(self, check_eo_data: bool = True, to_np: bool = False) -> pd.DataFrame:
         """Load dataset (labels + earth observation data) as a DataFrame"""
         if not self.df_path.exists():
             print(self.create_dataset())
@@ -366,6 +369,8 @@ class LabeledDataset:
                 f"{self.name} has missing earth observation data, "
                 + "run openmapflow create-datasets"
             )
+        if not to_np:
+            df[EO_DATA] = df[EO_DATA].progress_apply(str_to_np)
         return df
 
     def verify_and_standardize_df(self, df: pd.DataFrame) -> pd.DataFrame:
