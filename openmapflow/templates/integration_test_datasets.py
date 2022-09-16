@@ -38,7 +38,7 @@ class IntegrationTestLabeledData(TestCase):
             dfs.append(df)
         cls.dfs = pd.concat(dfs)
 
-    def test_raw_label_conversion():
+    def test_raw_label_conversion(self):
         for d in datasets:
             print(d.name)
             verify_df(d.load_labels())
