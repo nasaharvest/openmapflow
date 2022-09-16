@@ -2,7 +2,7 @@ import collections
 import functools
 import os
 from datetime import date
-from typing import Optional, Union
+from typing import Union
 
 import numpy as np
 import pandas as pd
