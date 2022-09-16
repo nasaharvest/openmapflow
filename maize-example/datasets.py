@@ -57,8 +57,7 @@ class RefAfricanCropsKenya01Labels(LabeledDataset):
         df2 = gpd.read_file(raw_dir / rack01 / f"{rack01}_01/labels.geojson")
         df3 = gpd.read_file(raw_dir / rack01 / f"{rack01}_02/labels.geojson")
         df = pd.concat([df1, df2, df3])
-        df[LAT] = df["Latitude"]
-        df[LON] = df["Longitude"]
+        df.rename(columns={"Latitude": LAT, "Longitude": LON}, inplace=True)
         df[START] = np.vectorize(to_date)(df["Planting Date"])
         df[START] = np.vectorize(lambda d: d.replace(month=1, day=1))(df[START])
         df[END] = np.vectorize(lambda d: d.replace(year=d.year + 1, month=12, day=31))(

@@ -17,8 +17,7 @@ raw_dir = PROJECT_ROOT / DataPaths.RAW_LABELS
 class UgandaBuildings2020(LabeledDataset):
     def load_labels(self):
         df = pd.read_csv(raw_dir / "Uganda_177_buildings_confidence_0.9.csv")
-        df[LAT] = df["latitude"]
-        df[LON] = df["longitude"]
+        df.rename(columns={"latitude": LAT, "longitude": LON}, inplace=True)
         df[START] = date(2020, 1, 1)
         df[END] = date(2021, 12, 31)
         df["is_building"] = 1.0
@@ -37,8 +36,7 @@ class GeowikiLandcover2017(LabeledDataset):
     def load_labels(self):
         df = pd.read_csv(raw_dir / "loc_all_2.txt", sep="\t")
         df = df[(df.sumcrop / 100) > 0.5].copy()
-        df[LAT] = df["loc_cent_Y"]
-        df[LON] = df["loc_cent_X"]
+        df.rename(columns={"loc_cent_Y": LAT, "loc_cent_X": LON}, inplace=True)
         df[START] = date(2017, 1, 1)
         df[END] = date(2018, 12, 31)
         df["is_building"] = 0.0
