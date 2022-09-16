@@ -42,7 +42,6 @@ class TestCLI(TestCase):
         self.assertIn("labeled_dataset.py", output)
         self.assertIn("notebooks", output)
         self.assertIn("pytorch_dataset.py", output)
-        self.assertIn("raw_labels.py", output)
         self.assertIn("scripts", output)
         self.assertIn("templates", output)
         self.assertIn("train_utils.py", output)
