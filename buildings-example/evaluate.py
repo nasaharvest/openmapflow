@@ -19,7 +19,7 @@ from torch.utils.data import DataLoader
 from openmapflow.config import PROJECT_ROOT, DataPaths
 from openmapflow.constants import SUBSET
 from openmapflow.pytorch_dataset import PyTorchDataset
-from openmapflow.train_utils import model_path_from_name, get_x_y
+from openmapflow.train_utils import get_x_y, model_path_from_name
 from openmapflow.utils import tqdm
 
 # ------------ Arguments -------------------------------------

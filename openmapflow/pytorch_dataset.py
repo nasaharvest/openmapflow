@@ -16,7 +16,7 @@ class PyTorchDataset(Dataset):
     def __len__(self) -> int:
         return len(self.y)
 
-    def __getitem__(self, index: int) -> Tuple[Tensor, Tensor, Tensor]:
+    def __getitem__(self, index: int) -> Tuple[Tensor, Tensor]:
         x_tensor = torch.from_numpy(self.x[index]).float()
         y_tensor = torch.tensor(int(self.y[index])).float()
         return x_tensor, y_tensor

@@ -1,19 +1,19 @@
 """
 File for storing references to datasets.
 """
-from typing import List
-
 from datetime import date
+from typing import List
 
 import pandas as pd
 
-from openmapflow.constants import CLASS_PROB, LAT, LON, START, END, COUNTRY, SUBSET
 from openmapflow.config import PROJECT_ROOT, DataPaths
+from openmapflow.constants import CLASS_PROB, COUNTRY, END, LAT, LON, START, SUBSET
 from openmapflow.datasets import GeowikiLandcover2017
-from openmapflow.labeled_dataset import LabeledDataset, create_datasets
 from openmapflow.label_utils import train_val_test_split
+from openmapflow.labeled_dataset import LabeledDataset, create_datasets
 
 label_col = CLASS_PROB
+
 
 # -----------------------------------------------------------------------------
 # Example custom dataset to be used as reference
