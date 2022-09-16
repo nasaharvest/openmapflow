@@ -214,8 +214,7 @@ class TestGenerate(TestCase):
                             "env": {
                                 "GDRIVE_CREDENTIALS_DATA": "${{ secrets.GDRIVE_CREDENTIALS_DATA }}"
                             },
-                            "run": "dvc pull $(openmapflow datapath DATASETS) -f"
-                            + "\ndvc pull $(openmapflow datapath MODELS) -f\n",
+                            "run": "dvc pull -f",
                         },
                         {
                             "name": "Integration test - Project",

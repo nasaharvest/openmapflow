@@ -91,8 +91,5 @@ class memoized(object):
         return functools.partial(self.__call__, obj)
 
 
-def str_to_np(x: str) -> Optional[np.ndarray]:
-    try:
-        return np.array(eval(x))
-    except TypeError:
-        return None
+def str_to_np(x: str) -> np.ndarray:
+    return np.array(eval(x))
