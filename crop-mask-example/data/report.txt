@@ -5,7 +5,6 @@ GeowikiLandcover2017 (Timesteps: 24)
 eo_data_complete          34270
 eo_data_export_failed       841
 eo_data_missing_values      379
-eo_data_skipped             376
 ✔ training amount: 34270, positive class: 21.2%
 
 
@@ -13,7 +12,6 @@ eo_data_skipped             376
 TogoCrop2019 (Timesteps: 24)
 ----------------------------------------------------------------------------
 eo_data_complete          1577
-eo_data_skipped             45
 eo_data_export_failed        5
 eo_data_missing_values       3
 eo_data_duplicate            1

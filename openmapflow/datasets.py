@@ -11,13 +11,17 @@ label_col = CLASS_PROB
 class GeowikiLandcover2017(LabeledDataset):
     def load_labels(self):
         # Source: https://github.com/nasaharvest/crop-mask/blob/master/datasets.py
-        return pd.read_csv(f"{gcloud_url}/crop/geowiki_landcover_2017.csv")
+        df = pd.read_csv(f"{gcloud_url}/crop/geowiki_landcover_2017.csv")
+        df = df[df[label_col] != 0.5].copy()
+        return df
 
 
 class TogoCrop2019(LabeledDataset):
     def load_labels(self):
         # Source: https://github.com/nasaharvest/crop-mask/blob/master/datasets.py
-        return pd.read_csv(f"{gcloud_url}/crop/Togo_2019.csv")
+        df = pd.read_csv(f"{gcloud_url}/crop/Togo_2019.csv")
+        df = df[df[label_col] != 0.5].copy()
+        return df
 
 
 class KenyaCrop201819(LabeledDataset):
