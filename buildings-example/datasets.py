@@ -12,6 +12,7 @@ from openmapflow.label_utils import train_val_test_split
 from openmapflow.labeled_dataset import LabeledDataset, create_datasets
 
 raw_dir = PROJECT_ROOT / DataPaths.RAW_LABELS
+label_col = "is_building"
 
 
 class UgandaBuildings2020(LabeledDataset):
@@ -20,7 +21,7 @@ class UgandaBuildings2020(LabeledDataset):
         df.rename(columns={"latitude": LAT, "longitude": LON}, inplace=True)
         df[START] = date(2020, 1, 1)
         df[END] = date(2021, 12, 31)
-        df["is_building"] = 1.0
+        df[label_col] = 1.0
         df[SUBSET] = train_val_test_split(index=df.index, val=0.1, test=0.1)
         return df
 
@@ -28,7 +29,7 @@ class UgandaBuildings2020(LabeledDataset):
 class UgandaParks2020(LabeledDataset):
     def load_labels(self):
         df = pd.read_csv(raw_dir / "Uganda_parks_2020.csv")
-        df["is_building"] = 0.0
+        df[label_col] = 0.0
         return df
 
 
@@ -39,7 +40,7 @@ class GeowikiLandcover2017(LabeledDataset):
         df.rename(columns={"loc_cent_Y": LAT, "loc_cent_X": LON}, inplace=True)
         df[START] = date(2017, 1, 1)
         df[END] = date(2018, 12, 31)
-        df["is_building"] = 0.0
+        df[label_col] = 0.0
         df[SUBSET] = train_val_test_split(index=df.index, val=0.05, test=0.05)
         return df
 
