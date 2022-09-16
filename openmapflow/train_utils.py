@@ -6,7 +6,7 @@ import pandas as pd
 
 from openmapflow.config import PROJECT, PROJECT_ROOT, DataPaths
 from openmapflow.constants import COUNTRY, EO_DATA, MONTHS, START
-from openmapflow.utils import to_date, str_to_np
+from openmapflow.utils import str_to_np, to_date, tqdm
 
 
 def generate_model_name(val_df: pd.DataFrame, start_month: str) -> str:
@@ -59,4 +59,5 @@ def get_x_y(
     def to_numpy(x: str):
         return str_to_np(x)[i : i + input_months, :]  # noqa
 
+    tqdm.pandas()
     return df[EO_DATA].progress_apply(to_numpy).to_list(), df[label_col].to_list()

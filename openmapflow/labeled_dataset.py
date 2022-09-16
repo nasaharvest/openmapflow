@@ -36,7 +36,7 @@ from openmapflow.constants import (
 )
 from openmapflow.ee_exporter import EarthEngineExporter, get_cloud_tif_list
 from openmapflow.engineer import calculate_ndvi, fillna, load_tif, remove_bands
-from openmapflow.utils import tqdm, str_to_np
+from openmapflow.utils import str_to_np, tqdm
 
 SEED = 42
 temp_dir = tempfile.gettempdir()
@@ -369,7 +369,8 @@ class LabeledDataset:
                 f"{self.name} has missing earth observation data, "
                 + "run openmapflow create-datasets"
             )
-        if not to_np:
+        if to_np:
+            tqdm.pandas()
             df[EO_DATA] = df[EO_DATA].progress_apply(str_to_np)
         return df
 
