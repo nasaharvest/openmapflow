@@ -17,7 +17,7 @@ from openmapflow.constants import (
     START,
     SUBSET,
 )
-from openmapflow.labeled_dataset import get_label_timesteps
+from openmapflow.labeled_dataset import get_label_timesteps, verify_df
 
 
 class IntegrationTestLabeledData(TestCase):
@@ -37,6 +37,11 @@ class IntegrationTestLabeledData(TestCase):
             df["name"] = d.dataset
             dfs.append(df)
         cls.dfs = pd.concat(dfs)
+
+    def test_raw_label_conversion():
+        for d in datasets:
+            print(d.name)
+            verify_df(d.load_labels())
 
     def test_dataset_subset_amounts(self):
         all_subsets_correct_size = True
