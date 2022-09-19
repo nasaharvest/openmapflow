@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from openmapflow.config import PROJECT, PROJECT_ROOT, DataPaths
-from openmapflow.constants import COUNTRY, EO_DATA, MONTHS, START, CLASS_PROB
+from openmapflow.constants import CLASS_PROB, COUNTRY, EO_DATA, MONTHS, START
 from openmapflow.utils import str_to_np, to_date, tqdm
 
 
