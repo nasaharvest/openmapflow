@@ -127,13 +127,13 @@ gsutil mb -l <YOUR_OPENMAPFLOW_YAML_GCLOUD_LOCATION> gs://<YOUR_OPENMAPFLOW_YAML
 
 Add reference to already existing dataset in your datasets.py:
 ```python
-from openmapflow.datasets import geowiki_landcover_2017, togo_crop_2019
+from openmapflow.datasets import GeowikiLandcover2017, TogoCrop2019
 
-datasets = [geowiki_landcover_2017, togo_crop_2019]
+datasets = [GeowikiLandcover2017(), TogoCrop2019()]
 ```
 Download and push datasets
 ```bash
-openmapflow create-dataset  # Download datasets
+openmapflow create-datasets # Download datasets
 dvc commit && dvc push      # Push data to version control
 
 git add .
@@ -150,37 +150,41 @@ Data can be added by either following the below documentation OR running the abo
 - [ ] [EarthEngine account](https://earthengine.google.com/signup) - for accessing Earth Engine and pulling satellite data
 - [ ] Raw labels - a file (csv/shp/zip/txt) containing a list of labels and their coordinates (latitude, longitude)
 
-Move raw labels into project:
-```bash
-export RAW_LABEL_DIR=$(openmapflow datapath RAW_LABELS)
-mkdir RAW_LABEL_DIR/<my dataset name>
-cp -r <path to my raw data files> RAW_LABEL_DIR/<my dataset name>
-```
-Add reference to data using a `CustomLabeledDataset` object in datasets.py, example:
+1. Move raw label files into project's data/raw_labels folder
+2. Convert raw labels to standardized dataframe using the `LabeledDataset` class in datasets.py, example:
 ```python
-datasets = [
-    CustomLabeledDataset(
-        dataset="example_dataset",
-        country="Togo",
-        raw_labels=(
-            RawLabels(
-                filename="Togo_2019.csv",
-                longitude_col="longitude",
-                latitude_col="latitude",
-                class_prob=lambda df: df["crop"],
-                start_year=2019,
-            ),
-        ),
-    ),
-    ...
-]
+label_col = "is_crop"
+
+class TogoCrop2019(LabeledDataset):
+    def load_labels(self) -> pd.DataFrame:
+        # Read in raw label file
+        df = pd.read_csv(PROJECT_ROOT / DataPaths.RAW_LABELS / "Togo_2019.csv")
+
+        # Rename coordinate columns to be used for getting Earth observation data
+        df.rename(columns={"latitude": LAT, "longitude": LON}, inplace=True)
+
+        # Set start and end date for Earth observation data
+        df[START], df[END] = date(2019, 1, 1), date(2020, 12, 31)
+
+        # Set consistent label column
+        df[label_col] = df["crop"].astype(float)
+
+        # Split labels into train, validation, and test sets
+        df[SUBSET] = train_val_test_split(index=df.index, val=0.2, test=0.2)
+
+        # Set country column for later analysis
+        df[COUNTRY] = "Togo"
+
+        return df
+
+datasets: List[LabeledDataset] = [TogoCrop2019(), ...]
 ```
 Run dataset creation:
 ```bash
 earthengine authenticate    # For getting new earth observation data
 gcloud auth login           # For getting cached earth observation data
 
-openmapflow create-dataset  # Initiatiates or checks progress of dataset creation
+openmapflow create-datasets # Initiatiates or checks progress of dataset creation
 
 dvc commit && dvc push      # Push new data to data version control
 
@@ -230,8 +234,8 @@ Only available through above Colab notebook. Cloud Architecture must be deployed
 
 # Accessing existing datasets
 ```python
-from openmapflow.datasets import togo_crop_2019
-df = togo_crop_2019.load_df()
+from openmapflow.datasets import TogoCrop2019
+df = TogoCrop2019().load_df(to_np=True)
 x = togo_crop_2019.iloc[0]["eo_data"]
 y = togo_crop_2019.iloc[0]["class_prob"]
 ```

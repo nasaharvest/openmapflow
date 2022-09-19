@@ -29,9 +29,7 @@ jobs:
       env:
         # https://dvc.org/doc/user-guide/setup-google-drive-remote#authorization
         GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
-      run: |
-        dvc pull $(openmapflow datapath DATASETS) -f
-        dvc pull $(openmapflow datapath MODELS) -f
+      run: dvc pull -f
 
     - name: Integration test - Project
       run: |
