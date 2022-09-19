@@ -9,7 +9,7 @@ from openmapflow.train_utils import generate_model_name, get_x_y, upsample_df
 
 class TestTrainUtils(TestCase):
 
-    tif_values: np.ndarray
+    tif_values: str
     df: pd.DataFrame
 
     @classmethod
