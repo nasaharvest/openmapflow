@@ -236,6 +236,6 @@ Only available through above Colab notebook. Cloud Architecture must be deployed
 ```python
 from openmapflow.datasets import TogoCrop2019
 df = TogoCrop2019().load_df(to_np=True)
-x = togo_crop_2019.iloc[0]["eo_data"]
-y = togo_crop_2019.iloc[0]["class_prob"]
+x = df.iloc[0]["eo_data"]
+y = df.iloc[0]["class_prob"]
 ```
