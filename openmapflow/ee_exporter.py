@@ -72,7 +72,8 @@ def get_cloud_tif_list(
         ]
     except Exception as e:
         raise Exception(
-            f"{e}\nPlease create the Google Cloud bucket: {dest_bucket} \nCommand: gsutil mb -l {region} gs://{dest_bucket}"
+            f"{e}\nPlease create the Google Cloud bucket: {dest_bucket}"
+            + f"\nCommand: gsutil mb -l {region} gs://{dest_bucket}"
         )
 
     return tif_list
