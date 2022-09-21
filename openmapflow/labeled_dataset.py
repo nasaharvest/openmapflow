@@ -12,7 +12,7 @@ from dateutil.relativedelta import relativedelta
 from pandas.compat._optional import import_optional_dependency
 
 from openmapflow.bbox import BBox
-from openmapflow.config import PROJECT_ROOT, BucketNames, GCLOUD_LOCATION
+from openmapflow.config import GCLOUD_LOCATION, PROJECT_ROOT, BucketNames
 from openmapflow.config import DataPaths as dp
 from openmapflow.constants import (
     CLASS_PROB,
