@@ -7,7 +7,7 @@ from argparse import ArgumentParser
 import pandas as pd
 import torch
 import yaml
-from datasets import datasets
+from datasets import datasets, label_col
 from sklearn.metrics import (
     accuracy_score,
     f1_score,
@@ -16,13 +16,18 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 from torch.utils.data import DataLoader
-from tqdm import tqdm
 from tsai.models.TransformerModel import TransformerModel
 
 from openmapflow.bands import BANDS_MAX
 from openmapflow.constants import SUBSET
 from openmapflow.pytorch_dataset import PyTorchDataset
-from openmapflow.train_utils import generate_model_name, model_path_from_name
+from openmapflow.train_utils import (
+    generate_model_name,
+    get_x_y,
+    model_path_from_name,
+    upsample_df,
+)
+from openmapflow.utils import tqdm
 
 try:
     import google.colab  # noqa
@@ -38,6 +43,7 @@ warnings.simplefilter("ignore", UserWarning)  # TorchScript throws excessive war
 parser = ArgumentParser()
 parser.add_argument("--model_name", type=str, default="")
 parser.add_argument("--start_month", type=str, default="February")
+parser.add_argument("--input_months", type=int, default=12)
 parser.add_argument("--batch_size", type=int, default=64)
 parser.add_argument("--upsample_minority_ratio", type=float, default=0.5)
 parser.add_argument("--lr", type=float, default=0.001)
@@ -50,18 +56,18 @@ upsample_minority_ratio: float = args["upsample_minority_ratio"]
 num_epochs: int = args["epochs"]
 lr: int = args["lr"]
 model_name: str = args["model_name"]
-
+input_months: int = args["input_months"]
 # ------------ Dataloaders -------------------------------------
-df = pd.concat([d.load_df() for d in tqdm(datasets, desc="Loading datasets")])
-train_df = df[df[SUBSET] == "training"].copy()
-val_df = df[df[SUBSET] == "validation"].copy()
-train_data = PyTorchDataset(
-    df=train_df,
-    start_month=start_month,
-    subset="training",
-    upsample_minority_ratio=upsample_minority_ratio,
-)
-val_data = PyTorchDataset(df=val_df, start_month=start_month, subset="validation")
+df = pd.concat([d.load_df() for d in datasets])
+train_df = df[df[SUBSET] == "training"]
+train_df = upsample_df(train_df, label_col, upsample_minority_ratio)
+val_df = df[df[SUBSET] == "validation"]
+x_train, y_train = get_x_y(train_df, label_col, start_month, input_months)
+x_val, y_val = get_x_y(val_df, label_col, start_month, input_months)
+
+# Convert to tensors
+train_data = PyTorchDataset(x=x_train, y=y_train)
+val_data = PyTorchDataset(x=x_val, y=y_val)
 train_dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
 val_dataloader = DataLoader(val_data, batch_size=batch_size, shuffle=False)
 
@@ -169,6 +175,8 @@ with tqdm(range(num_epochs), desc="Epoch") as tqdm_epoch:
 
         # ------------------------ Model saving --------------------------
         if lowest_validation_loss == val_loss:
+            # Some models in tsai need to be modified to be TorchScriptable
+            # https://github.com/timeseriesAI/tsai/issues/561
             sm = torch.jit.script(model)
             model_path = model_path_from_name(model_name=model_name)
             if model_path.exists():

@@ -89,3 +89,7 @@ class memoized(object):
     def __get__(self, obj, objtype):
         """Support instance methods."""
         return functools.partial(self.__call__, obj)
+
+
+def str_to_np(x: str) -> np.ndarray:
+    return np.array(eval(x))

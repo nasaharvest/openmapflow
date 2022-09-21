@@ -156,6 +156,10 @@ class EarthEngineExporter:
         ):
             return True
 
+        # Check if task is already started in EarthEngine
+        if not test and description in self.ee_task_list:
+            return True
+
         if len(self.ee_task_list) >= 3000:
             return False
 

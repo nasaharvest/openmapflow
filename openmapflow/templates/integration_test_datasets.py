@@ -17,7 +17,7 @@ from openmapflow.constants import (
     START,
     SUBSET,
 )
-from openmapflow.labeled_dataset import get_label_timesteps
+from openmapflow.labeled_dataset import get_label_timesteps, verify_df
 
 
 class IntegrationTestLabeledData(TestCase):
@@ -33,16 +33,21 @@ class IntegrationTestLabeledData(TestCase):
             raise unittest.SkipTest("No datasets found. Skipping all tests.")
 
         for d in datasets:
-            df = d.load_df()
-            df["name"] = d.dataset
+            df = d.load_df(to_np=True)
+            df["name"] = d.name
             dfs.append(df)
         cls.dfs = pd.concat(dfs)
+
+    def test_raw_label_conversion(self):
+        for d in datasets:
+            print(d.name)
+            verify_df(d.load_labels())
 
     def test_dataset_subset_amounts(self):
         all_subsets_correct_size = True
 
         for d in datasets:
-            df = self.dfs[self.dfs["name"] == d.dataset]
+            df = self.dfs[self.dfs["name"] == d.name]
             label_subset_counts = df[SUBSET].value_counts()
             eo_data_subset_counts = df[df[EO_DATA].notnull()][SUBSET].value_counts()
             for subset in df[SUBSET].unique():
@@ -76,7 +81,7 @@ class IntegrationTestLabeledData(TestCase):
     def test_label_and_eo_data_ranges_match(self):
         all_label_and_eo_data_ranges_match = True
         for d in datasets:
-            df = self.dfs[self.dfs["name"] == d.dataset]
+            df = self.dfs[self.dfs["name"] == d.name]
             label_month_amount = get_label_timesteps(df)
             eo_data_month_amount = df[EO_DATA].apply(lambda f: f.shape[0])
 
@@ -91,7 +96,7 @@ class IntegrationTestLabeledData(TestCase):
             label_ranges = label_month_amount.value_counts().to_dict()
             eo_data_ranges = eo_data_month_amount.value_counts().to_dict()
             print(
-                f"{mark} {d.dataset} label {label_ranges} and "
+                f"{mark} {d.name} label {label_ranges} and "
                 + f"eo_data {eo_data_ranges} ranges {last_word}"
             )
         self.assertTrue(
@@ -109,7 +114,7 @@ class IntegrationTestLabeledData(TestCase):
         all_older_eo_data_has_24_months = True
 
         for d in datasets:
-            df = self.dfs[self.dfs["name"] == d.dataset]
+            df = self.dfs[self.dfs["name"] == d.name]
             cutoff = pd.to_datetime(df[START]) < two_years_before_cutoff
             df = df[cutoff].copy()
             if len(df) == 0:
@@ -123,7 +128,7 @@ class IntegrationTestLabeledData(TestCase):
             else:
                 all_older_eo_data_has_24_months = False
                 mark = "\u2716"
-            print(f"{mark} {d.dataset} \t\t{month_amount.tolist()}")
+            print(f"{mark} {d.name} \t\t{month_amount.tolist()}")
 
         self.assertTrue(
             all_older_eo_data_has_24_months,
@@ -133,10 +138,10 @@ class IntegrationTestLabeledData(TestCase):
     def test_label_eo_data_for_closeness(self):
         total_num_mismatched = 0
         for d in datasets:
-            df = self.dfs[self.dfs["name"] == d.dataset]
+            df = self.dfs[self.dfs["name"] == d.name]
 
             if len(df) == 0:
-                print(f"\\ {d.dataset}:\t\tNo data")
+                print(f"\\ {d.name}:\t\tNo data")
                 continue
 
             label_tif_mismatch = df[
@@ -147,7 +152,7 @@ class IntegrationTestLabeledData(TestCase):
                 mark = "\u2716"
             else:
                 mark = "\u2714"
-            print(f"{mark} {d.dataset}:\t\tMismatches: {num_mismatched}")
+            print(f"{mark} {d.name}:\t\tMismatches: {num_mismatched}")
             total_num_mismatched += num_mismatched
         self.assertTrue(
             total_num_mismatched == 0,
