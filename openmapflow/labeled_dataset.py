@@ -39,6 +39,8 @@ from openmapflow.engineer import calculate_ndvi, fillna, load_tif, remove_bands
 from openmapflow.utils import str_to_np, tqdm
 
 SEED = 42
+np.random.seed(SEED)
+random.seed(SEED)
 temp_dir = tempfile.gettempdir()
 
 
@@ -323,8 +325,6 @@ class LabeledDataset:
     """
 
     def __post_init__(self):
-        np.random.seed(SEED)
-        random.seed(SEED)
         self.name = self.__class__.__name__
         if self.name == "LabeledDataset":
             raise ValueError("LabeledDataset must be inherited to be used.")
