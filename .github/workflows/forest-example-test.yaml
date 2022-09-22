@@ -43,8 +43,8 @@ jobs:
         dvc push
     - name: Push automated dataset updates
       run: | 
-        git config --global user.name 'Your Name'
-        git config --global user.email 'your-username@users.noreply.github.com'
+        git config --global user.name 'Dataset bot'
+        git config --global user.email 'dataset-bot@users.noreply.github.com'
         git add data
         git commit -m "Automated dataset updates"
         git push
