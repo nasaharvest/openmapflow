@@ -18,6 +18,8 @@ jobs:
     steps:
     - name: Clone repo
       uses: actions/checkout@v2
+      with:
+        ref: ${{ github.event.pull_request.head.ref }}
     - name: Set up python
       uses: actions/setup-python@v4
       with:
