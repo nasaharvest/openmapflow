@@ -2,6 +2,7 @@ import warnings
 from datetime import date, timedelta
 from typing import Dict, List, Optional, Union
 
+import os
 import pandas as pd
 from pandas.compat._optional import import_optional_dependency
 
@@ -325,21 +326,21 @@ class EarthEngineAPI:
         the default credentials will be used
     """
 
-    def __init__(self, credentials: Optional[str] = None) -> None:
-        try:
-            if credentials:
-                ee.Initialize(
-                    credentials=credentials,
-                    opt_url="https://earthengine-highvolume.googleapis.com",
-                )
-            else:
-                ee.Initialize(
-                    opt_url="https://earthengine-highvolume.googleapis.com",
-                )
-        except Exception:
-            print(
-                "This code may not work if you have not authenticated your earthengine account"
-            )
+    def __init__(self, project_id: str) -> None:
+        google_auth = import_optional_dependency("google.auth")
+        ee = import_optional_dependency("ee")
+        os.environ["GOOGLE_CLOUD_PROJECT"] = project_id
+        print("Logging into Earth Engine")
+        SCOPES = [
+            "https://www.googleapis.com/auth/cloud-platform",
+            "https://www.googleapis.com/auth/earthengine",
+        ]
+        CREDENTIALS, _ = google_auth.default(default_scopes=SCOPES)
+        ee.Initialize(
+            CREDENTIALS,
+            project=project_id,
+            opt_url="https://earthengine-highvolume.googleapis.com",
+        )
 
     def get_ee_url(self, lat, lon, start_date, end_date):
         ee_bbox = EEBoundingBox.from_centre(

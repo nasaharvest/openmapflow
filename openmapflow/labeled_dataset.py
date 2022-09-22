@@ -15,7 +15,7 @@ from pandas.compat._optional import import_optional_dependency
 
 from openmapflow.bbox import BBox
 from openmapflow.config import GCLOUD_LOCATION, PROJECT_ROOT, BucketNames
-from openmapflow.config import DataPaths as dp
+from openmapflow.config import DataPaths as dp, GCLOUD_PROJECT_ID
 from openmapflow.constants import (
     CLASS_PROB,
     END,
@@ -592,7 +592,7 @@ class LabeledDataset:
         df[END] = pd.to_datetime(df[END])
         df.reset_index()
 
-        ee_api = EarthEngineAPI()
+        ee_api = EarthEngineAPI(GCLOUD_PROJECT_ID)
         dd = import_optional_dependency("dask.dataframe")
         ddf = dd.from_pandas(df, npartitions=4)
         total = len(df)
