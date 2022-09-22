@@ -594,7 +594,7 @@ class LabeledDataset:
 
         ee_api = EarthEngineAPI()
         dd = import_optional_dependency("dask.dataframe")
-        ddf = dd.from_pandas(df, npartitions=10)
+        ddf = dd.from_pandas(df, npartitions=1)
         total = len(df)
 
         def get_eo_data(row, total=total):
