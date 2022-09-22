@@ -57,17 +57,26 @@ def get_ee_task_amount(prefix: Optional[str] = None):
     return amount
 
 
-def get_cloud_tif_list(dest_bucket: str, prefix: str = "tifs") -> List[str]:
+def get_cloud_tif_list(
+    dest_bucket: str, prefix: str = "tifs", region: str = "us-central1"
+) -> List[str]:
     """Gets a list of all cloud-free TIFs in a bucket."""
     storage = import_optional_dependency("google.cloud.storage")
-
     cloud_tif_list_iterator = storage.Client().list_blobs(dest_bucket, prefix=prefix)
-    return [
-        blob.name
-        for blob in tqdm(
-            cloud_tif_list_iterator, desc="Loading tifs already on Google Cloud"
+    try:
+        tif_list = [
+            blob.name
+            for blob in tqdm(
+                cloud_tif_list_iterator, desc="Loading tifs already on Google Cloud"
+            )
+        ]
+    except Exception as e:
+        raise Exception(
+            f"{e}\nPlease create the Google Cloud bucket: {dest_bucket}"
+            + f"\nCommand: gsutil mb -l {region} gs://{dest_bucket}"
         )
-    ]
+
+    return tif_list
 
 
 def make_combine_bands_function(bands):
