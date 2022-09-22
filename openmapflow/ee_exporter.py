@@ -2,6 +2,7 @@ import warnings
 from datetime import date, timedelta
 from typing import Dict, List, Optional, Union
 
+import json
 import os
 import pandas as pd
 from pandas.compat._optional import import_optional_dependency
@@ -158,12 +159,13 @@ def create_ee_image(
 
 
 def get_ee_credentials():
-    gcp_sa_email = os.environ.get("GCP_SA_EMAIL")
     gcp_sa_key = os.environ.get("GCP_SA_KEY")
-    if gcp_sa_email is not None and gcp_sa_key is not None:
+    if gcp_sa_key is not None:
+        gcp_sa_email = json.loads(gcp_sa_key)["client_email"]
         print(f"Logging into EarthEngine with {gcp_sa_email}")
         return ee.ServiceAccountCredentials(gcp_sa_email, key_data=gcp_sa_key)
     else:
+        print(f"Logging into EarthEngine with default credentials")
         return "persistent"
 
 

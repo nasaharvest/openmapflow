@@ -38,9 +38,12 @@ jobs:
         openmapflow create-datasets
         dvc commit -f
         dvc push
+    - name: Push automated dataset updates
+      run: | 
         git config --global user.name 'Your Name'
         git config --global user.email 'your-username@users.noreply.github.com'
-        git commit -m "Automated dataset update"
+        git add data
+        git commit -m "Automated dataset updates"
         git push
     - name: Integration test - Project
       run: |
