@@ -429,7 +429,7 @@ class LabeledDataset:
         df[END] = pd.to_datetime(df[END]).dt.strftime("%Y-%m-%d")
         return df
 
-    def create_dataset(self, force: bool = False) -> str:
+    def create_dataset(self, force: bool = False, interactive: bool = False) -> str:
         """
         A dataset consists of (X, y) pairs that are used to train and evaluate
         a machine learning model. In this case,
@@ -475,7 +475,7 @@ class LabeledDataset:
         # STEP 4: If no matching earth observation file, download it
         # ---------------------------------------------------------------------
         already_getting_eo = df_with_no_eo_files[EO_STATUS] == EO_STATUS_EXPORTING
-        if already_getting_eo.sum() > 0:
+        if interactive and already_getting_eo.sum() > 0:
             confirm = (
                 input(
                     f"{already_getting_eo.sum()} labels were already set to {EO_STATUS_EXPORTING} ,"
