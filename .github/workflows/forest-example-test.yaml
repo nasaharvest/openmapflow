@@ -29,8 +29,10 @@ jobs:
       env:
         # https://dvc.org/doc/user-guide/setup-google-drive-remote#authorization
         GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
       run: | 
         dvc pull -f
+        earthengine authenticate --auth_mode appdefault
         openmapflow create-datasets
         dvc commit -f
         dvc push
