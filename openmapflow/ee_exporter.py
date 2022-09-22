@@ -104,6 +104,58 @@ def ee_safe_str(s: str):
     return s.replace(".", "-").replace("=", "-").replace("/", "-")[:100]
 
 
+def create_ee_image(
+    polygon: "ee.Geometry.Polygon",
+    start_date: date,
+    end_date: date,
+    days_per_timestep: int = DAYS_PER_TIMESTEP,
+):
+    image_collection_list: List[ee.Image] = []
+    cur_date = start_date
+    cur_end_date = cur_date + timedelta(days=days_per_timestep)
+
+    # first, we get all the S1 images in an exaggerated date range
+    vv_imcol, vh_imcol = get_s1_image_collection(
+        polygon, start_date - timedelta(days=31), end_date + timedelta(days=31)
+    )
+
+    while cur_end_date <= end_date:
+        image_list: List[ee.Image] = []
+
+        # first, the S1 image which gets the entire s1 collection
+        image_list.append(
+            get_single_s1_image(
+                region=polygon,
+                start_date=cur_date,
+                end_date=cur_end_date,
+                vv_imcol=vv_imcol,
+                vh_imcol=vh_imcol,
+            )
+        )
+        for image_function in DYNAMIC_IMAGE_FUNCTIONS:
+            image_list.append(
+                image_function(
+                    region=polygon, start_date=cur_date, end_date=cur_end_date
+                )
+            )
+        image_collection_list.append(ee.Image.cat(image_list))
+
+        cur_date += timedelta(days=days_per_timestep)
+        cur_end_date += timedelta(days=days_per_timestep)
+
+    # now, we want to take our image collection and append the bands into a single image
+    imcoll = ee.ImageCollection(image_collection_list)
+    combine_bands_function = make_combine_bands_function(DYNAMIC_BANDS)
+    img = ee.Image(imcoll.iterate(combine_bands_function))
+
+    # finally, we add the SRTM image seperately since its static in time
+    total_image_list: List[ee.Image] = [img]
+    for static_image_function in STATIC_IMAGE_FUNCTIONS:
+        total_image_list.append(static_image_function(region=polygon))
+
+    return ee.Image.cat(total_image_list)
+
+
 class EarthEngineExporter:
     """
     Export satellite data from Earth engine. It's called using the following
@@ -126,10 +178,8 @@ class EarthEngineExporter:
         check_ee: bool = False,
         check_gcp: bool = False,
         credentials: Optional[str] = None,
-        days_per_timestep: int = DAYS_PER_TIMESTEP,
     ) -> None:
         self.dest_bucket = dest_bucket
-        self.days_per_timestep = days_per_timestep
         try:
             if credentials:
                 ee.Initialize(credentials=credentials)
@@ -172,50 +222,7 @@ class EarthEngineExporter:
         if len(self.ee_task_list) >= 3000:
             return False
 
-        image_collection_list: List[ee.Image] = []
-        cur_date = start_date
-        cur_end_date = cur_date + timedelta(days=self.days_per_timestep)
-
-        # first, we get all the S1 images in an exaggerated date range
-        vv_imcol, vh_imcol = get_s1_image_collection(
-            polygon, start_date - timedelta(days=31), end_date + timedelta(days=31)
-        )
-
-        while cur_end_date <= end_date:
-            image_list: List[ee.Image] = []
-
-            # first, the S1 image which gets the entire s1 collection
-            image_list.append(
-                get_single_s1_image(
-                    region=polygon,
-                    start_date=cur_date,
-                    end_date=cur_end_date,
-                    vv_imcol=vv_imcol,
-                    vh_imcol=vh_imcol,
-                )
-            )
-            for image_function in DYNAMIC_IMAGE_FUNCTIONS:
-                image_list.append(
-                    image_function(
-                        region=polygon, start_date=cur_date, end_date=cur_end_date
-                    )
-                )
-            image_collection_list.append(ee.Image.cat(image_list))
-
-            cur_date += timedelta(days=self.days_per_timestep)
-            cur_end_date += timedelta(days=self.days_per_timestep)
-
-        # now, we want to take our image collection and append the bands into a single image
-        imcoll = ee.ImageCollection(image_collection_list)
-        combine_bands_function = make_combine_bands_function(DYNAMIC_BANDS)
-        img = ee.Image(imcoll.iterate(combine_bands_function))
-
-        # finally, we add the SRTM image seperately since its static in time
-        total_image_list: List[ee.Image] = [img]
-        for static_image_function in STATIC_IMAGE_FUNCTIONS:
-            total_image_list.append(static_image_function(region=polygon))
-
-        img = ee.Image.cat(total_image_list)
+        img = create_ee_image(polygon, start_date, end_date)
 
         # and finally, export the image
         if not test:
@@ -281,6 +288,9 @@ class EarthEngineExporter:
         for expected_column in [START, END, LAT, LON]:
             assert expected_column in labels
 
+        labels[START] = pd.to_datetime(labels[START]).dt.date
+        labels[END] = pd.to_datetime(labels[END]).dt.date
+
         exports_started = 0
         print(f"Exporting {len(labels)} labels: ")
 
@@ -306,3 +316,43 @@ class EarthEngineExporter:
                 ):
                     print(f"Started {exports_started} exports. Ending export")
                     return None
+
+
+class EarthEngineAPI:
+    """
+    Fetch satellite data from Earth engine by URL.
+    :param credentials: The credentials to use for the export. If not specified,
+        the default credentials will be used
+    """
+
+    def __init__(self, credentials: Optional[str] = None) -> None:
+        try:
+            if credentials:
+                ee.Initialize(
+                    credentials=credentials,
+                    opt_url="https://earthengine-highvolume.googleapis.com",
+                )
+            else:
+                ee.Initialize(
+                    opt_url="https://earthengine-highvolume.googleapis.com",
+                )
+        except Exception:
+            print(
+                "This code may not work if you have not authenticated your earthengine account"
+            )
+
+    def get_ee_url(self, lat, lon, start_date, end_date):
+        ee_bbox = EEBoundingBox.from_centre(
+            mid_lat=lat,
+            mid_lon=lon,
+            surrounding_metres=80,
+        ).to_ee_polygon()
+        img = create_ee_image(ee_bbox, start_date, end_date)
+        return img.getDownloadURL(
+            {
+                "region": ee_bbox,
+                "scale": 10,
+                "filePerBand": False,
+                "format": "GEO_TIFF",
+            }
+        )
