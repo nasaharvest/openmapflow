@@ -24,7 +24,7 @@ class UgandaForest2019(LabeledDataset):
             PROJECT_ROOT / DataPaths.RAW_LABELS / "hansen_labelled_data.csv"
         )
 
-        df = df.sample(n=10, random_state=42)
+        df = df.sample(n=1000, random_state=42)
 
         # Rename coordinate columns to be used for getting Earth observation data
         df.rename(columns={"lon": LAT, "lat": LON}, inplace=True)
