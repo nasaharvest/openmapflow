@@ -32,6 +32,7 @@ jobs:
       env:
         # https://dvc.org/doc/user-guide/setup-google-drive-remote#authorization
         GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+        GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
       run: | 
         dvc pull -f
         openmapflow create-datasets

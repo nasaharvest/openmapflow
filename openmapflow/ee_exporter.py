@@ -327,15 +327,11 @@ class EarthEngineAPI:
     """
 
     def __init__(self, project_id: str) -> None:
-        google_auth = import_optional_dependency("google.auth")
-        ee = import_optional_dependency("ee")
-        os.environ["GOOGLE_CLOUD_PROJECT"] = project_id
-        print("Logging into Earth Engine")
-        SCOPES = [
-            "https://www.googleapis.com/auth/cloud-platform",
-            "https://www.googleapis.com/auth/earthengine",
-        ]
-        CREDENTIALS, _ = google_auth.default(default_scopes=SCOPES)
+
+        CREDENTIALS = ee.ServiceAccountCredentials(
+            "bsos-geog-harvest1@appspot.gserviceaccount.com",
+            key_data=os.environ["GCP_SA_KEY"],
+        )
         ee.Initialize(
             CREDENTIALS,
             project=project_id,
