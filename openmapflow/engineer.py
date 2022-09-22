@@ -61,7 +61,7 @@ def load_tif(
             start_date + timedelta(days=DAYS_PER_TIMESTEP) * i
             for i in range(len(da_split_by_time))
         ]
-        dynamic_data = xr.concat(da_split_by_time, timesteps, name="time")
+        dynamic_data = xr.concat(da_split_by_time, pd.Index(timesteps, name="time"))
     else:
         dynamic_data = xr.concat(
             da_split_by_time, pd.Index(range(len(da_split_by_time)), name="time")
