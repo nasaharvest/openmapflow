@@ -157,6 +157,16 @@ def create_ee_image(
     return ee.Image.cat(total_image_list)
 
 
+def get_ee_credentials():
+    gcp_sa_email = os.environ.get("GCP_SA_EMAIL")
+    gcp_sa_key = os.environ.get("GCP_SA_KEY")
+    if gcp_sa_email is not None and gcp_sa_key is not None:
+        print(f"Logging into EarthEngine with {gcp_sa_email}")
+        return ee.ServiceAccountCredentials(gcp_sa_email, key_data=gcp_sa_key)
+    else:
+        return "persistent"
+
+
 class EarthEngineExporter:
     """
     Export satellite data from Earth engine. It's called using the following
@@ -174,22 +184,10 @@ class EarthEngineExporter:
     """
 
     def __init__(
-        self,
-        dest_bucket: str,
-        check_ee: bool = False,
-        check_gcp: bool = False,
-        credentials: Optional[str] = None,
+        self, dest_bucket: str, check_ee: bool = False, check_gcp: bool = False
     ) -> None:
         self.dest_bucket = dest_bucket
-        try:
-            if credentials:
-                ee.Initialize(credentials=credentials)
-            else:
-                ee.Initialize()
-        except Exception:
-            print(
-                "This code may not work if you have not authenticated your earthengine account"
-            )
+        ee.Initialize(get_ee_credentials())
         self.check_ee = check_ee
         self.ee_task_list = get_ee_task_list() if self.check_ee else []
         self.check_gcp = check_gcp
@@ -326,15 +324,9 @@ class EarthEngineAPI:
         the default credentials will be used
     """
 
-    def __init__(self, project_id: str) -> None:
-
-        CREDENTIALS = ee.ServiceAccountCredentials(
-            "bsos-geog-harvest1@appspot.gserviceaccount.com",
-            key_data=os.environ["GCP_SA_KEY"],
-        )
+    def __init__(self) -> None:
         ee.Initialize(
-            CREDENTIALS,
-            project=project_id,
+            get_ee_credentials(),
             opt_url="https://earthengine-highvolume.googleapis.com",
         )
 
