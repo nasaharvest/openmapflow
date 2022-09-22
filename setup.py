@@ -46,6 +46,7 @@ setup(
     extras_require={
         "data": [
             "cmocean",
+            "dask",
             "earthengine-api",
             "geopandas",
             "google-cloud-storage",
@@ -55,6 +56,7 @@ setup(
         ],
         "all": [
             "cmocean",
+            "dask",
             "earthengine-api",
             "geopandas",
             "google-cloud-storage",
