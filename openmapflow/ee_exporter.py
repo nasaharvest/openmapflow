@@ -165,7 +165,7 @@ def get_ee_credentials():
         print(f"Logging into EarthEngine with {gcp_sa_email}")
         return ee.ServiceAccountCredentials(gcp_sa_email, key_data=gcp_sa_key)
     else:
-        print(f"Logging into EarthEngine with default credentials")
+        print("Logging into EarthEngine with default credentials")
         return "persistent"
 
 
