@@ -19,20 +19,23 @@ jobs:
     - name: Clone repo
       uses: actions/checkout@v2
     - name: Set up python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: 3.8
+        cache: 'pip' 
     - name: Install dependencies
       run: pip install -r requirements.txt
 
+    - uses: google-github-actions/auth@v0
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
     - name: Run data pipeline
       env:
         # https://dvc.org/doc/user-guide/setup-google-drive-remote#authorization
         GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
-        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
       run: | 
         dvc pull -f
-        earthengine authenticate --auth_mode appdefault
+        earthengine authenticate --auth_mode gcloud
         openmapflow create-datasets
         dvc commit -f
         dvc push
