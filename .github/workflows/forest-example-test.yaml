@@ -38,7 +38,7 @@ jobs:
         GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
       run: | 
         dvc pull -f
-        openmapflow create-datasets
+        openmapflow create-datasets --non-interactive
         dvc commit -f
         dvc push
     - name: Push automated dataset updates
