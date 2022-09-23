@@ -1,3 +1,4 @@
+import argparse
 import random
 import shutil
 import tempfile
@@ -384,7 +385,8 @@ class LabeledDataset:
             + "\n"
         )
 
-    def _duplicates_check(self, df: pd.DataFrame):
+    def _mark_duplicates(self, df: pd.DataFrame):
+        """Mark duplicates in dataframe"""
         clean_df = df[clean_df_condition(df)]
         duplicates = clean_df.duplicated(subset=[EO_LAT, EO_LON, EO_FILE])
         if duplicates.sum() > 0:
@@ -394,7 +396,6 @@ class LabeledDataset:
             df.loc[duplicates_index, EO_LAT] = None
             df.loc[duplicates_index, EO_LON] = None
             df.loc[duplicates_index, EO_FILE] = None
-            df.to_csv(self.df_path, index=False)
         return df
 
     def load_df(self, check_eo_data: bool = True, to_np: bool = False) -> pd.DataFrame:
@@ -413,7 +414,7 @@ class LabeledDataset:
             df[EO_DATA] = df[EO_DATA].progress_apply(str_to_np)
         return df
 
-    def verify_and_standardize_df(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _verify_and_standardize_df(self, df: pd.DataFrame) -> pd.DataFrame:
         print(f"Verifying labels: {self.name}")
         if not verify_df(df):
             raise ValueError("DataFrame is not valid, check the output above.")
@@ -429,41 +430,12 @@ class LabeledDataset:
         df[END] = pd.to_datetime(df[END]).dt.strftime("%Y-%m-%d")
         return df
 
-    def create_dataset(self, force: bool = False, interactive: bool = False) -> str:
-        """
-        A dataset consists of (X, y) pairs that are used to train and evaluate
-        a machine learning model. In this case,
-        - X is the earth observation data for a lat lon coordinate over a 24 month time series
-        - y is the binary class label for that coordinate
-        To create a dataset:
-        1. Obtain the labels
-        2. Check if the eath observation data already exists
-        3. Use the label coordinates to match to the associated eath observation data (X)
-        4. If the eath observation data is missing, download it using Google Earth Engine
-        5. Create the dataset
-        """
-        # ---------------------------------------------------------------------
-        # STEP 1: Obtain the labels
-        # ---------------------------------------------------------------------
-        if not self.df_path.exists() or force:
-            df = self.load_labels()
-            df = self.verify_and_standardize_df(df)
-            df.to_csv(self.df_path, index=False)
-        df = pd.read_csv(self.df_path)
+    def _fetch_eo_data_with_ee_tasks(
+        self, df: pd.DataFrame, no_eo: pd.Series, interactive: bool = False
+    ) -> pd.DataFrame:
+        """Fetch earth observation data for labels in a DataFrame using Earth Engine Tasks"""
 
-        # ---------------------------------------------------------------------
-        # STEP 2: Check if earth observation data already available
-        # ---------------------------------------------------------------------
-        no_eo = clean_df_condition(df) & (df[EO_DATA].isnull())
-        if no_eo.sum() == 0:
-            df = self._duplicates_check(df)
-            return self.summary(df)
-
-        print(self.summary(df))
-
-        # ---------------------------------------------------------------------
-        # STEP 3: Match labels to earth observation files
-        # ---------------------------------------------------------------------
+        # STEP 1: Match labels to earth observation files
         df[MATCHING_EO_FILES] = ""
         df.loc[no_eo, MATCHING_EO_FILES] = _match_labels_to_eo_files(df[no_eo])
 
@@ -471,9 +443,7 @@ class LabeledDataset:
         df_with_no_eo_files = df[no_eo].loc[~eo_files_found]
         df_with_eo_files = df[no_eo].loc[eo_files_found]
 
-        # ---------------------------------------------------------------------
-        # STEP 4: If no matching earth observation file, download it
-        # ---------------------------------------------------------------------
+        # STEP 2: If no matching earth observation file, download it
         already_getting_eo = df_with_no_eo_files[EO_STATUS] == EO_STATUS_EXPORTING
         if interactive and already_getting_eo.sum() > 0:
             confirm = (
@@ -494,9 +464,7 @@ class LabeledDataset:
             ).export_for_labels(labels=df_with_no_eo_files)
             df.loc[df_with_no_eo_files.index, EO_STATUS] = EO_STATUS_EXPORTING
 
-        # ---------------------------------------------------------------------
-        # STEP 5: Create the dataset (earth observation data, label)
-        # ---------------------------------------------------------------------
+        # STEP 3: Create the dataset (earth observation data, label)
         if len(df_with_eo_files) > 0:
             storage = import_optional_dependency("google.cloud.storage")
             tif_bucket = storage.Client().bucket(BucketNames.LABELED_EO)
@@ -551,52 +519,24 @@ class LabeledDataset:
                 )
 
             df.drop(columns=[MATCHING_EO_FILES], inplace=True)
-            df.to_csv(self.df_path, index=False)
-        return self.summary(df)
+        return df
 
-    def create_dataset_ee_api(self, force: bool = False) -> str:
-        """
-        A dataset consists of (X, y) pairs that are used to train and evaluate
-        a machine learning model. In this case,
-        - X is the earth observation data for a lat lon coordinate over a 24 month time series
-        - y is the binary class label for that coordinate
-        To create a dataset:
-        1. Obtain the labels
-        2. Check if the eath observation data already exists
-        3. Use the label coordinates to fetch the associated eath observation data (X)
-        """
-        # ---------------------------------------------------------------------
-        # STEP 1: Obtain the labels
-        # ---------------------------------------------------------------------
-        if not self.df_path.exists() or force:
-            df = self.load_labels()
-            df = self.verify_and_standardize_df(df)
-            df.to_csv(self.df_path, index=False)
-        df = pd.read_csv(self.df_path)
+    def _fetch_eo_data_with_ee_api(
+        self, df: pd.DataFrame, npartitions: int = 4
+    ) -> pd.DataFrame:
+        """Fetch earth observation data for labels in a DataFrame using Earth Engine API"""
 
-        # ---------------------------------------------------------------------
-        # STEP 2: Check if earth observation data already available
-        # ---------------------------------------------------------------------
-        no_eo = clean_df_condition(df) & (df[EO_DATA].isnull())
-        if no_eo.sum() == 0:
-            df = self._duplicates_check(df)
-            return self.summary(df)
-
-        print(self.summary(df))
-
-        # ---------------------------------------------------------------------
-        # STEP 3: Fetch data and create the dataset (eo data, label)
-        # ---------------------------------------------------------------------
+        # Initialize dataframe and EarthEngineAPI
         df[EO_DATA] = df[EO_DATA].astype(object)
         df[START] = pd.to_datetime(df[START])
         df[END] = pd.to_datetime(df[END])
         df.reset_index()
-
         ee_api = EarthEngineAPI()
         dd = import_optional_dependency("dask.dataframe")
-        ddf = dd.from_pandas(df, npartitions=4)
+        ddf = dd.from_pandas(df, npartitions=npartitions)
         total = len(df)
 
+        # Download and extract eo data time series for each label
         def get_eo_data(row, total=total):
             prefix = f"{row.name}/{total}:"
             print(f"{prefix} fetching EarthEngine image url")
@@ -615,20 +555,78 @@ class LabeledDataset:
 
         out = ddf.apply(get_eo_data, meta=tuple, axis=1).compute()
         df[EO_DATA], df[EO_LAT], df[EO_LON], df[EO_STATUS] = zip(*out)
-        df = self._duplicates_check(df)
+
+        return df
+
+    def create_dataset(
+        self, ee_api: bool = False, interactive: bool = True, npartitions: bool = 4
+    ) -> str:
+        """
+        A dataset consists of (X, y) pairs that are used to train and evaluate
+        a machine learning model. In this case,
+        - X is the earth observation data for a lat lon coordinate over a 24 month time series
+        - y is the binary class label for that coordinate
+        To create a dataset: load the labels, fetch the earth observation data, and save the dataset
+        """
+
+        # Load the labels
+        if not self.df_path.exists():
+            df = self.load_labels()
+            df = self._verify_and_standardize_df(df)
+            df.to_csv(self.df_path, index=False)
+        df = pd.read_csv(self.df_path)
+
+        # Check if earth observation data is already present
+        no_eo = clean_df_condition(df) & (df[EO_DATA].isnull())
+        if no_eo.sum() == 0:
+            df = self._mark_duplicates(df)
+            return self.summary(df)
+
+        # Fetch the earth observation data
+        print(self.summary(df))
+        if ee_api:
+            df = self._fetch_eo_data_with_ee_api(df, no_eo, npartitions=npartitions)
+        else:
+            df = self._fetch_eo_data_with_ee_tasks(df, no_eo, interactive=interactive)
+        df = self._mark_duplicates(df)
+
+        # Save the dataset
         df.to_csv(self.df_path, index=False)
         return self.summary(df)
 
 
-def create_datasets(datasets: List[LabeledDataset], ee_api: bool = False) -> None:
+def create_datasets(datasets: List[LabeledDataset]) -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--ee_api",
+        dest="ee_api",
+        action="store_true",
+        help="Use Earth Engine API for eo data fetching",
+    )
+    parser.add_argument(
+        "--non-interactive",
+        dest="interactive",
+        action="store_false",
+        help="Run in non-interactive mode",
+    )
+    parser.add_argument(
+        "--npartitions",
+        dest="npartitions",
+        type=int,
+        default=4,
+        help="Number of partitions (only valid for ee_api mode)",
+    )
+    parser.set_defaults(ee_api=False)
+    parser.set_defaults(interactive=True)
+    args = parser.parse_args().__dict__
     report = "DATASET REPORT (autogenerated, do not edit directly)"
     for d in datasets:
         if not isinstance(d, LabeledDataset):
             raise TypeError(f"Expected LabeledDataset, got {type(d)}")
-        if ee_api:
-            summary = d.create_dataset_ee_api()
-        else:
-            summary = d.create_dataset()
+
+        summary = d.create_dataset(
+            ee_api=args["ee_api"], interactive=args["interactive"]
+        )
         print(summary)
         report += "\n\n" + summary
 

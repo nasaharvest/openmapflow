@@ -17,7 +17,7 @@ case $1 in
         ;;
     "create-datasets")
         check_openmapflow_yaml
-        python3 -c "from datasets import datasets; from openmapflow.labeled_dataset import create_datasets; create_datasets(datasets)"
+        python3 -c "from datasets import datasets; from openmapflow.labeled_dataset import create_datasets; create_datasets(datasets)" "${@:2}"
         ;;
     "datapath")
         check_openmapflow_yaml
