@@ -47,7 +47,7 @@ jobs:
         git config --global user.email 'dataset-bot@users.noreply.github.com'
         git pull
         git add data
-        git commit -m "Automated dataset updates"
+        git commit -m "Automated dataset updates" || echo "No updates to commit"
         git push
     - name: Integration test - Project
       run: |
