@@ -5,7 +5,7 @@ version() { python3 -c "from openmapflow.constants import VERSION; print(VERSION
 datasets() { python3 -c "from openmapflow.config import DataPaths; print(DataPaths.REPORT)"; }
 check_openmapflow_yaml() {
     if [ ! -f "openmapflow.yaml" ]; then
-        echo "No openmapflow.yaml file found. Please create one by running: openmapflow generate"
+        echo "Please navigate to a directory containing openmapflow.yaml or create one by running: openmapflow generate"
         return 1
     fi
 }
