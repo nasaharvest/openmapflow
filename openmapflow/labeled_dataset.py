@@ -4,7 +4,7 @@ import shutil
 import tempfile
 import warnings
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -136,7 +136,7 @@ def _match_labels_to_eo_files(labels: pd.DataFrame) -> pd.Series:
 
 
 def _find_matching_point(
-    start: str, eo_paths: List[Path], label_lon: float, label_lat: float, tif_bucket
+    eo_paths: List[Path], label_lon: float, label_lat: float, tif_bucket
 ) -> Tuple[np.ndarray, float, float, str]:
     """
     Given a label coordinate (y) this functions finds the associated satellite data (X)
@@ -145,16 +145,13 @@ def _find_matching_point(
     So the function finds the closest grid coordinate to the label coordinate.
     Additional value is given to a grid coordinate that is close to the center of the tif.
     """
-    start_date = datetime.strptime(start, "%Y-%m-%d")
     tif_slope_tuples = []
     for p in eo_paths:
         blob = tif_bucket.blob(str(p))
         local_path = Path(f"{temp_dir}/{p.name}")
         if not local_path.exists():
             blob.download_to_filename(str(local_path))
-        tif_slope_tuples.append(
-            load_tif(local_path, start_date=start_date, num_timesteps=None)
-        )
+        tif_slope_tuples.append(load_tif(local_path))
         if local_path.exists():
             local_path.unlink()
 
@@ -472,9 +469,8 @@ class LabeledDataset:
             df[EO_DATA] = df[EO_DATA].astype(object)
             df[EO_FILE] = df[EO_FILE].astype(str)
 
-            def set_df(i, start, eo_paths, lon, lat, pbar):
+            def set_df(i, eo_paths, lon, lat, pbar):
                 (eo_data, eo_lon, eo_lat, eo_file) = _find_matching_point(
-                    start=start,
                     eo_paths=eo_paths,
                     label_lon=lon,
                     label_lat=lat,
@@ -511,7 +507,6 @@ class LabeledDataset:
             ) as pbar:
                 np.vectorize(set_df, otypes="b")(
                     i=df_with_eo_files.index,
-                    start=df_with_eo_files[START],
                     eo_paths=df_with_eo_files[MATCHING_EO_FILES],
                     lon=df_with_eo_files[LON],
                     lat=df_with_eo_files[LAT],
@@ -559,7 +554,7 @@ class LabeledDataset:
         return df
 
     def create_dataset(
-        self, ee_api: bool = False, interactive: bool = True, npartitions: bool = 4
+        self, ee_api: bool = False, interactive: bool = True, npartitions: int = 4
     ) -> str:
         """
         A dataset consists of (X, y) pairs that are used to train and evaluate
@@ -567,6 +562,9 @@ class LabeledDataset:
         - X is the earth observation data for a lat lon coordinate over a 24 month time series
         - y is the binary class label for that coordinate
         To create a dataset: load the labels, fetch the earth observation data, and save the dataset
+        :param ee_api: Use Earth Engine API to fetch earth observation data
+        :param interactive: Allow user prompts
+        :param npartitions: Number of partitions to use when fetching earth observation data using API
         """
 
         # Load the labels
@@ -585,7 +583,7 @@ class LabeledDataset:
         # Fetch the earth observation data
         print(self.summary(df))
         if ee_api:
-            df = self._fetch_eo_data_with_ee_api(df, no_eo, npartitions=npartitions)
+            df = self._fetch_eo_data_with_ee_api(df, npartitions=npartitions)
         else:
             df = self._fetch_eo_data_with_ee_tasks(df, no_eo, interactive=interactive)
         df = self._mark_duplicates(df)
