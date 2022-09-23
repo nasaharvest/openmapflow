@@ -1,10 +1,11 @@
-from pathlib import Path
-from datetime import datetime
 import unittest
+from datetime import datetime
+from pathlib import Path
+
 import numpy as np
 
-from openmapflow.engineer import load_tif, fillna, process_test_file
 from openmapflow.bands import BANDS, DYNAMIC_BANDS, STATIC_BANDS
+from openmapflow.engineer import fillna, load_tif, process_test_file
 
 TIF_FILE = Path(__file__).parent / "98-togo_2019-02-06_2020-02-01.tif"
 
