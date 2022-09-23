@@ -564,7 +564,7 @@ class LabeledDataset:
         To create a dataset: load the labels, fetch the earth observation data, and save the dataset
         :param ee_api: Use Earth Engine API to fetch earth observation data
         :param interactive: Allow user prompts
-        :param npartitions: Number of partitions to use when fetching earth observation data using API
+        :param npartitions: Number of partitions to use when fetching earth observation data
         """
 
         # Load the labels
