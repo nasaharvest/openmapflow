@@ -61,10 +61,9 @@ class TestLabeledDatasetCustom(TestCase):
     @skipIf(XARRAY_NOT_INSTALLED, "xarray not installed")
     @patch("openmapflow.labeled_dataset.load_tif")
     def test_find_matching_point_from_one(self, mock_load_tif):
-        mock_data = xr.DataArray(
+        mock_load_tif.return_value = xr.DataArray(
             data=np.ones((24, 19, 17, 17)), dims=("time", "band", "y", "x")
         )
-        mock_load_tif.return_value = mock_data, 0.0
         labelled_np, closest_lon, closest_lat, source_file = _find_matching_point(
             eo_paths=[Path("mock")],
             label_lon=5,
@@ -86,12 +85,9 @@ class TestLabeledDatasetCustom(TestCase):
 
         def side_effect(path):
             idx = [i for i, p in enumerate(tif_paths) if p.stem == Path(path).stem][0]
-            return (
-                xr.DataArray(
-                    dims=("time", "band", "y", "x"),
-                    data=np.ones((24, 19, 17, 17)) * idx,
-                ),
-                0.0,
+            return xr.DataArray(
+                dims=("time", "band", "y", "x"),
+                data=np.ones((24, 19, 17, 17)) * idx,
             )
 
         mock_load_tif.side_effect = side_effect
@@ -111,17 +107,15 @@ class TestLabeledDatasetCustom(TestCase):
     def test_find_matching_point_from_url(
         self, mock_load_tif, mock_requests, mock_shutil
     ):
-        mock_data = xr.DataArray(
-            data=np.ones((24, 19, 17, 17)), dims=("time", "band", "y", "x")
-        )
-
         @dataclass
         class MockResponse:
             raw: str = ""
             status_code: int = 200
 
         mock_requests.get.return_value = MockResponse()
-        mock_load_tif.return_value = mock_data, 0.0
+        mock_load_tif.return_value = xr.DataArray(
+            data=np.ones((24, 19, 17, 17)), dims=("time", "band", "y", "x")
+        )
         labelled_np, closest_lon, closest_lat = _find_matching_point_url(
             url="https://mock", label_lon=5, label_lat=5
         )

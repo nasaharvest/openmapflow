@@ -2,7 +2,6 @@ import argparse
 import random
 import shutil
 import tempfile
-import warnings
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -42,7 +41,7 @@ from openmapflow.ee_exporter import (
     EarthEngineExporter,
     get_cloud_tif_list,
 )
-from openmapflow.engineer import calculate_ndvi, fillna, load_tif, remove_bands
+from openmapflow.engineer import calculate_ndvi, load_tif, remove_bands
 from openmapflow.utils import str_to_np, tqdm
 
 SEED = 42
@@ -145,21 +144,20 @@ def _find_matching_point(
     So the function finds the closest grid coordinate to the label coordinate.
     Additional value is given to a grid coordinate that is close to the center of the tif.
     """
-    tif_slope_tuples = []
+    tifs = []
     for p in eo_paths:
         blob = tif_bucket.blob(str(p))
         local_path = Path(f"{temp_dir}/{p.name}")
         if not local_path.exists():
             blob.download_to_filename(str(local_path))
-        tif_slope_tuples.append(load_tif(local_path))
+        tifs.append(load_tif(local_path))
         if local_path.exists():
             local_path.unlink()
 
-    if len(tif_slope_tuples) > 1:
+    if len(tifs) > 1:
         min_distance_from_point = np.inf
         min_distance_from_center = np.inf
-        for i, tif_slope_tuple in enumerate(tif_slope_tuples):
-            tif, slope = tif_slope_tuple
+        for i, tif in enumerate(tifs):
             lon, lon_idx = _find_nearest(tif.x, label_lon)
             lat, lat_idx = _find_nearest(tif.y, label_lat)
             distance_from_point = _distance(label_lat, label_lon, lat, lon)
@@ -173,22 +171,16 @@ def _find_matching_point(
                 min_distance_from_center = distance_from_center
                 min_distance_from_point = distance_from_point
                 eo_data = tif.sel(x=lon).sel(y=lat).values
-                average_slope = slope
                 eo_file = eo_paths[i].name
     else:
-        tif, slope = tif_slope_tuples[0]
+        tif = tifs[0]
         closest_lon = _find_nearest(tif.x, label_lon)[0]
         closest_lat = _find_nearest(tif.y, label_lat)[0]
         eo_data = tif.sel(x=closest_lon).sel(y=closest_lat).values
-        average_slope = slope
         eo_file = eo_paths[0].name
 
     eo_data = calculate_ndvi(eo_data)
     eo_data = remove_bands(eo_data)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        eo_data = fillna(eo_data, average_slope)
-
     return eo_data, closest_lon, closest_lat, eo_file
 
 
@@ -206,7 +198,7 @@ def _find_matching_point_url(
     with local_path.open("wb") as f:
         shutil.copyfileobj(r.raw, f)
 
-    tif, slope = load_tif(local_path)
+    tif = load_tif(local_path)
     if local_path.exists():
         local_path.unlink()
 
@@ -214,14 +206,8 @@ def _find_matching_point_url(
     closest_lat = _find_nearest(tif.y, label_lat)[0]
 
     eo_data = tif.sel(x=closest_lon).sel(y=closest_lat).values
-    average_slope = slope
-
     eo_data = calculate_ndvi(eo_data)
     eo_data = remove_bands(eo_data)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        eo_data = fillna(eo_data, average_slope)
-
     return eo_data, closest_lon, closest_lat
 
 
