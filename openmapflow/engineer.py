@@ -18,20 +18,34 @@ from openmapflow.bands import (
 
 
 def _fillna(data):
+    """Fill in the missing values in the data array"""
+    bands_np = np.array(DYNAMIC_BANDS + STATIC_BANDS)
+    if len(data.shape) != 4:
+        raise ValueError(
+            f"Expected data to be 4D (time, band, x, y) - got {data.shape}"
+        )
+    if data.shape[1] != len(bands_np):
+        raise ValueError(
+            f"Expected data to have {len(bands_np)} bands - got {data.shape[1]}"
+        )
+
     is_nan = np.isnan(data)
     if not is_nan.any().item():
         return data
     mean_per_time_band = data.mean(axis=(2, 3), skipna=True)
     is_nan_any = is_nan.any(axis=(0, 2, 3)).values
     is_nan_all = is_nan.all(axis=(0, 2, 3)).values
-    bands_np = np.array(DYNAMIC_BANDS + STATIC_BANDS)
     bands_all_nans = bands_np[is_nan_all]
     bands_some_nans = bands_np[is_nan_any & ~is_nan_all]
     if bands_all_nans.size > 0:
         print(f"WARNING: Bands: {bands_all_nans} have all nan values")
+        # If a band has all nan values, fill with default: 0
         mean_per_time_band[:, is_nan_all] = 0
     if bands_some_nans.size > 0:
         print(f"WARNING: Bands: {bands_some_nans} have some nan values")
+    if np.isnan(mean_per_time_band).any():
+        mean_per_band = mean_per_time_band.mean(axis=0, skipna=True)
+        return data.fillna(mean_per_band)
     return data.fillna(mean_per_time_band)
 
 
@@ -59,8 +73,6 @@ def load_tif(
     num_timesteps = num_dynamic_bands // bands_per_timestep
 
     static_data = da.isel(band=slice(num_bands - len(STATIC_BANDS), num_bands))
-
-    # average_slope = np.nanmean(static_data.values[STATIC_BANDS.index("slope"), :, :])
 
     for timestep in range(num_timesteps):
         time_specific_da = da.isel(

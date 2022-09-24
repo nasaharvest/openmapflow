@@ -2,16 +2,26 @@ import unittest
 from pathlib import Path
 
 import numpy as np
+import xarray as xr
 
 from openmapflow.bands import DYNAMIC_BANDS, STATIC_BANDS
-from openmapflow.engineer import load_tif, process_test_file
+from openmapflow.engineer import load_tif, process_test_file, _fillna
 
 TIF_FILE = Path(__file__).parent / "98-togo_2019-02-06_2020-02-01.tif"
 
 NUM_TIMESTEPS = 12
+BANDS = DYNAMIC_BANDS + STATIC_BANDS
 
 
 class TestEngineer(unittest.TestCase):
+    def setUp(self):
+        data = np.ones((NUM_TIMESTEPS, len(BANDS), 17, 17))
+
+        # Make each band have a unique value
+        for i in range(len(BANDS)):
+            data[:, i] = data[:, i] * i
+        self.xr_data = xr.DataArray(data=data, dims=("time", "band", "y", "x"))
+
     def test_load_tif_file(self):
 
         loaded_file = load_tif(TIF_FILE)
@@ -32,10 +42,48 @@ class TestEngineer(unittest.TestCase):
         # https://en.wikipedia.org/wiki/Highest_temperature_recorded_on_Earth
         self.assertTrue(((temperature_values) < 329.85).all())
 
+    def test_fillna_identity(self):
+        self.assertTrue((self.xr_data == _fillna(self.xr_data)).all())
+
+    def test_fillna_wrong_shape(self):
+        with self.assertRaises(ValueError):
+            _fillna(self.xr_data[:, 0])
+        with self.assertRaises(ValueError):
+            _fillna(self.xr_data[:, 1:5])
+
+    def test_fillna_missing_value(self):
+        self.xr_data[0, 0, 0, 0] = float("nan")
+        self.xr_data[5, 2, 5, 5] = float("nan")
+        self.xr_data[11, 10, 16, 16] = float("nan")
+        new_xr_data = _fillna(self.xr_data)
+        self.assertEqual(new_xr_data[0, 0, 0, 0], 0)
+        self.assertEqual(new_xr_data[5, 2, 5, 5], 2)
+        self.assertEqual(new_xr_data[11, 10, 16, 16], 10)
+
+    def test_fillna_missing_band(self):
+        self.xr_data[:, 10, 16, 16] = float("nan")
+        new_xr_data = _fillna(self.xr_data)
+        self.assertEqual(new_xr_data[11, 10, 16, 16], 10)
+
+    def test_fillna_missing_band_everywhere(self):
+        self.xr_data[:, 10, :, :] = float("nan")
+        new_xr_data = _fillna(self.xr_data)
+        self.assertEqual(new_xr_data[11, 10, 16, 16], 0)
+
+    def test_fillna_missing_whole_timestep(self):
+        self.xr_data[3, :, :, :] = float("nan")
+        new_xr_data = _fillna(self.xr_data)
+        self.assertTrue((new_xr_data[3] == self.xr_data[4]).all())
+
+    def test_fillna_missing_everything(self):
+        self.xr_data[:, ::, :] = float("nan")
+        new_xr_data = _fillna(self.xr_data)
+        self.assertTrue((new_xr_data == 0).all())
+
     def test_fillna_real(self):
-        loaded_file1 = load_tif(TIF_FILE, fillnans=False)
+        loaded_file1 = load_tif(TIF_FILE, fillna=False)
         self.assertTrue(np.isnan(loaded_file1).any())
-        loaded_file2 = load_tif(TIF_FILE, fillnans=True)
+        loaded_file2 = load_tif(TIF_FILE, fillna=True)
         self.assertFalse(np.isnan(loaded_file2).any())
 
     def test_process_test_file(self):
