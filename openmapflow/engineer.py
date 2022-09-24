@@ -80,7 +80,6 @@ def load_tif(
                 timestep * bands_per_timestep, (timestep + 1) * bands_per_timestep
             )
         )
-        # time_specific_da = fillna2(time_specific_da, DYNAMIC_BANDS)
         time_specific_da = xr.concat([time_specific_da, static_data], "band")
         time_specific_da["band"] = range(bands_per_timestep + len(STATIC_BANDS))
         da_split_by_time.append(time_specific_da)
