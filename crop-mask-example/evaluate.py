@@ -41,6 +41,7 @@ model_path = model_path_from_name(model_name=model_name)
 
 # ------------ Dataloaders -------------------------------------
 df = pd.concat([d.load_df() for d in datasets])
+df[label_col] = (df[label_col] > 0.5).astype(int)
 test_df = df[df[SUBSET] == "testing"]
 x_test, y_test = get_x_y(test_df, label_col, start_month, input_months)
 
