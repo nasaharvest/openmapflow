@@ -5,7 +5,7 @@ import numpy as np
 import xarray as xr
 
 from openmapflow.bands import DYNAMIC_BANDS, STATIC_BANDS
-from openmapflow.engineer import load_tif, process_test_file, _fillna
+from openmapflow.engineer import _fillna, load_tif, process_test_file
 
 TIF_FILE = Path(__file__).parent / "98-togo_2019-02-06_2020-02-01.tif"
 
