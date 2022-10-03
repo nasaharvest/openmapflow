@@ -30,11 +30,17 @@ def model_path_from_name(model_name: str) -> Path:
 
 
 def upsample_df(
-    df: pd.DataFrame, class_col: str = CLASS_PROB, upsample_ratio: float = 1.0
+    df: pd.DataFrame, label_col: str = CLASS_PROB, upsample_ratio: float = 1.0
 ) -> pd.DataFrame:
     """Upsample a dataframe to have more balanced classes."""
-    positive = df[class_col].astype(bool)
-    negative = ~df[class_col].astype(bool)
+    label_classes = df[label_col].unique()
+    if len(label_classes) != 2:
+        raise ValueError(
+            f"Can only upsample binary classes. Found {len(label_classes)} classe in {label_col}"
+        )
+
+    positive = df[label_col].astype(bool)
+    negative = ~df[label_col].astype(bool)
     if len(df[positive]) > len(df[negative]):
         minority_label = "negative"
         minority = negative
