@@ -1,14 +1,19 @@
 ####################################################################################################################################
 # This script downloads OpenMapFlow predictions, merges them, and uploads the merged tif file to Google Cloud Storage.
-# It is intended to be run in a Google Cloud VM when large maps cannot be merged in Colab.
+# It is intended to be run in a Google Cloud VM (with all Cloud APIs enabled) when large maps cannot be merged in Colab.
+#
+# Running script in the backgroud:
+# sh merging.sh > out.txt 2>&1 &
+# Checking logs
+# tail -100 out.txt 
 ####################################################################################################################################
 sudo apt-get install python3-gdal -y
 sudo apt-get install gdal-bin -y
 
 # Config
-export MAP_KEY="Kenya_maize/min_lat=-4.8_min_lon=33.9_max_lat=5.5_max_lon=42.0_dates=2021-02-01_2022-02-01_all"
-export BUCKET_PREDS="gs://crop-type-preds"
-export BUCKET_PREDS_MERGED="gs://crop-type-preds-merged"
+export MAP_KEY="Togo_crop-mask_2019_February/min_lat=7.23_min_lon=31.65_max_lat=8.23_max_lon=32.65_dates=2019-02-01_2020-02-01_all"
+export BUCKET_PREDS="gs://crop-mask-example-preds"
+export BUCKET_PREDS_MERGED="gs://crop-mask-example-preds-merged"
 
 # Setup
 export PREFIX=$(python3 -c "import os; print(os.environ['MAP_KEY'].replace('/', '_'))")
