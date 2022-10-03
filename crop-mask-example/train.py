@@ -59,6 +59,7 @@ model_name: str = args["model_name"]
 input_months: int = args["input_months"]
 # ------------ Dataloaders -------------------------------------
 df = pd.concat([d.load_df() for d in datasets])
+df[label_col] = (df[label_col] > 0.5).astype(int)
 train_df = df[df[SUBSET] == "training"]
 train_df = upsample_df(train_df, label_col, upsample_minority_ratio)
 val_df = df[df[SUBSET] == "validation"]
