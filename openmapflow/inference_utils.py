@@ -44,7 +44,7 @@ def get_available_bboxes(
     """
     if len(buckets_to_check) == 0:
         raise ValueError("No buckets to check")
-    client = storage.Client()
+    client = storage.Client(project=GCLOUD_PROJECT_ID)
     previous_matches = []
     available_bboxes = []
     bbox_regex = (
