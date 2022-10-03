@@ -19,7 +19,7 @@ from openmapflow.bands import (
 
 def load_tif(
     filepath: Path,
-    start_date: datetime,
+    start_date: Optional[datetime] = None,
     num_timesteps: Optional[int] = None,
 ):
     r"""
@@ -56,12 +56,16 @@ def load_tif(
         time_specific_da["band"] = range(bands_per_timestep + len(STATIC_BANDS))
         da_split_by_time.append(time_specific_da)
 
-    timesteps = [
-        start_date + timedelta(days=DAYS_PER_TIMESTEP) * i
-        for i in range(len(da_split_by_time))
-    ]
-
-    dynamic_data = xr.concat(da_split_by_time, pd.Index(timesteps, name="time"))
+    if start_date:
+        timesteps = [
+            start_date + timedelta(days=DAYS_PER_TIMESTEP) * i
+            for i in range(len(da_split_by_time))
+        ]
+        dynamic_data = xr.concat(da_split_by_time, pd.Index(timesteps, name="time"))
+    else:
+        dynamic_data = xr.concat(
+            da_split_by_time, pd.Index(range(len(da_split_by_time)), name="time")
+        )
     dynamic_data.attrs["band_descriptions"] = BANDS
 
     return dynamic_data, average_slope

@@ -1,4 +1,5 @@
 import warnings
+from dataclasses import dataclass
 from pathlib import Path
 from unittest import TestCase, skipIf
 from unittest.mock import Mock, patch
@@ -12,6 +13,7 @@ from openmapflow.labeled_dataset import (
     _distance,
     _distance_point_from_center,
     _find_matching_point,
+    _find_matching_point_url,
     _find_nearest,
     _generate_bbox_from_paths,
     _get_tif_paths,
@@ -64,7 +66,6 @@ class TestLabeledDatasetCustom(TestCase):
         )
         mock_load_tif.return_value = mock_data, 0.0
         labelled_np, closest_lon, closest_lat, source_file = _find_matching_point(
-            start="2020-10-10",
             eo_paths=[Path("mock")],
             label_lon=5,
             label_lat=5,
@@ -83,7 +84,7 @@ class TestLabeledDatasetCustom(TestCase):
     def test_find_matching_point_from_multiple(self, mock_load_tif):
         tif_paths = [Path("mock1"), Path("mock2"), Path("mock3")]
 
-        def side_effect(path, start_date, num_timesteps):
+        def side_effect(path):
             idx = [i for i, p in enumerate(tif_paths) if p.stem == Path(path).stem][0]
             return (
                 xr.DataArray(
@@ -95,16 +96,40 @@ class TestLabeledDatasetCustom(TestCase):
 
         mock_load_tif.side_effect = side_effect
         labelled_np, closest_lon, closest_lat, source_file = _find_matching_point(
-            start="2020-10-10",
-            eo_paths=tif_paths,
-            label_lon=8,
-            label_lat=8,
-            tif_bucket=Mock(),
+            eo_paths=tif_paths, label_lon=8, label_lat=8, tif_bucket=Mock()
         )
         self.assertEqual(closest_lon, 8)
         self.assertEqual(closest_lat, 8)
         self.assertEqual(source_file, "mock1")
         expected = np.ones((24, 18)) * 0.0
+        self.assertTrue((labelled_np == expected).all())
+
+    @skipIf(XARRAY_NOT_INSTALLED, "xarray not installed")
+    @patch("openmapflow.labeled_dataset.shutil")
+    @patch("openmapflow.labeled_dataset.requests")
+    @patch("openmapflow.labeled_dataset.load_tif")
+    def test_find_matching_point_from_url(
+        self, mock_load_tif, mock_requests, mock_shutil
+    ):
+        mock_data = xr.DataArray(
+            data=np.ones((24, 19, 17, 17)), dims=("time", "band", "y", "x")
+        )
+
+        @dataclass
+        class MockResponse:
+            raw: str = ""
+            status_code: int = 200
+
+        mock_requests.get.return_value = MockResponse()
+        mock_load_tif.return_value = mock_data, 0.0
+        labelled_np, closest_lon, closest_lat = _find_matching_point_url(
+            url="https://mock", label_lon=5, label_lat=5
+        )
+        self.assertEqual(closest_lon, 5)
+        self.assertEqual(closest_lat, 5)
+        self.assertEqual(labelled_np.shape, (24, 18))
+        expected = np.ones((24, 18))
+        expected[:, -1] = 0  # NDVI is 0
         self.assertTrue((labelled_np == expected).all())
 
     def test_find_nearest(self):

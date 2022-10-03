@@ -31,19 +31,22 @@ class TestEarthEngineExporter(TestCase):
         tif_list = get_cloud_tif_list("mock_bucket")
         assert tif_list == []
 
+    @patch("openmapflow.ee_exporter.ee.Initialize")
     @patch("openmapflow.ee_exporter.ee.Geometry.Polygon")
     @patch("openmapflow.ee_exporter.EarthEngineExporter._export_for_polygon")
-    def test_export_for_labels(self, mock_export_for_polygon, mock_polygon):
+    def test_export_for_labels(
+        self, mock_export_for_polygon, mock_polygon, mock_ee_initialize
+    ):
         mock_polygon.return_value = None
-        start_date_str = "2019-04-22"
-        end_date_str = "2020-04-16"
+        start_date = date(2019, 4, 22)
+        end_date = date(2020, 4, 16)
 
         labels = pd.DataFrame(
             {
                 LON: [-74.55285616553732, -75.55285616553732],
                 LAT: [46.22024965230018, 47.22024965230018],
-                END: [end_date_str, end_date_str],
-                START: [start_date_str, start_date_str],
+                END: [str(end_date), str(end_date)],
+                START: [str(start_date), str(start_date)],
             }
         )
         EarthEngineExporter(
@@ -52,7 +55,7 @@ class TestEarthEngineExporter(TestCase):
 
         assert mock_export_for_polygon.call_count == 2
 
-        ending = f"dates={start_date_str}_{end_date_str}_all"
+        ending = f"dates={start_date}_{end_date}_all"
 
         identifier_1 = (
             f"min_lat=46.2195_min_lon=-74.5539_max_lat=46.221_max_lon=-74.5518_{ending}"
@@ -63,27 +66,28 @@ class TestEarthEngineExporter(TestCase):
         mock_export_for_polygon.assert_has_calls(
             [
                 call(
-                    end_date=end_date_str,
+                    end_date=end_date,
                     polygon=None,
                     polygon_identifier=identifier_1,
-                    start_date=start_date_str,
+                    start_date=start_date,
                     test=False,
                 ),
                 call(
-                    end_date=end_date_str,
+                    end_date=end_date,
                     polygon=None,
                     polygon_identifier=identifier_2,
-                    start_date=start_date_str,
+                    start_date=start_date,
                     test=False,
                 ),
             ],
             any_order=True,
         )
 
+    @patch("openmapflow.ee_exporter.ee.Initialize")
     @patch("openmapflow.ee_exporter.ee.Geometry.Polygon")
     @patch("openmapflow.ee_exporter.EarthEngineExporter._export_for_polygon")
     def test_export_for_bbox_metres_per_polygon_None(
-        self, mock_export_for_polygon, mock_polygon
+        self, mock_export_for_polygon, mock_polygon, mock_ee_initialize
     ):
         mock_polygon.return_value = None
 
@@ -114,10 +118,11 @@ class TestEarthEngineExporter(TestCase):
             test=True,
         )
 
+    @patch("openmapflow.ee_exporter.ee.Initialize")
     @patch("openmapflow.ee_exporter.ee.Geometry.Polygon")
     @patch("openmapflow.ee_exporter.EarthEngineExporter._export_for_polygon")
     def test_export_for_bbox_metres_per_polygon_10000(
-        self, mock_export_for_polygon, mock_polygon
+        self, mock_export_for_polygon, mock_polygon, mock_ee_initialize
     ):
         mock_polygon.return_value = None
 

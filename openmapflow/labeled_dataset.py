@@ -1,13 +1,16 @@
+import argparse
 import random
+import shutil
 import tempfile
 import warnings
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date
 from pathlib import Path
 from typing import Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
+import requests
 from dateutil.relativedelta import relativedelta
 from pandas.compat._optional import import_optional_dependency
 
@@ -34,7 +37,11 @@ from openmapflow.constants import (
     START,
     SUBSET,
 )
-from openmapflow.ee_exporter import EarthEngineExporter, get_cloud_tif_list
+from openmapflow.ee_exporter import (
+    EarthEngineAPI,
+    EarthEngineExporter,
+    get_cloud_tif_list,
+)
 from openmapflow.engineer import calculate_ndvi, fillna, load_tif, remove_bands
 from openmapflow.utils import str_to_np, tqdm
 
@@ -129,7 +136,7 @@ def _match_labels_to_eo_files(labels: pd.DataFrame) -> pd.Series:
 
 
 def _find_matching_point(
-    start: str, eo_paths: List[Path], label_lon: float, label_lat: float, tif_bucket
+    eo_paths: List[Path], label_lon: float, label_lat: float, tif_bucket
 ) -> Tuple[np.ndarray, float, float, str]:
     """
     Given a label coordinate (y) this functions finds the associated satellite data (X)
@@ -138,16 +145,13 @@ def _find_matching_point(
     So the function finds the closest grid coordinate to the label coordinate.
     Additional value is given to a grid coordinate that is close to the center of the tif.
     """
-    start_date = datetime.strptime(start, "%Y-%m-%d")
     tif_slope_tuples = []
     for p in eo_paths:
         blob = tif_bucket.blob(str(p))
         local_path = Path(f"{temp_dir}/{p.name}")
         if not local_path.exists():
             blob.download_to_filename(str(local_path))
-        tif_slope_tuples.append(
-            load_tif(local_path, start_date=start_date, num_timesteps=None)
-        )
+        tif_slope_tuples.append(load_tif(local_path))
         if local_path.exists():
             local_path.unlink()
 
@@ -186,6 +190,39 @@ def _find_matching_point(
         eo_data = fillna(eo_data, average_slope)
 
     return eo_data, closest_lon, closest_lat, eo_file
+
+
+def _find_matching_point_url(
+    url: str, label_lon: float, label_lat: float
+) -> Tuple[np.ndarray, float, float]:
+    """
+    Given a label url this functions fetches the associated satellite data (X).
+    """
+    r = requests.get(url, stream=True)
+    if r.status_code != 200:
+        r.raise_for_status()
+
+    local_path = Path(f"{temp_dir}/{Path(url).stem.replace(':', '_')}.tif")
+    with local_path.open("wb") as f:
+        shutil.copyfileobj(r.raw, f)
+
+    tif, slope = load_tif(local_path)
+    if local_path.exists():
+        local_path.unlink()
+
+    closest_lon = _find_nearest(tif.x, label_lon)[0]
+    closest_lat = _find_nearest(tif.y, label_lat)[0]
+
+    eo_data = tif.sel(x=closest_lon).sel(y=closest_lat).values
+    average_slope = slope
+
+    eo_data = calculate_ndvi(eo_data)
+    eo_data = remove_bands(eo_data)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        eo_data = fillna(eo_data, average_slope)
+
+    return eo_data, closest_lon, closest_lat
 
 
 def get_label_timesteps(labels: pd.DataFrame):
@@ -345,7 +382,8 @@ class LabeledDataset:
             + "\n"
         )
 
-    def _duplicates_check(self, df: pd.DataFrame):
+    def _mark_duplicates(self, df: pd.DataFrame):
+        """Mark duplicates in dataframe"""
         clean_df = df[clean_df_condition(df)]
         duplicates = clean_df.duplicated(subset=[EO_LAT, EO_LON, EO_FILE])
         if duplicates.sum() > 0:
@@ -355,7 +393,6 @@ class LabeledDataset:
             df.loc[duplicates_index, EO_LAT] = None
             df.loc[duplicates_index, EO_LON] = None
             df.loc[duplicates_index, EO_FILE] = None
-            df.to_csv(self.df_path, index=False)
         return df
 
     def load_df(self, check_eo_data: bool = True, to_np: bool = False) -> pd.DataFrame:
@@ -374,7 +411,7 @@ class LabeledDataset:
             df[EO_DATA] = df[EO_DATA].progress_apply(str_to_np)
         return df
 
-    def verify_and_standardize_df(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _verify_and_standardize_df(self, df: pd.DataFrame) -> pd.DataFrame:
         print(f"Verifying labels: {self.name}")
         if not verify_df(df):
             raise ValueError("DataFrame is not valid, check the output above.")
@@ -390,41 +427,12 @@ class LabeledDataset:
         df[END] = pd.to_datetime(df[END]).dt.strftime("%Y-%m-%d")
         return df
 
-    def create_dataset(self, force: bool = False):
-        """
-        A dataset consists of (X, y) pairs that are used to train and evaluate
-        a machine learning model. In this case,
-        - X is the earth observation data for a lat lon coordinate over a 24 month time series
-        - y is the binary class label for that coordinate
-        To create a dataset:
-        1. Obtain the labels
-        2. Check if the eath observation data already exists
-        3. Use the label coordinates to match to the associated eath observation data (X)
-        4. If the eath observation data is missing, download it using Google Earth Engine
-        5. Create the dataset
-        """
-        # ---------------------------------------------------------------------
-        # STEP 1: Obtain the labels
-        # ---------------------------------------------------------------------
-        if not self.df_path.exists() or force:
-            df = self.load_labels()
-            df = self.verify_and_standardize_df(df)
-            df.to_csv(self.df_path, index=False)
-        df = pd.read_csv(self.df_path)
+    def _fetch_eo_data_with_ee_tasks(
+        self, df: pd.DataFrame, no_eo: pd.Series, interactive: bool = False
+    ) -> pd.DataFrame:
+        """Fetch earth observation data for labels in a DataFrame using Earth Engine Tasks"""
 
-        # ---------------------------------------------------------------------
-        # STEP 2: Check if earth observation data already available
-        # ---------------------------------------------------------------------
-        no_eo = clean_df_condition(df) & (df[EO_DATA].isnull())
-        if no_eo.sum() == 0:
-            df = self._duplicates_check(df)
-            return self.summary(df)
-
-        print(self.summary(df))
-
-        # ---------------------------------------------------------------------
-        # STEP 3: Match labels to earth observation files
-        # ---------------------------------------------------------------------
+        # STEP 1: Match labels to earth observation files
         df[MATCHING_EO_FILES] = ""
         df.loc[no_eo, MATCHING_EO_FILES] = _match_labels_to_eo_files(df[no_eo])
 
@@ -432,11 +440,9 @@ class LabeledDataset:
         df_with_no_eo_files = df[no_eo].loc[~eo_files_found]
         df_with_eo_files = df[no_eo].loc[eo_files_found]
 
-        # ---------------------------------------------------------------------
-        # STEP 4: If no matching earth observation file, download it
-        # ---------------------------------------------------------------------
+        # STEP 2: If no matching earth observation file, download it
         already_getting_eo = df_with_no_eo_files[EO_STATUS] == EO_STATUS_EXPORTING
-        if already_getting_eo.sum() > 0:
+        if interactive and already_getting_eo.sum() > 0:
             confirm = (
                 input(
                     f"{already_getting_eo.sum()} labels were already set to {EO_STATUS_EXPORTING} ,"
@@ -450,28 +456,21 @@ class LabeledDataset:
 
         if len(df_with_no_eo_files) > 0:
             print(f"{len(df_with_no_eo_files)} labels not matched")
-            df_with_no_eo_files[START] = pd.to_datetime(
-                df_with_no_eo_files[START]
-            ).dt.date
-            df_with_no_eo_files[END] = pd.to_datetime(df_with_no_eo_files[END]).dt.date
             EarthEngineExporter(
                 check_ee=True, check_gcp=True, dest_bucket=BucketNames.LABELED_EO
             ).export_for_labels(labels=df_with_no_eo_files)
             df.loc[df_with_no_eo_files.index, EO_STATUS] = EO_STATUS_EXPORTING
 
-        # ---------------------------------------------------------------------
-        # STEP 5: Create the dataset (earth observation data, label)
-        # ---------------------------------------------------------------------
+        # STEP 3: Create the dataset (earth observation data, label)
         if len(df_with_eo_files) > 0:
             storage = import_optional_dependency("google.cloud.storage")
             tif_bucket = storage.Client().bucket(BucketNames.LABELED_EO)
 
             df[EO_DATA] = df[EO_DATA].astype(object)
-            df[EO_FILE] = df[EO_DATA].astype(str)
+            df[EO_FILE] = df[EO_FILE].astype(str)
 
-            def set_df(i, start, eo_paths, lon, lat, pbar):
+            def set_df(i, eo_paths, lon, lat, pbar):
                 (eo_data, eo_lon, eo_lat, eo_file) = _find_matching_point(
-                    start=start,
                     eo_paths=eo_paths,
                     label_lon=lon,
                     label_lat=lat,
@@ -508,7 +507,6 @@ class LabeledDataset:
             ) as pbar:
                 np.vectorize(set_df, otypes="b")(
                     i=df_with_eo_files.index,
-                    start=df_with_eo_files[START],
                     eo_paths=df_with_eo_files[MATCHING_EO_FILES],
                     lon=df_with_eo_files[LON],
                     lat=df_with_eo_files[LAT],
@@ -516,16 +514,117 @@ class LabeledDataset:
                 )
 
             df.drop(columns=[MATCHING_EO_FILES], inplace=True)
+        return df
+
+    def _fetch_eo_data_with_ee_api(
+        self, df: pd.DataFrame, npartitions: int = 4
+    ) -> pd.DataFrame:
+        """Fetch earth observation data for labels in a DataFrame using Earth Engine API"""
+
+        # Initialize dataframe and EarthEngineAPI
+        df[EO_DATA] = df[EO_DATA].astype(object)
+        df[START] = pd.to_datetime(df[START])
+        df[END] = pd.to_datetime(df[END])
+        df.reset_index()
+        ee_api = EarthEngineAPI()
+        dd = import_optional_dependency("dask.dataframe")
+        ddf = dd.from_pandas(df, npartitions=npartitions)
+        total = len(df)
+
+        # Download and extract eo data time series for each label
+        def get_eo_data(row, total=total):
+            prefix = f"{row.name}/{total}:"
+            print(f"{prefix} fetching EarthEngine image url")
+            url = ee_api.get_ee_url(
+                lat=row[LAT], lon=row[LON], start_date=row[START], end_date=row[END]
+            )
+            print(f"{prefix} fetching data: {url}")
+            eo_data, eo_lon, eo_lat = _find_matching_point_url(
+                url=url, label_lon=row[LON], label_lat=row[LAT]
+            )
+            if eo_data is None:
+                print(f"WARNING: {prefix} could not extract data from: {url}")
+                return None, None, None, EO_STATUS_MISSING_VALUES
+            print(f"{prefix} Successfully obtained earth observation data")
+            return eo_data.tolist(), eo_lat, eo_lon, EO_STATUS_COMPLETE
+
+        out = ddf.apply(get_eo_data, meta=tuple, axis=1).compute()
+        df[EO_DATA], df[EO_LAT], df[EO_LON], df[EO_STATUS] = zip(*out)
+
+        return df
+
+    def create_dataset(
+        self, ee_api: bool = False, interactive: bool = True, npartitions: int = 4
+    ) -> str:
+        """
+        A dataset consists of (X, y) pairs that are used to train and evaluate
+        a machine learning model. In this case,
+        - X is the earth observation data for a lat lon coordinate over a 24 month time series
+        - y is the binary class label for that coordinate
+        To create a dataset: load the labels, fetch the earth observation data, and save the dataset
+        :param ee_api: Use Earth Engine API to fetch earth observation data
+        :param interactive: Allow user prompts
+        :param npartitions: Number of partitions to use when fetching earth observation data
+        """
+
+        # Load the labels
+        if not self.df_path.exists():
+            df = self.load_labels()
+            df = self._verify_and_standardize_df(df)
             df.to_csv(self.df_path, index=False)
+        df = pd.read_csv(self.df_path)
+
+        # Check if earth observation data is already present
+        no_eo = clean_df_condition(df) & (df[EO_DATA].isnull())
+        if no_eo.sum() == 0:
+            df = self._mark_duplicates(df)
+            return self.summary(df)
+
+        # Fetch the earth observation data
+        print(self.summary(df))
+        if ee_api:
+            df = self._fetch_eo_data_with_ee_api(df, npartitions=npartitions)
+        else:
+            df = self._fetch_eo_data_with_ee_tasks(df, no_eo, interactive=interactive)
+        df = self._mark_duplicates(df)
+
+        # Save the dataset
+        df.to_csv(self.df_path, index=False)
         return self.summary(df)
 
 
-def create_datasets(datasets: List[LabeledDataset]):
+def create_datasets(datasets: List[LabeledDataset]) -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--ee_api",
+        dest="ee_api",
+        action="store_true",
+        help="Use Earth Engine API for eo data fetching",
+    )
+    parser.add_argument(
+        "--non-interactive",
+        dest="interactive",
+        action="store_false",
+        help="Run in non-interactive mode",
+    )
+    parser.add_argument(
+        "--npartitions",
+        dest="npartitions",
+        type=int,
+        default=4,
+        help="Number of partitions (only valid for ee_api mode)",
+    )
+    parser.set_defaults(ee_api=False)
+    parser.set_defaults(interactive=True)
+    args = parser.parse_args().__dict__
     report = "DATASET REPORT (autogenerated, do not edit directly)"
     for d in datasets:
         if not isinstance(d, LabeledDataset):
             raise TypeError(f"Expected LabeledDataset, got {type(d)}")
-        summary = d.create_dataset()
+
+        summary = d.create_dataset(
+            ee_api=args["ee_api"], interactive=args["interactive"]
+        )
         print(summary)
         report += "\n\n" + summary
 
