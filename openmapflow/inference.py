@@ -1,7 +1,5 @@
-import re
-from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -44,15 +42,6 @@ class Inference:
             )
 
     @staticmethod
-    def start_date_from_str(path: Union[Path, str]) -> datetime:
-        dates = re.findall(r"\d{4}-\d{2}-\d{2}", str(path))
-        if len(dates) < 1:
-            raise ValueError(f"{path} should have at least one date")
-        start_date_str = dates[0]
-        start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
-        return start_date
-
-    @staticmethod
     def _combine_predictions(
         flat_lat: np.ndarray, flat_lon: np.ndarray, batch_predictions: List[np.ndarray]
     ) -> pd.DataFrame:
@@ -84,13 +73,10 @@ class Inference:
     def run(
         self,
         local_path: Path,
-        start_date: Optional[datetime] = None,
         dest_path: Optional[Path] = None,
     ) -> pd.DataFrame:
         """Runs inference on a single tif file."""
-        if start_date is None:
-            start_date = self.start_date_from_str(local_path)
-        x_np, flat_lat, flat_lon = process_test_file(local_path, start_date)
+        x_np, flat_lat, flat_lon = process_test_file(local_path)
 
         if self.normalizing_dict is not None:
             x_np = (x_np - self.normalizing_dict["mean"]) / self.normalizing_dict["std"]

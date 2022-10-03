@@ -126,13 +126,8 @@ class ModelHandler(BaseHandler):
         local_src_path = download_file(uri)
         local_dest_path = Path(tempfile.gettempdir() + f"/pred_{Path(uri).stem}.nc")
 
-        start_date = Inference.start_date_from_str(uri)
-        print(f"HANDLER: Start date: {start_date}")
-
         print("HANDLER: Starting inference")
-        self.inference_module.run(
-            local_path=local_src_path, start_date=start_date, dest_path=local_dest_path
-        )
+        self.inference_module.run(local_path=local_src_path, dest_path=local_dest_path)
         print("HANDLER: Completed inference")
         dest_uri = upload_file(
             bucket_name=self.dest_bucket_name, local_path=local_dest_path, src_uri=uri
