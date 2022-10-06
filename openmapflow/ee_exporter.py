@@ -186,10 +186,14 @@ class EarthEngineExporter:
     """
 
     def __init__(
-        self, dest_bucket: str, check_ee: bool = False, check_gcp: bool = False
+        self,
+        dest_bucket: str,
+        check_ee: bool = False,
+        check_gcp: bool = False,
+        credentials=None,
     ) -> None:
         self.dest_bucket = dest_bucket
-        ee.Initialize(get_ee_credentials())
+        ee.Initialize(credentials=credentials if credentials else get_ee_credentials())
         self.check_ee = check_ee
         self.ee_task_list = get_ee_task_list() if self.check_ee else []
         self.check_gcp = check_gcp
@@ -326,9 +330,9 @@ class EarthEngineAPI:
         the default credentials will be used
     """
 
-    def __init__(self) -> None:
+    def __init__(self, credentials=None) -> None:
         ee.Initialize(
-            get_ee_credentials(),
+            ee.Initialize(credentials if credentials else get_ee_credentials()),
             opt_url="https://earthengine-highvolume.googleapis.com",
         )
 
