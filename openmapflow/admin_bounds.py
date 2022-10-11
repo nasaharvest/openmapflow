@@ -15,7 +15,7 @@ class AdminBoundary:
 
         assert len(self.country_iso3) == 3, "country_iso3 should be 3 letters"
 
-    def load_natural_earth_vector(self) -> gpd.GeoDataFrame:
+    def load_natural_earth_vector(self) -> None:
         """Load natural earth vector data for a country"""
         natural_earth_data = gpd.read_file(
             shpreader.natural_earth(
@@ -24,7 +24,7 @@ class AdminBoundary:
         )
 
         if len(self.regions_of_interest) == 0:
-            boundary = natural_earth_data[
+            self.boundary = natural_earth_data[
                 natural_earth_data["adm1_code"].str.startswith(self.country_iso3)
             ].copy()
 
@@ -46,10 +46,9 @@ class AdminBoundary:
             country_boundary = natural_earth_data[
                 natural_earth_data["adm1_code"].str.startswith(self.country_iso3)
             ]
-            boundary = country_boundary[
+            self.boundary = country_boundary[
                 country_boundary["name"].isin(self.regions_of_interest)
             ].copy()
-        return boundary
 
     def get_admin_identifier(self, start_date, end_start) -> str:
 
