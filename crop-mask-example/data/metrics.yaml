@@ -16,6 +16,17 @@ Togo_crop-mask_2019_February:
     precision: 0.609
     recall: 0.8879
     roc_auc: 0.8404
+bhyehcvpr:
+  class_probability:
+    0: 0.6537216828478964
+    1: 0.34627831715210355
+  test_metrics:
+    accuracy: 0.7379
+    f1: 0.7011
+    precision: 0.5793
+    recall: 0.8879
+    roc_auc: 0.8463
+  test_size: 309
 eunice-crop:
   local_testing_original_size: 309
   local_testing_positive_class_percentage: 0.3463
