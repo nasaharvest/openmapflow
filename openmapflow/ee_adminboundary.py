@@ -22,9 +22,9 @@ class EEAdminBoundary(AdminBoundary):
                 return ee.FeatureCollection(features.append(ee.Geometry.Polygon(cords)))
             else:
                 return ee.Feature(ee.Geometry.Polygon(cords))
-    
+
     # TODO: divide the polygon into smaller polygons
     # def to_polygons(self) -> List[ee.Geometry.Polygon]:
     #     pass
-    
+
     # def from_center
