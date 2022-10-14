@@ -108,7 +108,9 @@ def create_new_bbox_widget(get_bbox, coord_widgets):
     rectangle_widget = Box([VBox(all_coords, layout=Layout(align_items="center"))])
     cached_display = rectangle_widget.layout.display
     rectangle_widget.layout.display = "none"
-    toggle = ToggleButtons(options=["Square bbox", "Rectangle bbox"])
+    # TODO: dropdown for admin boundaries
+    # adim_wigdet = 
+    toggle = ToggleButtons(options=["Square bbox", "Rectangle bbox", "Admin boundary"])
 
     def change_visibility(event):
         try:
@@ -127,9 +129,12 @@ def create_new_bbox_widget(get_bbox, coord_widgets):
             bbox = get_bbox()
             for k in bbox_keys:
                 coord_widgets[k].value = round(getattr(bbox, k), 3)
+        elif i == 2:
+            # TODO: Admin boundary
+            pass
 
     toggle.observe(change_visibility)
-    return VBox([toggle, square_widget, rectangle_widget])
+    return VBox([toggle, square_widget, rectangle_widget, admin_widget])
 
 
 def create_available_bbox_widget(available_bboxes, update_event):
