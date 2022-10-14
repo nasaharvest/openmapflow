@@ -332,7 +332,7 @@ class EarthEngineAPI:
 
     def __init__(self, credentials=None) -> None:
         ee.Initialize(
-            ee.Initialize(credentials if credentials else get_ee_credentials()),
+            credentials if credentials else get_ee_credentials(),
             opt_url="https://earthengine-highvolume.googleapis.com",
         )
 
