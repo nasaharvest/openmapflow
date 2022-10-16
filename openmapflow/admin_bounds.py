@@ -24,9 +24,10 @@ class AdminBoundary:
         )
 
         if len(self.regions_of_interest) == 0:
-            self.boundary = natural_earth_data[
+            boundary = natural_earth_data[
                 natural_earth_data["adm1_code"].str.startswith(self.country_iso3)
             ].copy()
+            self.boundary = boundary.dissolve(by="adm0_a3")
 
         else:
             available_regions = natural_earth_data[
