@@ -3,7 +3,7 @@ import geopandas as gpd
 
 import cartopy.io.shapereader as shpreader
 from dataclasses import dataclass
-from typing import List
+from typing import List, Tuple
 
 
 @dataclass
@@ -14,9 +14,8 @@ class AdminBoundary:
     def __post_init__(self):
 
         assert len(self.country_iso3) == 3, "country_iso3 should be 3 letters"
+        self.country_iso3 = self.country_iso3.upper()
 
-    def load_natural_earth_vector(self) -> gpd.GeoDataFrame:
-        """Load natural earth vector data for a country"""
         natural_earth_data = gpd.read_file(
             shpreader.natural_earth(
                 resolution="10m", category="cultural", name="admin_1_states_provinces"
@@ -50,8 +49,7 @@ class AdminBoundary:
             self.boundary = country_boundary[
                 country_boundary["name"].isin(self.regions_of_interest)
             ].copy()
-        return self.boundary
-
+            self.boundary = self.boundary.dissolve(by="adm0_a3")
 
     def get_admin_identifier(self, start_date, end_start) -> str:
 
