@@ -1,8 +1,10 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 import ee
+from geopandas import gpd
 import numpy as np
+from shapely.geometry import Polygon
 
 from openmapflow.admin_bounds import AdminBoundary
 
@@ -12,23 +14,22 @@ class EEAdminBoundary(AdminBoundary):
     r""" """
 
     def to_ee_polygon(self) -> ee.Geometry.Polygon:
-        features = []
-        for i in range(len(self.boundary)):
-            if len(self.boundary) == 0:
-                return ee.Geometry
-            geoms_ = [i for i in self.boundary.geometry]
-            x, y = geoms_[i].exterior.coords.xy
-            cords = np.dstack((x, y)).tolist()
-            if i > 0:
-                return ee.FeatureCollection(features.append(ee.Geometry.Polygon(cords)))
-            else:
-                return ee.Feature(ee.Geometry.Polygon(cords))
+        if self.boundary.geom_type[0] == "Polygon":
+            for i in self.boundary.geometry:
+                return ee.Geometry.Polygon(np.dstack(i.exterior.coords.xy).tolist())
+        if self.boundary.geom_type[0] == "MultiPolygon":
+            for i in self.boundary.geometry:
+                return [
+                    ee.Geometry.Polygon(np.dstack(j.exterior.coords.xy).tolist())
+                    for j in i
+                ]
 
-    def to_polygon(self, size_per_patch: int = 3300) -> List[ee.Geometry.Polygon]:
+    def to_polygons(self, size_per_patch: int = 3300) -> List[ee.Geometry.Polygon]:
 
         self.boundary = self.boundary.to_crs(
             epsg=3857
-        )  # TODO: might need a second on this
+        )  # TODO: might need a second on this / check
+        # https://vscode.dev/github/nasaharvest/openmapflow/openmapflow/ee_boundingbox.py#L86
         xmin, ymin, xmax, ymax = self.boundary.total_bounds
 
         cols = np.arange(xmin, xmax + size_per_patch, size_per_patch)
@@ -36,18 +37,20 @@ class EEAdminBoundary(AdminBoundary):
 
         print(f"Splitting into {len(cols)-1} columns and {len(rows)-1} rows")
 
-        out_poygons: List[ee.Geometry.Polygon] = []
+        polygons = []
         for x in cols[:-1]:
             for y in rows[:-1]:
-                out_poygons.append(
-                    ee.Geometry.Polygon(
+                polygons.append(
+                    Polygon(
                         [
-                            [x, y],
-                            [x, y + size_per_patch],
-                            [x + size_per_patch, y + size_per_patch],
-                            [x + size_per_patch, y],
-                        ],
+                            (x, y),
+                            (x + size_per_patch, y),
+                            (x + size_per_patch, y + size_per_patch),
+                            (x, y + size_per_patch),
+                        ]
                     )
                 )
-
-        return out_poygons
+        fish_net = gpd.GeoDataFrame({"geometry": polygons}, crs=self.boundary.crs)
+        boundary_clip = gpd.clip(fish_net, self.boundary).to_crs(epsg=4326)
+        for i in boundary_clip.geometry:
+            return [ee.Geometry.Polygon(np.dstack(i.exterior.coords.xy).tolist())]
