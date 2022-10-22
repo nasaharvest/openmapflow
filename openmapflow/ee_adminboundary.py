@@ -17,7 +17,7 @@ class EEAdminBoundary(AdminBoundary):
         if self.boundary.geom_type[0] == "Polygon":
             for i in self.boundary.geometry:
                 return ee.Geometry.Polygon(np.dstack(i.exterior.coords.xy).tolist())
-        if self.boundary.geom_type[0] == "MultiPolygon":
+        elif self.boundary.geom_type[0] == "MultiPolygon":
             for i in self.boundary.geometry:
                 return [
                     ee.Geometry.Polygon(np.dstack(j.exterior.coords.xy).tolist())
