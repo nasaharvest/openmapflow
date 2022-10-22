@@ -10,7 +10,6 @@ from typing import List, Tuple
 class AdminBoundary:
     country_iso3: str
     regions_of_interest: List[str]
-
     def __post_init__(self):
 
         assert len(self.country_iso3) == 3, "country_iso3 should be 3 letters"
@@ -58,7 +57,7 @@ class AdminBoundary:
             return f"country_code={country_code}_dates={start_date}_{end_start}"
         else:
             return (
-                f"country_code={country_code}_region(s)={'_'.join(self.regions_of_interest)}_"
+                f"country_code={country_code}_region={'_'.join(self.regions_of_interest)}_"
                 f"dates={start_date}_{end_start}"
             )
 
@@ -67,9 +66,9 @@ class AdminBoundary:
         "Get country_iso3 and regions_of_interest from a string"
 
         country_iso3 = re.search(r"country_code=(\w{3})", s).group(1)
-        regions_of_interest = re.search(r"region\(s\)=([\w_]+)", s)
+        regions_of_interest = re.search(r"region=([\w_]+)", s)
         if regions_of_interest:
-            regions_of_interest = regions_of_interest.group(1).split("_")
+            regions_of_interest = regions_of_interest.group(1).split("_")[:-1]
         else:
             regions_of_interest = []
         return cls(country_iso3=country_iso3, regions_of_interest=regions_of_interest)
