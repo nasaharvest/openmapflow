@@ -1,9 +1,10 @@
 import re
 import geopandas as gpd
+from shapely.geometry import Point, box
 
 import cartopy.io.shapereader as shpreader
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import List
 
 
 @dataclass
@@ -49,6 +50,17 @@ class AdminBoundary:
                 country_boundary["name"].isin(self.regions_of_interest)
             ].copy()
             self.boundary = self.boundary.dissolve(by="adm0_a3")
+
+    def contains(self, lat, lon) -> bool:
+        """ check if a point is inside the admin boundary"""
+        point = gpd.GeoSeries(Point(lon, lat), crs="EPSG:4326")
+        return self.boundary.geometry[0].contains(point.geometry[0])
+
+    def contains_bbox(self, bbox) -> bool:
+        """ check if the labels bbox is inside the admin boundary"""
+        bbox_bound = gpd.GeoSeries(box(bbox.min_lon, bbox.min_lat, bbox.max_lon, bbox.max_lat), crs="EPSG:4326")
+        return self.self.boundary.geometry[0].contains(bbox_bound.geometry[0])
+
 
     def get_admin_identifier(self, start_date, end_start) -> str:
 
