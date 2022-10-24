@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List
 
 import ee
 from geopandas import gpd
@@ -28,8 +28,7 @@ class EEAdminBoundary(AdminBoundary):
 
         self.boundary = self.boundary.to_crs(
             epsg=3857
-        )  # TODO: might need a second on this / check
-        # https://vscode.dev/github/nasaharvest/openmapflow/openmapflow/ee_boundingbox.py#L86
+        ) # convert to web mercator for area calculation
         xmin, ymin, xmax, ymax = self.boundary.total_bounds
 
         cols = np.arange(xmin, xmax + size_per_patch, size_per_patch)
