@@ -9,6 +9,7 @@ from pandas.compat._optional import import_optional_dependency
 
 from openmapflow.bands import DAYS_PER_TIMESTEP, DYNAMIC_BANDS
 from openmapflow.bbox import BBox
+from openmapflow.admin_bounds import AdminBoundary
 from openmapflow.constants import END, LAT, LON, START
 from openmapflow.utils import tqdm
 
@@ -16,6 +17,7 @@ try:
     import ee
 
     from openmapflow.ee_boundingbox import EEBoundingBox
+    from openmapflow.ee_adminboundary import EEAdminBoundary
     from openmapflow.eo.era5 import get_single_image as get_single_era5_image
     from openmapflow.eo.sentinel1 import get_image_collection as get_s1_image_collection
     from openmapflow.eo.sentinel1 import get_single_image as get_single_s1_image
@@ -276,6 +278,44 @@ class EarthEngineExporter:
             return_obj[identifier] = self._export_for_polygon(
                 polygon=region,
                 polygon_identifier=f"{bbox_name}/{identifier}",
+                start_date=start_date,
+                end_date=end_date,
+                file_dimensions=file_dimensions,
+                test=True,
+            )
+        return return_obj
+
+    def export_for_adminbondary(
+        self,
+        adminboundary: AdminBoundary,
+        start_date: date,
+        end_date: date,
+        size_per_patch: Optional[int] = 30000,
+        file_dimensions: Optional[int] = None,
+    ) -> Dict[str, bool]:
+        if start_date > end_date:
+            raise ValueError(f"Start date {start_date} is after end date {end_date}")
+
+        if size_per_patch is not None:
+            regions = EEAdminBoundary.to_polygons(
+                adminboundary, size_per_patch=size_per_patch
+            )
+            ids = [f"batch_{i}/{i}" for i in range(len(regions))]
+        else:
+            regions = EEAdminBoundary.to_ee_polygon(adminboundary)
+            ids = [f"batch_0/0"]
+        if len(adminboundary.regions_of_interest) == 0:
+            roi_name = adminboundary.country_iso3
+        else:
+            roi_name = (
+                f"{adminboundary.country_iso3}_"
+                f"{'_'.join(str(x) for x in adminboundary.regions_of_interest)}"
+            )
+        return_obj = {}
+        for identifier, region in zip(ids, regions):
+            return_obj[identifier] = self._export_for_polygon(
+                polygon=region,
+                polygon_identifier=f"{roi_name}/{identifier}",
                 start_date=start_date,
                 end_date=end_date,
                 file_dimensions=file_dimensions,
