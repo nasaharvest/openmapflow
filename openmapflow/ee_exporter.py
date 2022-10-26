@@ -290,20 +290,20 @@ class EarthEngineExporter:
         adminboundary: AdminBoundary,
         start_date: date,
         end_date: date,
-        size_per_patch: Optional[int] = 30000,
+        metres_per_polygon: Optional[int] = 30000,
         file_dimensions: Optional[int] = None,
     ) -> Dict[str, bool]:
         if start_date > end_date:
             raise ValueError(f"Start date {start_date} is after end date {end_date}")
 
-        if size_per_patch is not None:
+        if metres_per_polygon is not None:
             regions = EEAdminBoundary.to_polygons(
-                adminboundary, size_per_patch=size_per_patch
+                adminboundary, metres_per_polygon=metres_per_polygon
             )
             ids = [f"batch_{i}/{i}" for i in range(len(regions))]
         else:
             regions = EEAdminBoundary.to_ee_polygon(adminboundary)
-            ids = [f"batch_0/0"]
+            ids = [f"batch/0"]
         if len(adminboundary.regions_of_interest) == 0:
             roi_name = adminboundary.country_iso3
         else:
