@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:experimental
-FROM pytorch/torchserve:0.5.3-cpu
+FROM pytorch/torchserve:0.6.0-cpu
 USER root
 RUN pip3 install --upgrade pip
 ARG VERSION
