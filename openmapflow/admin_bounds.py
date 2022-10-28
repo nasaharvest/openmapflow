@@ -11,11 +11,13 @@ from typing import List
 class AdminBoundary:
     country_iso3: str
     regions_of_interest: List[str]
+
     def __post_init__(self):
 
         assert len(self.country_iso3) == 3, "country_iso3 should be 3 letters"
         self.country_iso3 = self.country_iso3.upper()
-
+        self.regions_of_interest = [region.title() for region in self.regions_of_interest]
+        
         natural_earth_data = gpd.read_file(
             shpreader.natural_earth(
                 resolution="10m", category="cultural", name="admin_1_states_provinces"
@@ -51,36 +53,3 @@ class AdminBoundary:
             ].copy()
             self.boundary = self.boundary.dissolve(by="adm0_a3")
 
-    def contains(self, lat, lon) -> bool:
-        """ check if a point is inside the admin boundary"""
-        point = gpd.GeoSeries(Point(lon, lat), crs="EPSG:4326")
-        return self.boundary.geometry[0].contains(point.geometry[0])
-
-    def contains_bbox(self, bbox) -> bool:
-        """ check if the labels bbox is inside the admin boundary"""
-        bbox_bound = gpd.GeoSeries(box(bbox.min_lon, bbox.min_lat, bbox.max_lon, bbox.max_lat), crs="EPSG:4326")
-        return self.self.boundary.geometry[0].contains(bbox_bound.geometry[0])
-
-
-    def get_admin_identifier(self, start_date, end_start) -> str:
-
-        country_code = self.country_iso3.lower()
-        if len(self.regions_of_interest) == 0:
-            return f"country_code={country_code}_dates={start_date}_{end_start}"
-        else:
-            return (
-                f"country_code={country_code}_region={'_'.join(self.regions_of_interest)}_"
-                f"dates={start_date}_{end_start}"
-            )
-
-    @classmethod
-    def from_str(cls, s: str) -> "AdminBoundary":
-        "Get country_iso3 and regions_of_interest from a string"
-
-        country_iso3 = re.search(r"country_code=(\w{3})", s).group(1)
-        regions_of_interest = re.search(r"region=([\w_]+)", s)
-        if regions_of_interest:
-            regions_of_interest = regions_of_interest.group(1).split("_")[:-1]
-        else:
-            regions_of_interest = []
-        return cls(country_iso3=country_iso3, regions_of_interest=regions_of_interest)
