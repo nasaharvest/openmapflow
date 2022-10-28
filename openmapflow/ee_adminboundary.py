@@ -24,15 +24,15 @@ class EEAdminBoundary(AdminBoundary):
                     for j in i
                 ]
 
-    def to_polygons(self, size_per_patch: int = 3300) -> List[ee.Geometry.Polygon]:
+    def to_polygons(self, metres_per_polygon: int = 10000) -> List[ee.Geometry.Polygon]:
 
         self.boundary = self.boundary.to_crs(
             epsg=3857
-        ) # convert to web mercator for area calculation
+        )  # convert to web mercator for area calculation
         xmin, ymin, xmax, ymax = self.boundary.total_bounds
 
-        cols = np.arange(xmin, xmax + size_per_patch, size_per_patch)
-        rows = np.arange(ymin, ymax + size_per_patch, size_per_patch)
+        cols = np.arange(xmin, xmax + metres_per_polygon, metres_per_polygon)
+        rows = np.arange(ymin, ymax + metres_per_polygon, metres_per_polygon)
 
         print(f"Splitting into {len(cols)-1} columns and {len(rows)-1} rows")
 
@@ -43,13 +43,24 @@ class EEAdminBoundary(AdminBoundary):
                     Polygon(
                         [
                             (x, y),
-                            (x + size_per_patch, y),
-                            (x + size_per_patch, y + size_per_patch),
-                            (x, y + size_per_patch),
+                            (x + metres_per_polygon, y),
+                            (x + metres_per_polygon, y + metres_per_polygon),
+                            (x, y + metres_per_polygon),
                         ]
                     )
                 )
         fish_net = gpd.GeoDataFrame({"geometry": polygons}, crs=self.boundary.crs)
         boundary_clip = gpd.clip(fish_net, self.boundary).to_crs(epsg=4326)
+        output_polygons: List[ee.Geometry.Polygon] = []
+
         for i in boundary_clip.geometry:
-            return [ee.Geometry.Polygon(np.dstack(i.exterior.coords.xy).tolist())]
+            if i.geom_type == "Polygon":
+                output_polygons.append(
+                    ee.Geometry.Polygon(np.dstack(i.exterior.coords.xy).tolist())
+                )
+            elif i.geom_type == "MultiPolygon":
+                for j in i:
+                    output_polygons.append(
+                        ee.Geometry.Polygon(np.dstack(j.exterior.coords.xy).tolist())
+                    )
+        return output_polygons
