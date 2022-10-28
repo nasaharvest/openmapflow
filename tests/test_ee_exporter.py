@@ -5,6 +5,7 @@ from unittest.mock import call, patch
 import pandas as pd
 
 from openmapflow.bbox import BBox
+from openmapflow.admin_bounds import AdminBoundary
 from openmapflow.constants import END, LAT, LON, START
 from openmapflow.ee_exporter import (
     EarthEngineExporter,
@@ -154,6 +155,74 @@ class TestEarthEngineExporter(TestCase):
                     test=True,
                 )
                 for i in range(1155)
+            ],
+            any_order=True,
+        )
+
+    @patch("openmapflow.ee_exporter.ee.Initialize")
+    @patch("openmapflow.ee_exporter.ee.Geometry.Polygon")
+    @patch("openmapflow.ee_exporter.EarthEngineExporter._export_for_polygon")
+    def test_export_for_adminbounds_size_per_polygon_None(
+        self, mock_export_for_polygon, mock_polygon, mock_ee_initialize
+    ):
+        mock_polygon.return_value = None
+
+        start_date, end_date = date(2019, 4, 1), date(2020, 4, 1)
+        admin_bounds = AdminBoundary(
+            country_iso3="NGA",
+            regions_of_interest=[],
+        )
+        EarthEngineExporter(
+            dest_bucket="mock", check_gcp=False, check_ee=False
+        ).export_for_adminbondary(
+            adminboundary=admin_bounds,
+            start_date=start_date,
+            end_date=end_date,
+            metres_per_polygon=None,
+        )
+        self.assertEqual(mock_export_for_polygon.call_count, 1)
+        mock_export_for_polygon.assert_called_with(
+            end_date=end_date,
+            polygon=None,
+            polygon_identifier="NGA/batch/0",
+            start_date=start_date,
+            file_dimensions=None,
+            test=True,
+        )
+
+    @patch("openmapflow.ee_exporter.ee.Initialize")
+    @patch("openmapflow.ee_exporter.ee.Geometry.Polygon")
+    @patch("openmapflow.ee_exporter.EarthEngineExporter._export_for_polygon")
+    def test_export_for_adminbounds_size_per_polygon_10000(
+        self, mock_export_for_polygon, mock_polygon, mock_ee_initialize
+    ):
+        mock_polygon.return_value = None
+
+        start_date, end_date = date(2019, 4, 1), date(2020, 4, 1)
+        admin_bounds = AdminBoundary(
+            country_iso3="TGO",
+            regions_of_interest=[],
+        )
+        EarthEngineExporter(
+            dest_bucket="mock", check_gcp=False, check_ee=False
+        ).export_for_adminbondary(
+            adminboundary=admin_bounds,
+            start_date=start_date,
+            end_date=end_date,
+            metres_per_polygon=100000,
+        )
+        self.assertEqual(mock_export_for_polygon.call_count, 6)
+        mock_export_for_polygon.assert_has_calls(
+            [
+                call(
+                    end_date=end_date,
+                    polygon=None,
+                    polygon_identifier=f"NGA/batch_{i}/{i}",
+                    start_date=start_date,
+                    file_dimensions=None,
+                    test=True,
+                )
+                for i in range(6)
             ],
             any_order=True,
         )
