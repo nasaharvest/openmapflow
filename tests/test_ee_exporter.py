@@ -211,18 +211,18 @@ class TestEarthEngineExporter(TestCase):
             end_date=end_date,
             metres_per_polygon=100000,
         )
-        self.assertEqual(mock_export_for_polygon.call_count, 6)
+        self.assertEqual(mock_export_for_polygon.call_count, 16)
         mock_export_for_polygon.assert_has_calls(
             [
                 call(
                     end_date=end_date,
                     polygon=None,
-                    polygon_identifier=f"NGA/batch_{i}/{i}",
+                    polygon_identifier=f"TGO/batch_{i}/{i}",
                     start_date=start_date,
                     file_dimensions=None,
                     test=True,
                 )
-                for i in range(6)
+                for i in range(16)
             ],
             any_order=True,
         )
