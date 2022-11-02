@@ -12,7 +12,6 @@ import pandas as pd
 import requests
 from dateutil.relativedelta import relativedelta
 from pandas.compat._optional import import_optional_dependency
-from openmapflow.admin_bounds import AdminBoundary
 
 from openmapflow.bbox import BBox
 from openmapflow.config import GCLOUD_LOCATION, PROJECT_ROOT, BucketNames
@@ -84,15 +83,6 @@ def _generate_bbox_from_paths() -> Dict[Path, BBox]:
         for uri in tqdm(cloud_eo_uris, desc="Generating BBoxes from paths")
     }
 
-# TODO: fix the connecting methods
-def _generate_adminbounadry_from_paths() -> Dict[Path, AdminBoundary]:
-    cloud_eo_uris = get_cloud_tif_list(
-        BucketNames.LABELED_EO, region=GCLOUD_LOCATION
-    )
-    return {
-        Path(uri): AdminBoundary.from_str(uri)
-        for uri in tqdm(cloud_eo_uris, desc="Generating AdminBoundaries from paths")
-    }
 
 def _get_tif_paths(
     path_to_bbox: Dict,
