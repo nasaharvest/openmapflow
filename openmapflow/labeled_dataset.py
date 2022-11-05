@@ -437,7 +437,7 @@ class LabeledDataset:
                 or "n"
             )
             if confirm.lower() == "y":
-                df.loc[already_getting_eo, EO_STATUS] = EO_STATUS_EXPORT_FAILED
+                df.loc[already_getting_eo.index, EO_STATUS] = EO_STATUS_EXPORT_FAILED
                 df_with_no_eo_files = df_with_no_eo_files.loc[~already_getting_eo]
 
         if len(df_with_no_eo_files) > 0:
