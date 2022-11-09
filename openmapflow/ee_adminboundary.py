@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from typing import List
 
 import ee
-from geopandas import gpd
 import numpy as np
+from geopandas import gpd
 from shapely.geometry import Polygon
 
 from openmapflow.admin_bounds import AdminBoundary
@@ -64,3 +64,9 @@ class EEAdminBoundary(AdminBoundary):
                         ee.Geometry.Polygon(np.dstack(j.exterior.coords.xy).tolist())
                     )
         return output_polygons
+
+    def from_adminboundary(admin_bounds: AdminBoundary) -> "EEAdminBoundary":
+        return EEAdminBoundary(
+            country_iso3=admin_bounds.country_iso3,
+            regions_of_interest=admin_bounds.regions_of_interest,
+        )

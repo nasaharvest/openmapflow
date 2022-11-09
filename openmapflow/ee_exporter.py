@@ -7,17 +7,17 @@ from typing import Dict, List, Optional, Union
 import pandas as pd
 from pandas.compat._optional import import_optional_dependency
 
+from openmapflow.admin_bounds import AdminBoundary
 from openmapflow.bands import DAYS_PER_TIMESTEP, DYNAMIC_BANDS
 from openmapflow.bbox import BBox
-from openmapflow.admin_bounds import AdminBoundary
 from openmapflow.constants import END, LAT, LON, START
 from openmapflow.utils import tqdm
 
 try:
     import ee
 
-    from openmapflow.ee_boundingbox import EEBoundingBox
     from openmapflow.ee_adminboundary import EEAdminBoundary
+    from openmapflow.ee_boundingbox import EEBoundingBox
     from openmapflow.eo.era5 import get_single_image as get_single_era5_image
     from openmapflow.eo.sentinel1 import get_image_collection as get_s1_image_collection
     from openmapflow.eo.sentinel1 import get_single_image as get_single_s1_image
@@ -296,14 +296,15 @@ class EarthEngineExporter:
         if start_date > end_date:
             raise ValueError(f"Start date {start_date} is after end date {end_date}")
 
+        ee_adminboundary = EEAdminBoundary.from_adminboundary(adminboundary)
         if metres_per_polygon is not None:
-            regions = EEAdminBoundary.to_polygons(
-                adminboundary, metres_per_polygon=metres_per_polygon
+            regions = ee_adminboundary.to_polygons(
+                metres_per_polygon=metres_per_polygon
             )
             ids = [f"batch_{i}/{i}" for i in range(len(regions))]
         else:
-            regions = EEAdminBoundary.to_ee_polygon(adminboundary)
-            ids = [f"batch/0"]
+            regions = ee_adminboundary.to_ee_polygon()
+            ids = ["batch/0"]
         if len(adminboundary.regions_of_interest) == 0:
             roi_name = adminboundary.country_iso3
         else:
