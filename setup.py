@@ -66,6 +66,7 @@ setup(
             "xarray",
             "fastcore<1.5.18",
             "tsai",
+            "rtree",
         ],
     },
     python_requires=">=3.6",
