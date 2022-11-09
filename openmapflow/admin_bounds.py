@@ -18,7 +18,7 @@ class AdminBoundary:
         ]
 
         natural_earth_data = gpd.read_file(
-            r"openmapflow\dataset\natural_earth\ne_10m_admin_1_states_provinces.shp"
+            "openmapflow/dataset/natural_earth/ne_10m_admin_1_states_provinces.shp"
         )
 
         if len(self.regions_of_interest) == 0:
