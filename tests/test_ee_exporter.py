@@ -4,8 +4,8 @@ from unittest.mock import call, patch
 
 import pandas as pd
 
-from openmapflow.bbox import BBox
 from openmapflow.admin_bounds import AdminBoundary
+from openmapflow.bbox import BBox
 from openmapflow.constants import END, LAT, LON, START
 from openmapflow.ee_exporter import (
     EarthEngineExporter,
