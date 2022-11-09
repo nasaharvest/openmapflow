@@ -1,10 +1,7 @@
-import re
-import geopandas as gpd
-from shapely.geometry import Point, box
-
-import cartopy.io.shapereader as shpreader
 from dataclasses import dataclass
 from typing import List
+
+import geopandas as gpd
 
 
 @dataclass
@@ -16,12 +13,12 @@ class AdminBoundary:
 
         assert len(self.country_iso3) == 3, "country_iso3 should be 3 letters"
         self.country_iso3 = self.country_iso3.upper()
-        self.regions_of_interest = [region.title() for region in self.regions_of_interest]
-        
+        self.regions_of_interest = [
+            region.title() for region in self.regions_of_interest
+        ]
+
         natural_earth_data = gpd.read_file(
-            shpreader.natural_earth(
-                resolution="10m", category="cultural", name="admin_1_states_provinces"
-            )
+            r"openmapflow\dataset\natural_earth\ne_10m_admin_1_states_provinces.shp"
         )
 
         if len(self.regions_of_interest) == 0:
@@ -52,4 +49,3 @@ class AdminBoundary:
                 country_boundary["name"].isin(self.regions_of_interest)
             ].copy()
             self.boundary = self.boundary.dissolve(by="adm0_a3")
-
