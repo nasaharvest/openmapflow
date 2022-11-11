@@ -29,6 +29,7 @@ from openmapflow.constants import (
     EO_STATUS_EXPORT_FAILED,
     EO_STATUS_EXPORTING,
     EO_STATUS_MISSING_VALUES,
+    EO_STATUS_SKIPPED,
     EO_STATUS_WAITING,
     LAT,
     LON,
@@ -224,6 +225,7 @@ def clean_df_condition(df: pd.DataFrame) -> pd.Series:
         (df[EO_STATUS] != EO_STATUS_MISSING_VALUES)
         & (df[EO_STATUS] != EO_STATUS_EXPORT_FAILED)
         & (df[EO_STATUS] != EO_STATUS_DUPLICATE)
+        & (df[EO_STATUS] != EO_STATUS_SKIPPED)
     )
 
 
