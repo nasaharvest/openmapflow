@@ -395,7 +395,7 @@ class LabeledDataset:
                 + "run openmapflow create-datasets"
             )
         if to_np:
-            tqdm.pandas(self.name)
+            tqdm.pandas(desc=self.name)
             df[EO_DATA] = df[EO_DATA].progress_apply(str_to_np)
         return df
 
