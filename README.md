@@ -32,7 +32,7 @@ Rapid map creation with machine learning and earth observation data.
 * [Tutorial](#tutorial-)
 * [Creating a map from scratch](#creating-a-map-from-scratch)
     * [Generating a project](#generating-a-project-)
-    * [Adding data](#adding-data-)
+    * [Adding data](#adding-data)
     * [Training a model](#training-a-model-)
     * [Creating a map](#creating-a-map-)
 * [Accessing existing datasets](#accessing-existing-datasets)
