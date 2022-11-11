@@ -102,11 +102,7 @@ After all configuration is set, the following project structure will be generate
 ```
 
 **Github Actions Secrets**
-When code is pushed to the repository a Github action will be run to verify project configuration, data integrity, and script functionality. This action will pull data using dvc and thereby needs access to remote storage (your Google Drive). To allow the Github action to access the data, add a new repository secret ([instructions](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository)). 
-- In step 5 of the instructions, name the secret: `GDRIVE_CREDENTIALS_DATA`
-- In step 6, enter the value in .dvc/tmp/gdrive-user-creditnals.json (in your repository)
-
-When a new model is pushed to the repository a Github action will be run to deploy this model to Google Cloud. To allow the Github action to access Google Cloud add a new repository secret ([instructions](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository)). 
+Being able to pull and deploy data inside Github Actions requires access to Google Cloud. To allow the Github action to access Google Cloud, add a new repository secret ([instructions](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository)). 
 - In step 5 of the instructions, name the secret: `GCP_SA_KEY`
 - In step 6, enter your Google Cloud Service Account Key
 

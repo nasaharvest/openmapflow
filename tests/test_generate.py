@@ -153,9 +153,6 @@ class TestGenerate(TestCase):
                         {"uses": "iterative/setup-dvc@v1"},
                         {
                             "name": "Deploy Google Cloud Architecture",
-                            "env": {
-                                "GDRIVE_CREDENTIALS_DATA": "${{ secrets.GDRIVE_CREDENTIALS_DATA }}"
-                            },
                             "run": "openmapflow deploy",
                         },
                     ],
@@ -211,9 +208,6 @@ class TestGenerate(TestCase):
                         },
                         {
                             "name": "dvc pull data",
-                            "env": {
-                                "GDRIVE_CREDENTIALS_DATA": "${{ secrets.GDRIVE_CREDENTIALS_DATA }}"
-                            },
                             "run": "dvc pull -f",
                         },
                         {
