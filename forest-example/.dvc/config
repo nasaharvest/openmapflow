@@ -1,6 +1,0 @@
-[core]
-    remote = gsremote
-['remote "gdrive"']
-    url = gdrive://1eriIDTnsJ68D9-9ZBu1NdVMXmhncMBv6
-['remote "gsremote"']
-    url = gs://harvest-public-assets/openmapflow-dvc/forest-example
