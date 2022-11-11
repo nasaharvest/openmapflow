@@ -252,7 +252,7 @@ class TestGenerate(TestCase):
         def input_response(prompt):
             if "a)" in prompt:
                 return "a"
-            return "fake-gdrive-id"
+            return "gs://fake-bucket"
 
         with tempfile.TemporaryDirectory() as tmpdir:
             os.chdir(tmpdir)
@@ -273,5 +273,5 @@ class TestGenerate(TestCase):
         ]
         self.assertIn("dvc init", system_calls)
         self.assertIn("dvc add " + " ".join(dvc_files), system_calls)
-        self.assertIn("dvc remote add -d gdrive gdrive://fake-gdrive-id", system_calls)
+        self.assertIn("dvc remote add -d gcs gs://fake-bucket", system_calls)
         self.assertIn("dvc push", system_calls)
