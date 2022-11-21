@@ -1,0 +1,50 @@
+-----------------------------------------------------
+TRAINING PARAMETERS:
+model_name: NormAllCh-n_ep10-Feb_12-lr0001-b_size64-upsm_ratio05
+start_month: February
+input_months: 12
+batch_size: 64
+upsample_minority_ratio: 0.5
+lr: 0.001
+num_epochs: 10
+
+Normalizing band values by STATISTICS_BANDS_MAX
+Model(
+  (model): TransformerModel(
+    (permute): Permute(dims=2, 0, 1)
+    (inlinear): Linear(in_features=18, out_features=64, bias=True)
+    (relu): ReLU()
+    (transformer_encoder): TransformerEncoder(
+      (layers): ModuleList(
+        (0): TransformerEncoderLayer(
+          (self_attn): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=64, out_features=64, bias=True)
+          )
+          (linear1): Linear(in_features=64, out_features=128, bias=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (linear2): Linear(in_features=128, out_features=64, bias=True)
+          (norm1): LayerNorm((64,), eps=1e-05, elementwise_affine=True)
+          (norm2): LayerNorm((64,), eps=1e-05, elementwise_affine=True)
+          (dropout1): Dropout(p=0.1, inplace=False)
+          (dropout2): Dropout(p=0.1, inplace=False)
+        )
+      )
+      (norm): LayerNorm((64,), eps=1e-05, elementwise_affine=True)
+    )
+    (transpose): Transpose(1, 0)
+    (max): Max(dim=1, keepdim=False)
+    (outlinear): Linear(in_features=64, out_features=1, bias=True)
+  )
+)
+EPOCH: TRAIN-LOSS,	 VAL-LOSS	 --- F1,	 ACCURACY,	 PERCISION,	 RECALL,	 ROC-AUC,	
+0: 0.5362811704625755,	 0.7643632966258466	 --- 0.037,	 0.4368,	 0.6,	 0.0191,	 0.6788
+1: 0.4428918339200447,	 0.5575918142115597	 --- 0.7376,	 0.7329,	 0.832,	 0.6624,	 0.8128
+4: 0.39901211187368296,	 0.4553845255813874	 --- 0.8462,	 0.8267,	 0.8516,	 0.8408,	 0.8837
+8: 0.37996963478782403,	 0.44505997739113623	 --- 0.8478,	 0.8159,	 0.7978,	 0.9045,	 0.8728
+9: 0.3785630509567418,	 0.4254689153135899	 --- 0.8599,	 0.8412,	 0.8599,	 0.8599,	 0.889
+
+model_path: /home/naama/Documents/MyProjects/OpenMapFlow/openmapflow/crop-mask-example/data/models/NormAllCh-n_ep10-Feb_12-lr0001-b_size64-upsm_ratio05.pt
+
+-----------------------------------------------------
+EVALUATION METRICS:
+{'accuracy': 0.8123, 'f1': 0.7642, 'precision': 0.6763, 'recall': 0.8785, 'roc_auc': 0.8861}
