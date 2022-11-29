@@ -372,7 +372,12 @@ class LabeledDataset:
 
     def _mark_duplicates(self, df: pd.DataFrame):
         """Mark duplicates in dataframe"""
-        clean_df = df[clean_df_condition(df)]
+        clean_df = df[
+            clean_df_condition(df)
+            & df[EO_LAT].notnull()
+            & df[EO_LON].notnull()
+            & df[EO_FILE].notnull()
+        ]
         duplicates = clean_df.duplicated(subset=[EO_LAT, EO_LON, EO_FILE])
         if duplicates.sum() > 0:
             print(f"Found {duplicates.sum()} duplicates")
