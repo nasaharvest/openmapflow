@@ -1,2 +1,0 @@
-dvc[gdrive]>=2.10.1
--e ..[all]

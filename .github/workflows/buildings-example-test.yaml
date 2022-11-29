@@ -28,9 +28,6 @@ jobs:
       run: pip install -r requirements.txt
 
     - name: dvc pull data
-      env:
-        # https://dvc.org/doc/user-guide/setup-google-drive-remote#authorization
-        GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
       run: dvc pull -f
 
     - name: Integration test - Project

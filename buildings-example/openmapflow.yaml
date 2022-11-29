@@ -1,4 +1,4 @@
-version: 0.1.6rc3
+version: 0.2.1
 project: buildings-example
 description: OpenMapFlow buildings example
 gcloud:

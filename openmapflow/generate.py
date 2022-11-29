@@ -177,7 +177,7 @@ def setup_dvc(PROJECT_ROOT: Path, is_subdir: bool, dp):
     if not confirmation("Install dvc for data version control?"):
         return
 
-    _print_and_run("pip install dvc[gdrive]")
+    _print_and_run("pip install dvc[gs]")
     if is_subdir:
         _print_and_run("dvc init --subdir")
     else:
@@ -188,17 +188,23 @@ def setup_dvc(PROJECT_ROOT: Path, is_subdir: bool, dp):
 
     print("dvc stores data in remote storage (s3, gcs, gdrive, etc)")
     print("https://dvc.org/doc/command-reference/remote/add#supported-storage-types")
-    option = input("a) Setup gdrive / b) Exit and setup own remote [a]/b: ")
+    option = input(
+        "a) Setup google cloud remote storage / b) Exit and setup own remote [a]/b: "
+    )
     if option.lower() == "b":
         return
 
-    print("We'll follow: https://dvc.org/doc/user-guide/setup-google-drive-remote")
-    gdrive_url = input("Last part of gdrive folder url: ")
-    if gdrive_url:
-        _print_and_run(f"dvc remote add -d gdrive gdrive://{gdrive_url}")
+    print(
+        "We'll follow: https://dvc.org/doc/command-reference/remote/add#google-cloud-storage"
+    )
+    gcs_uri = input("Google Cloud Storage URI (E.g. gs://mybucket/path): ")
+    if gcs_uri.startswith("gs://"):
+        _print_and_run(f"dvc remote add -d gcs {gcs_uri}")
         _print_and_run("dvc push")
     else:
-        print("You must enter a valid gdrive url")
+        print(
+            "You must enter a valid Google Cloud Storage URI (E.g. gs://mybucket/path)"
+        )
 
 
 if __name__ == "__main__":

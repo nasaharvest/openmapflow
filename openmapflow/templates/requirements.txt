@@ -1,2 +1,2 @@
-dvc[gdrive]>=2.10.1
+dvc[gs]>=2.10.1
 openmapflow[all]
