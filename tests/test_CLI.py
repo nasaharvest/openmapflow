@@ -59,8 +59,9 @@ class TestCLI(TestCase):
 
     @skipIf(os.name == "nt", "Not yet available on Windows")
     def test_help(self):
+        self.maxDiff = None
         actual_output = check_output(["openmapflow", "help"]).decode().rstrip()
-        long_line = "-" * 81
+        long_line = "-" * 93
         expected_output = f"""{long_line}
                               OpenMapFlow CLI\n{long_line}
 openmapflow cp <source> <destination> - copy a file or directory from the library
@@ -72,5 +73,6 @@ openmapflow dir - outputs openmapflow library directory
 openmapflow generate - generates an openmapflow project
 openmapflow help - outputs this message
 openmapflow ls - lists files in openmapflow library directory
+openmapflow verify <DATASET> - verifies a user declared LabeledDataset class in datasets.py
 openmapflow version - package version"""
         self.assertEqual(actual_output, expected_output)

@@ -17,11 +17,11 @@ case $1 in
         ;;
     "create-datasets")
         check_openmapflow_yaml
-        python3 -c "from datasets import datasets; from openmapflow.labeled_dataset import create_datasets; create_datasets(datasets)" "${@:2}"
+        python -c "from datasets import datasets; from openmapflow.labeled_dataset import create_datasets; create_datasets(datasets)" "${@:2}"
         ;;
     "datapath")
         check_openmapflow_yaml
-        python3 -c "from openmapflow.config import DataPaths; print(DataPaths.get('$2'))"
+        python -c "from openmapflow.config import DataPaths; print(DataPaths.get('$2'))"
         ;;
     "datasets")
         check_openmapflow_yaml
@@ -35,10 +35,14 @@ case $1 in
         librarydir
         ;;
     "generate")
-        python3 "$(librarydir)/generate.py"
+        python "$(librarydir)/generate.py"
         ;;
     "ls")
         ls "$(librarydir)/$2"
+        ;;
+    "verify")
+        check_openmapflow_yaml
+        python -c "from datasets import $2; from openmapflow.labeled_dataset import verify_df; verify_df($2().load_labels())"
         ;;
     "version")
         version
@@ -47,9 +51,9 @@ case $1 in
         version
         ;;
     *)
-        echo "---------------------------------------------------------------------------------"
+        echo "---------------------------------------------------------------------------------------------"
         echo "                              OpenMapFlow CLI" 
-        echo "---------------------------------------------------------------------------------"
+        echo "---------------------------------------------------------------------------------------------"
         echo "openmapflow cp <source> <destination> - copy a file or directory from the library"
         echo "openmapflow create-datasets - creates datasets for all datasets in datasets.py"
         echo "openmapflow datapath <DATAPATH> - outputs a relative path to the data directory"
@@ -59,6 +63,7 @@ case $1 in
         echo "openmapflow generate - generates an openmapflow project"
         echo "openmapflow help - outputs this message"
         echo "openmapflow ls - lists files in openmapflow library directory"
+        echo "openmapflow verify <DATASET> - verifies a user declared LabeledDataset class in datasets.py"
         echo "openmapflow version - package version"
         ;;
     esac
