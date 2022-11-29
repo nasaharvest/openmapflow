@@ -51,9 +51,9 @@ case $1 in
         version
         ;;
     *)
-        echo "---------------------------------------------------------------------------------"
+        echo "---------------------------------------------------------------------------------------------"
         echo "                              OpenMapFlow CLI" 
-        echo "---------------------------------------------------------------------------------"
+        echo "---------------------------------------------------------------------------------------------"
         echo "openmapflow cp <source> <destination> - copy a file or directory from the library"
         echo "openmapflow create-datasets - creates datasets for all datasets in datasets.py"
         echo "openmapflow datapath <DATAPATH> - outputs a relative path to the data directory"
@@ -63,7 +63,7 @@ case $1 in
         echo "openmapflow generate - generates an openmapflow project"
         echo "openmapflow help - outputs this message"
         echo "openmapflow ls - lists files in openmapflow library directory"
-        echo "openmapflow verify <DATASET> - verifies that the dataset in datasets.py is valid"
+        echo "openmapflow verify <DATASET> - verifies a user declared LabeledDataset class in datasets.py"
         echo "openmapflow version - package version"
         ;;
     esac

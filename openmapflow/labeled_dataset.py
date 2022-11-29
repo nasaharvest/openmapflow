@@ -618,3 +618,18 @@ def create_datasets(datasets: List[LabeledDataset]) -> None:
 
     with (PROJECT_ROOT / dp.REPORT).open("w") as f:
         f.write(report)
+
+
+def print_verification(dataset_name: str):
+    # Try importing
+
+    try:
+        from datasets import dataset_name as dataset
+    except ImportError:
+        pass
+    try:
+        import dataset_name as dataset
+    except ImportError:
+        pass
+
+    verify_df(dataset().load_labels())
