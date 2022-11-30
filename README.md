@@ -28,6 +28,8 @@ Rapid map creation with machine learning and earth observation data.
 
 **Example projects:** [Cropland](https://github.com/nasaharvest/openmapflow/tree/main/crop-mask-example), [Buildings](https://github.com/nasaharvest/openmapflow/tree/main/buildings-example), [Maize](https://github.com/nasaharvest/openmapflow/tree/main/maize-example)
 
+**Example maps:** [Earth Engine script](https://code.earthengine.google.com/5671905780e2707ab3627d63b20ca9bc)
+
 
 * [Tutorial](#tutorial-)
 * [Creating a map from scratch](#creating-a-map-from-scratch)
