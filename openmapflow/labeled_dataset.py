@@ -362,12 +362,11 @@ class LabeledDataset:
         timesteps = get_label_timesteps(df).unique()
         eo_status_str = str(df[EO_STATUS].value_counts()).rsplit("\n", 1)[0]
         return (
-            f"{self.name} (Timesteps: {','.join([str(int(t)) for t in timesteps])})\n"
+            f"\n{self.name} (Timesteps: {','.join([str(int(t)) for t in timesteps])})\n"
             + "----------------------------------------------------------------------------\n"
             + eo_status_str
             + "\n"
             + _label_eo_counts(df)
-            + "\n"
         )
 
     def _mark_duplicates(self, df: pd.DataFrame):
