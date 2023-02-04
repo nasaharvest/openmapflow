@@ -15,6 +15,7 @@ try:
         DatePicker,
         Dropdown,
         FloatText,
+        Text,
         Layout,
         RadioButtons,
         Select,
@@ -82,6 +83,22 @@ class InferenceBBox(BBox):
         # Done: 10:02:44
         pass
 
+def InferenceAdmin(AdminBoundary):
+    def __post_init__(self):
+        super().__post_init__()
+        self.area = self.get_area_km2()
+    
+    def get_area_km2(self) -> float:
+        area = self.boundary.to_crs("EPSG:3857").geometry.area / 1e6
+        return area[0]
+    
+    @classmethod
+    def from_admin(cls, admin: AdminBoundary):
+        return cls(admin.country_iso3, admin.regions_of_interest)
+    
+    def get_leaflet_rectangle(self):
+        return self.boundary.to_crs("EPSG:4326").geometry[0]
+
 
 def create_coords_widget(bbox, margin, update_bbox):
     coord_widgets = {}
@@ -106,9 +123,11 @@ def create_new_bbox_widget(get_bbox, coord_widgets):
     lon_coords = Box([coord_widgets["min_lon"], coord_widgets["max_lon"]])
     all_coords = [coord_widgets["max_lat"], lon_coords, coord_widgets["min_lat"]]
     rectangle_widget = Box([VBox(all_coords, layout=Layout(align_items="center"))])
+    admin_widget = Text(value="ISO Admin3 code: NGA", description="Admin name")
+    admin_widget.layout.display = "none"
     cached_display = rectangle_widget.layout.display
     rectangle_widget.layout.display = "none"
-    toggle = ToggleButtons(options=["Square bbox", "Rectangle bbox"])
+    toggle = ToggleButtons(options=["Square bbox", "Rectangle bbox", "Admin name"])
 
     def change_visibility(event):
         try:
@@ -118,18 +137,24 @@ def create_new_bbox_widget(get_bbox, coord_widgets):
         if i == 0:
             square_widget.layout.display = "block"
             rectangle_widget.layout.display = "none"
+            admin_widget.layout.display = "none"
             bbox = get_bbox()
             coord_widgets["lat"].value = round(bbox.center[0], 3)
             coord_widgets["lon"].value = round(bbox.center[1], 3)
         elif i == 1:
             square_widget.layout.display = "none"
+            admin_widget.layout.display = "none"
             rectangle_widget.layout.display = cached_display
             bbox = get_bbox()
             for k in bbox_keys:
                 coord_widgets[k].value = round(getattr(bbox, k), 3)
+        elif i == 2:
+            square_widget.layout.display = "none"
+            rectangle_widget.layout.display = "none"
+            admin_widget.layout.display = "block"
 
     toggle.observe(change_visibility)
-    return VBox([toggle, square_widget, rectangle_widget])
+    return VBox([toggle, square_widget, rectangle_widget, admin_widget])
 
 
 def create_available_bbox_widget(available_bboxes, update_event):
@@ -147,6 +172,8 @@ class InferenceWidget:
         lat: float = 7.72,
         lon: float = 1.18,
         margin: float = 0.02,
+        admin_name: str = None,
+        # regions_of_interest: List[str] = None,
         start_date=date(2020, 2, 1),
         end_date=date(2021, 2, 1),
         verbose=False,
@@ -158,6 +185,7 @@ class InferenceWidget:
             min_lon=lon - margin,
             max_lon=lon + margin,
         )
+        # self.admin_bound  = 
         self.available_bboxes = available_bboxes
 
         # -----------------------------------------------------------------------
@@ -240,8 +268,7 @@ class InferenceWidget:
           <b>Area:</b> {self.bbox.get_area_km2():,.1f} km² <br>
           <b>Time:</b> Coming soon. <br>
           <b>Cost:</b> Coming soon.
-          <div/>
-        """
+          <div/>"""
 
     def get_warning_HTML(self, description):
         return f"<p style='color:red'>{description}</p>"
