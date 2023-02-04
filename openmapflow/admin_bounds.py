@@ -49,3 +49,15 @@ class AdminBoundary:
                 country_boundary["name"].isin(self.regions_of_interest)
             ].copy()
             self.boundary = self.boundary.dissolve(by="adm0_a3")
+    
+    @classmethod
+    def from_str(cls, s: str) -> "AdminBoundary":
+        "Get country_iso3 and regions_of_interest from a string"
+
+        country_iso3 = re.search(r"country_code=(\w{3})", s).group(1)
+        regions_of_interest = re.search(r"region=([\w_]+)", s)
+        if regions_of_interest:
+            regions_of_interest = regions_of_interest.group(1).split("_")[:-1]
+        else:
+            regions_of_interest = []
+        return cls(country_iso3=country_iso3, regions_of_interest=regions_of_interest)
