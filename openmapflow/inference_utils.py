@@ -9,6 +9,7 @@ import requests
 from google.cloud import storage
 
 from openmapflow.bbox import BBox
+from openmapflow.admin_bounds import AdminBoundary
 from openmapflow.config import GCLOUD_LOCATION, GCLOUD_PROJECT_ID, PROJECT
 from openmapflow.config import BucketNames as bn
 from openmapflow.ee_exporter import get_ee_task_amount
@@ -60,6 +61,7 @@ def get_available_bboxes(
             if p not in previous_matches:
                 previous_matches.append(p)
                 available_bboxes.append(BBox.from_str(f"gs://{bucket_name}/{p}"))
+                available_bboxes.append(AdminBoundary.from_str(f"gs://{bucket_name}/{p}"))
     return available_bboxes
 
 
