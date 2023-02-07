@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import re
 from typing import List
 
 import geopandas as gpd
@@ -18,7 +19,7 @@ class AdminBoundary:
         ]
 
         natural_earth_data = gpd.read_file(
-            "openmapflow/dataset/natural_earth/ne_10m_admin_1_states_provinces.shp"
+            "../dataset/natural_earth/ne_10m_admin_1_states_provinces.shp"
         )
 
         if len(self.regions_of_interest) == 0:
@@ -61,3 +62,12 @@ class AdminBoundary:
         else:
             regions_of_interest = []
         return cls(country_iso3=country_iso3, regions_of_interest=regions_of_interest)
+    
+    def get_identifier(self, start_date, end_date) -> str:
+        "Get a unique identifier for the admin boundary"
+
+        if len(self.regions_of_interest) == 0:
+            return f"{self.country_iso3}_{start_date}_{end_date}_all"
+        else:
+            return f"{self.country_iso3}_{'_'.join(self.regions_of_interest)}_{start_date}_{end_date}_all"
+        
