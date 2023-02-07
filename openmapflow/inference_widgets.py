@@ -2,8 +2,10 @@ import re
 from dataclasses import dataclass
 from datetime import date, datetime
 from functools import partial
+from typing import List
 
 from openmapflow.bbox import BBox
+from openmapflow.admin_bounds import AdminBoundary
 
 try:
     import pyproj
@@ -83,7 +85,8 @@ class InferenceBBox(BBox):
         # Done: 10:02:44
         pass
 
-def InferenceAdmin(AdminBoundary):
+@dataclass
+class InferenceAdmin(AdminBoundary):
     def __post_init__(self):
         super().__post_init__()
         self.area = self.get_area_km2()
@@ -115,15 +118,18 @@ def create_coords_widget(bbox, margin, update_bbox):
         coord_widgets[k].observe(update_bbox)
     return coord_widgets
 
+def create_admin_widget(admin, update_bbox):
+    admin_widget = Text(value=admin, description="Admin name")
+    admin_widget.observe(update_bbox)
+    return admin_widget
 
-def create_new_bbox_widget(get_bbox, coord_widgets):
+def create_new_bbox_widget(get_bbox, coord_widgets, admin_widget):
     square_widget = VBox(
         [coord_widgets["lat"], coord_widgets["lon"], coord_widgets["margin"]]
     )
     lon_coords = Box([coord_widgets["min_lon"], coord_widgets["max_lon"]])
     all_coords = [coord_widgets["max_lat"], lon_coords, coord_widgets["min_lat"]]
     rectangle_widget = Box([VBox(all_coords, layout=Layout(align_items="center"))])
-    admin_widget = Text(value="ISO Admin3 code: NGA", description="Admin name")
     admin_widget.layout.display = "none"
     cached_display = rectangle_widget.layout.display
     rectangle_widget.layout.display = "none"
@@ -172,8 +178,8 @@ class InferenceWidget:
         lat: float = 7.72,
         lon: float = 1.18,
         margin: float = 0.02,
-        admin_name: str = None,
-        # regions_of_interest: List[str] = None,
+        country_iso3: str = "NGA",
+        regions_of_interest: List[str] = [],
         start_date=date(2020, 2, 1),
         end_date=date(2021, 2, 1),
         verbose=False,
@@ -185,7 +191,7 @@ class InferenceWidget:
             min_lon=lon - margin,
             max_lon=lon + margin,
         )
-        # self.admin_bound  = 
+        self.admin_bound  = InferenceAdmin(country_iso3, regions_of_interest)
         self.available_bboxes = available_bboxes
 
         # -----------------------------------------------------------------------
@@ -196,9 +202,10 @@ class InferenceWidget:
             self.bbox.get_leaflet_rectangle(),
         )
         self.map = Map(layers=layers, center=self.bbox.center, zoom=11)
-        self.coord_widgets = create_coords_widget(self.bbox, margin, self.update_bbox)
+        self.coord_widgets = create_coords_widget(self.bbox, margin,self.update_bbox)
+        self.admin_widget = create_admin_widget(country_iso3, self.update_bbox)
         self.new_bbox_widget = create_new_bbox_widget(
-            lambda: self.bbox, self.coord_widgets
+            lambda: self.bbox, self.coord_widgets, self.admin_widget
         )
         self.available_bbox_widget = create_available_bbox_widget(
             available_bboxes, self.update_bbox
@@ -299,6 +306,7 @@ class InferenceWidget:
         if event["name"] != "value":
             return
         key = event["owner"].description
+        print(key)
         value = event["new"]
         if key == "lat":
             self.bbox = InferenceBBox(
