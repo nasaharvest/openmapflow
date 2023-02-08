@@ -200,7 +200,7 @@ class InferenceWidget:
         layers = (
             basemap_to_tiles(basemaps.Esri.WorldStreetMap),
             self.bbox.get_leaflet_rectangle(),
-        )
+        ) # TODO: self.admin_bound.get_leaflet_rectangle() 
         self.map = Map(layers=layers, center=self.bbox.center, zoom=11)
         self.coord_widgets = create_coords_widget(self.bbox, margin,self.update_bbox)
         self.admin_widget = create_admin_widget(country_iso3, self.update_bbox)
@@ -235,7 +235,7 @@ class InferenceWidget:
     def get_map_key(self):
         version = self.bbox.get_identifier(
             str(self.start_widget.value), str(self.end_widget.value)
-        )
+        ) # TODO: switch between admin and bbox
         map_key = f"{self.model_picker.value}/{version}"
         if self.are_tifs_in_right_spot(map_key):
             self.check_key_widget.layout.display = "block"
@@ -260,10 +260,10 @@ class InferenceWidget:
     def get_config_as_dict(self):
         map_key = self.get_map_key()
         return {
-            "bbox": self.bbox,
+            "bbox": self.bbox, # TODO: switch between admin and bbox
             "start_date": self.start_widget.value,
             "end_date": self.end_widget.value,
-            "tifs_in_gcloud": self.bbox.name,
+            "tifs_in_gcloud": self.bbox.name, # TODO: switch between admin and bbox
             "tifs_in_right_spot": self.are_tifs_in_right_spot(map_key),
             "map_key": map_key,
         }
