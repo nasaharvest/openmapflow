@@ -1,6 +1,8 @@
 [core]
-    remote = gsremote
+    remote = gspersonal
 ['remote "gdrive"']
     url = gdrive://1EMHILcNFwdusMHHs4eC4OVIJ0Ncp9fiY/crop-mask-example-dvcstore
 ['remote "gsremote"']
     url = gs://harvest-public-assets/openmapflow-dvc/crop-mask-example
+['remote "gspersonal"']
+    url = gs://openmapflow-public/dvc/crop-mask-example

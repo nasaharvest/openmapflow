@@ -1,3 +1,4 @@
+import os
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Dict
@@ -50,6 +51,8 @@ CONFIG_YML = update_dict(DEFAULT_CONFIG, CUSTOM_CONFIG)
 GCLOUD_PROJECT_ID = CONFIG_YML["gcloud"]["project_id"]
 GCLOUD_LOCATION = CONFIG_YML["gcloud"]["location"]
 DOCKER_TAG = f"{GCLOUD_LOCATION}-docker.pkg.dev/{GCLOUD_PROJECT_ID}/{PROJECT}/{PROJECT}"
+
+os.environ["GOOGLE_CLOUD_PROJECT"] = GCLOUD_PROJECT_ID
 
 
 class DataPaths:

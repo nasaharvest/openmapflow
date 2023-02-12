@@ -1,6 +1,8 @@
 [core]
-    remote = gsremote
+    remote = gspersonal
 ['remote "gdrive"']
     url = gdrive://1K7gpq7vE7AJ5cWP1xaqXfQX1mPc-IUXC
 ['remote "gsremote"']
     url = gs://harvest-public-assets/openmapflow-dvc/maize-example
+['remote "gspersonal"']
+    url = gs://openmapflow-public/dvc/maize-example
