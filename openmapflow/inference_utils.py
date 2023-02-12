@@ -44,7 +44,7 @@ def get_available_bboxes(
     """
     if len(buckets_to_check) == 0:
         raise ValueError("No buckets to check")
-    client = storage.Client(project=GCLOUD_PROJECT_ID)
+    client = storage.Client()
     previous_matches = []
     available_bboxes = []
     bbox_regex = (
@@ -63,22 +63,20 @@ def get_available_bboxes(
     return available_bboxes
 
 
-def get_gcs_file_amount(
-    bucket_name: str, prefix: str, project: str = GCLOUD_PROJECT_ID
-) -> int:
-    blobs = storage.Client(project=project).list_blobs(bucket_name, prefix=prefix)
+def get_gcs_file_amount(bucket_name: str, prefix: str) -> int:
+    blobs = storage.Client().list_blobs(bucket_name, prefix=prefix)
     return len(list(blobs))
 
 
 def get_gcs_file_dict_and_amount(
-    bucket_name: str, prefix: str, project: str = GCLOUD_PROJECT_ID
+    bucket_name: str, prefix: str
 ) -> Tuple[Dict[str, List[str]], int]:
     """
     Gets a dictionary of all files in a bucket with their amount.
     Returns:
         Dictionary of files and their amount.
     """
-    blobs = storage.Client(project=project).list_blobs(bucket_name, prefix=prefix)
+    blobs = storage.Client().list_blobs(bucket_name, prefix=prefix)
     files_dict = defaultdict(lambda: [])
     amount = 0
     for blob in tqdm(blobs, desc=f"From {bucket_name}"):
@@ -170,7 +168,7 @@ def make_new_predictions(
         missing: Dictionary of missing predictions.
         bucket_name: Bucket name to rename files in.
     """
-    bucket = storage.Client(project=GCLOUD_PROJECT_ID).bucket(bucket_name)
+    bucket = storage.Client().bucket(bucket_name)
     for batch, files in tqdm(missing.items(), desc="Going through batches"):
         for file in tqdm(files, desc="Renaming files", leave=False):
             blob_name = f"{batch}/{file}.tif"
