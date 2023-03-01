@@ -148,8 +148,12 @@ Data can be added by either following the below documentation OR running the abo
 - [ ] [EarthEngine account](https://earthengine.google.com/signup) - for accessing Earth Engine and pulling satellite data
 - [ ] Raw labels - a file (csv/shp/zip/txt) containing a list of labels and their coordinates (latitude, longitude)
 
-1. Move raw label files into project's data/raw_labels folder
-2. Convert raw labels to standardized dataframe using the `LabeledDataset` class in datasets.py, example:
+1. Pull the latest data
+```bash
+dvc pull
+```
+2. Move raw label files into project's data/raw_labels folder
+3. Write a `LabeledDataset` class in `datasets.py` with a `load_labels` function that converts raw labels to a standard format, example:
 ```python
 label_col = "is_crop"
 
@@ -177,15 +181,20 @@ class TogoCrop2019(LabeledDataset):
 
 datasets: List[LabeledDataset] = [TogoCrop2019(), ...]
 ```
-Run dataset creation:
+3. Check your new dataset `load_labels` function
+```bash
+openmapflow verify TogoCrop2019
+```
+4. Run dataset creation (can be skipped if automated in CI e.g. in https://github.com/nasaharvest/crop-mask):
 ```bash
 earthengine authenticate    # For getting new earth observation data
 gcloud auth login           # For getting cached earth observation data
-
 openmapflow create-datasets # Initiatiates or checks progress of dataset creation
+```
 
-dvc commit && dvc push      # Push new data to data version control
-
+5. Push new data to remote storage and new code to Github
+```bash
+dvc commit && dvc push
 git add .
 git commit -m'Created new dataset'
 git push
