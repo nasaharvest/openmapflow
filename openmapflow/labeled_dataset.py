@@ -620,5 +620,5 @@ def create_datasets(datasets: List[LabeledDataset]) -> None:
         print(summary)
         report += "\n\n" + summary
 
-    with (PROJECT_ROOT / dp.REPORT).open("w") as f:
+    with (PROJECT_ROOT / dp.REPORT).open("w", encoding="utf-8") as f:
         f.write(report)
