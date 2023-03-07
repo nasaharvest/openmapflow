@@ -13,7 +13,7 @@ TEMPLATE_REQUIREMENTS = TEMPLATES_DIR / "requirements.txt"
 TEMPLATE_README = TEMPLATES_DIR / "README.md"
 TEMPLATE_DEPLOY_YML = TEMPLATES_DIR / "github-deploy.yaml"
 TEMPLATE_TEST_YML = TEMPLATES_DIR / "github-test.yaml"
-VERSION = "0.2.3rc1"
+VERSION = "0.2.3rc2"
 
 # -------------- Dataframe column names --------------------------------------
 SOURCE = "source"
