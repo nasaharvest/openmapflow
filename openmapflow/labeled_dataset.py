@@ -180,8 +180,8 @@ def _find_matching_point(
         eo_data = tif.sel(x=closest_lon).sel(y=closest_lat).values
         eo_file = eo_paths[0].name
 
-    eo_data = calculate_ndvi(eo_data)
     eo_data = remove_bands(eo_data)
+    eo_data = calculate_ndvi(eo_data)
     return eo_data, closest_lon, closest_lat, eo_file
 
 
@@ -207,8 +207,8 @@ def _find_matching_point_url(
     closest_lat = _find_nearest(tif.y, label_lat)[0]
 
     eo_data = tif.sel(x=closest_lon).sel(y=closest_lat).values
-    eo_data = calculate_ndvi(eo_data)
     eo_data = remove_bands(eo_data)
+    eo_data = calculate_ndvi(eo_data)
     return eo_data, closest_lon, closest_lat
 
 
