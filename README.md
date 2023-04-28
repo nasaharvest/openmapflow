@@ -246,3 +246,13 @@ df = TogoCrop2019().load_df(to_np=True)
 x = df.iloc[0]["eo_data"]
 y = df.iloc[0]["class_prob"]
 ```
+
+# Citation
+```
+@inproceedings{OpenMapFlow2023,
+  title={OpenMapFlow: A Library for Rapid Map Creation with Machine Learning and Remote Sensing Data},
+  author={Zvonkov, Ivan and Tseng, Gabriel and Nakalembe, Catherine and Kerner, Hannah},
+  booktitle={AAAI},
+  year={2023}
+}
+```
