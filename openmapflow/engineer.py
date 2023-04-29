@@ -170,8 +170,8 @@ def process_test_file(path_to_file: Path) -> Tuple[np.ndarray, np.ndarray, np.nd
     x_np = da.values
     x_np = x_np.reshape(x_np.shape[0], x_np.shape[1], x_np.shape[2] * x_np.shape[3])
     x_np = np.moveaxis(x_np, -1, 0)
-    x_np = calculate_ndvi(x_np)
     x_np = remove_bands(x_np)
+    x_np = calculate_ndvi(x_np)
 
     # Get lat lons
     lon, lat = np.meshgrid(da.x.values, da.y.values)
