@@ -83,7 +83,7 @@ class Inference:
 
         batches = [
             x_np[i : i + self.batch_size]  # noqa: E203
-            for i in range(0, (x_np.shape[0] - 1), self.batch_size)
+            for i in range(0, x_np.shape[0], self.batch_size)
         ]
         batch_predictions = [self._on_single_batch(b) for b in batches]
         combined_pred = self._combine_predictions(flat_lat, flat_lon, batch_predictions)
