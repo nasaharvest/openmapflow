@@ -22,7 +22,7 @@ S2_BANDS = [
     "B12",
 ]
 S2_MAX_VALUES = [float(1e4)] * len(S2_BANDS)
-ERA5_BANDS = ["temperature_2m", "total_precipitation"]
+ERA5_BANDS = ["temperature_2m", "total_precipitation_sum"]
 # the hottest temperature ever recorded on Earth is 329.85K
 # (https://en.wikipedia.org/wiki/List_of_weather_records#Hottest)
 # For rainfall, http://www.bom.gov.au/water/designRainfalls/rainfallEvents/worldRecRainfall.shtml
