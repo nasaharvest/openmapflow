@@ -180,8 +180,8 @@ def _find_matching_point(
         eo_data = tif.sel(x=closest_lon).sel(y=closest_lat).values
         eo_file = eo_paths[0].name
 
-    eo_data = calculate_ndvi(eo_data)
     eo_data = remove_bands(eo_data)
+    eo_data = calculate_ndvi(eo_data)
     return eo_data, closest_lon, closest_lat, eo_file
 
 
@@ -207,8 +207,8 @@ def _find_matching_point_url(
     closest_lat = _find_nearest(tif.y, label_lat)[0]
 
     eo_data = tif.sel(x=closest_lon).sel(y=closest_lat).values
-    eo_data = calculate_ndvi(eo_data)
     eo_data = remove_bands(eo_data)
+    eo_data = calculate_ndvi(eo_data)
     return eo_data, closest_lon, closest_lat
 
 
@@ -387,7 +387,12 @@ class LabeledDataset:
             df.loc[duplicates_index, EO_FILE] = None
         return df
 
-    def load_df(self, check_eo_data: bool = True, to_np: bool = False) -> pd.DataFrame:
+    def load_df(
+        self,
+        check_eo_data: bool = True,
+        to_np: bool = False,
+        disable_tqdm: bool = False,
+    ) -> pd.DataFrame:
         """Load dataset (labels + earth observation data) as a DataFrame"""
         if not self.df_path.exists():
             print(self.create_dataset())
@@ -399,8 +404,11 @@ class LabeledDataset:
                 + "run openmapflow create-datasets"
             )
         if to_np:
-            tqdm.pandas(desc=self.name)
-            df[EO_DATA] = df[EO_DATA].progress_apply(str_to_np)
+            if disable_tqdm:
+                df[EO_DATA] = df[EO_DATA].apply(str_to_np)
+            else:
+                tqdm.pandas(desc=self.name)
+                df[EO_DATA] = df[EO_DATA].progress_apply(str_to_np)
         return df
 
     def _verify_and_standardize_df(self, df: pd.DataFrame) -> pd.DataFrame:

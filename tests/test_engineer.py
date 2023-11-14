@@ -4,21 +4,21 @@ from pathlib import Path
 import numpy as np
 import xarray as xr
 
-from openmapflow.bands import DYNAMIC_BANDS, STATIC_BANDS
+from openmapflow.bands import BANDS, DYNAMIC_BANDS, STATIC_BANDS
 from openmapflow.engineer import _fillna, load_tif, process_test_file
 
 TIF_FILE = Path(__file__).parent / "98-togo_2019-02-06_2020-02-01.tif"
 
 NUM_TIMESTEPS = 12
-BANDS = DYNAMIC_BANDS + STATIC_BANDS
+ORIGINAL_BANDS = DYNAMIC_BANDS + STATIC_BANDS
 
 
 class TestEngineer(unittest.TestCase):
     def setUp(self):
-        data = np.ones((NUM_TIMESTEPS, len(BANDS), 17, 17))
+        data = np.ones((NUM_TIMESTEPS, len(ORIGINAL_BANDS), 17, 17))
 
         # Make each band have a unique value
-        for i in range(len(BANDS)):
+        for i in range(len(ORIGINAL_BANDS)):
             data[:, i] = data[:, i] * i
         self.xr_data = xr.DataArray(data=data, dims=("time", "band", "y", "x"))
 
@@ -86,8 +86,16 @@ class TestEngineer(unittest.TestCase):
         loaded_file2 = load_tif(TIF_FILE, fillna=True)
         self.assertFalse(np.isnan(loaded_file2).any())
 
-    def test_process_test_file(self):
+    def test_process_test_file_shape(self):
         x_np, flat_lat, flat_lon = process_test_file(TIF_FILE)
         self.assertEqual(x_np.shape, (289, 12, 18))
         self.assertEqual(flat_lat.shape, (289,))
         self.assertEqual(flat_lon.shape, (289,))
+
+    def test_process_test_file_NDVI(self):
+        x_np, _, _ = process_test_file(TIF_FILE)
+        b4 = x_np[:, :, BANDS.index("B4")]
+        b8 = x_np[:, :, BANDS.index("B8")]
+        ndvi = (b8 - b4) / (b8 + b4)
+        computed_ndvi = x_np[:, :, BANDS.index("NDVI")]
+        self.assertTrue(np.array_equal(ndvi, computed_ndvi), "NDVI values not equal")

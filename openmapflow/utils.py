@@ -43,9 +43,9 @@ def confirmation(message, default="y"):
 
 
 def to_date(d):
-    if type(d) == np.datetime64:
+    if type(d) == np.datetime64:  # noqa: E721
         return d.astype("M8[D]").astype("O")
-    elif type(d) == str:
+    elif type(d) == str:  # noqa: E721
         return pd.to_datetime(d).date()
     else:
         return d.date()

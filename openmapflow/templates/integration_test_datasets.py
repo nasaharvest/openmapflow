@@ -62,9 +62,13 @@ class IntegrationTestLabeledData(TestCase):
         )
 
     def test_for_duplicates(self):
-        duplicates = self.dfs[self.dfs.duplicated(subset=[EO_LAT, EO_LON, EO_FILE])]
-        num_dupes = len(duplicates)
-        self.assertTrue(num_dupes == 0, f"Found {num_dupes} duplicates")
+        duplicates = self.dfs[
+            self.dfs.duplicated(subset=[EO_LAT, EO_LON, EO_FILE], keep=False)
+        ]
+        num_dupes = len(duplicates) // 2
+        self.assertTrue(
+            num_dupes == 0, f"Found {num_dupes} duplicates: {duplicates['name']}"
+        )
 
     def test_eo_data_for_emptiness(self):
         num_empty_eo_data = len(self.dfs[self.dfs[EO_DATA].isnull()])

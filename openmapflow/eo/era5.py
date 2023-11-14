@@ -5,7 +5,7 @@ import ee
 from openmapflow.bands import ERA5_BANDS as BANDS
 from openmapflow.utils import date_to_string
 
-image_collection = "ECMWF/ERA5_LAND/MONTHLY"
+image_collection = "ECMWF/ERA5_LAND/MONTHLY_AGGR"
 
 
 def get_single_image(region: ee.Geometry, start_date: date, end_date: date) -> ee.Image:
