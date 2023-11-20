@@ -1,0 +1,67 @@
+-----------------------------------------------------
+TRAINING PARAMETERS:
+model_name: Togo25epPreTrain_TransOrig-n_ep20-Feb_12-lr001-b_size64-upsm_ratio10
+start_month: February
+input_months: 12
+batch_size: 64
+upsample_minority_ratio: 1.0
+lr: 0.001
+num_epochs: 20
+
+
+***
+Using Pre-Trained model: data/models/TransOrig-n_ep25-Feb_12-lr001-b_size64-upsm_ratio05.pt
+Re-Training model on Togo for 20 more epochs...
+***
+
+RecursiveScriptModule(
+  original_name=Model
+  (model): RecursiveScriptModule(
+    original_name=TransformerModel
+    (permute): RecursiveScriptModule(original_name=Permute)
+    (inlinear): RecursiveScriptModule(original_name=Linear)
+    (relu): RecursiveScriptModule(original_name=ReLU)
+    (transformer_encoder): RecursiveScriptModule(
+      original_name=TransformerEncoder
+      (layers): RecursiveScriptModule(
+        original_name=ModuleList
+        (0): RecursiveScriptModule(
+          original_name=TransformerEncoderLayer
+          (self_attn): RecursiveScriptModule(
+            original_name=MultiheadAttention
+            (out_proj): RecursiveScriptModule(original_name=NonDynamicallyQuantizableLinear)
+          )
+          (linear1): RecursiveScriptModule(original_name=Linear)
+          (dropout): RecursiveScriptModule(original_name=Dropout)
+          (linear2): RecursiveScriptModule(original_name=Linear)
+          (norm1): RecursiveScriptModule(original_name=LayerNorm)
+          (norm2): RecursiveScriptModule(original_name=LayerNorm)
+          (dropout1): RecursiveScriptModule(original_name=Dropout)
+          (dropout2): RecursiveScriptModule(original_name=Dropout)
+        )
+      )
+      (norm): RecursiveScriptModule(original_name=LayerNorm)
+    )
+    (transpose): RecursiveScriptModule(original_name=Transpose)
+    (max): RecursiveScriptModule(original_name=Max)
+    (outlinear): RecursiveScriptModule(original_name=Linear)
+  )
+)
+EPOCH: TRAIN-LOSS,	 VAL-LOSS	 --- F1,	 ACCURACY,	 PERCISION,	 RECALL,	 ROC-AUC,	
+0: 0.37317999459448314,	 0.38260806666599717	 --- 0.875,	 0.8556,	 0.8589,	 0.8917,	 0.9046
+1: 0.3459385664122445,	 0.37447539501779775	 --- 0.8636,	 0.8484,	 0.8808,	 0.8471,	 0.9131
+2: 0.32123537006832303,	 0.3699199722588923	 --- 0.8682,	 0.852,	 0.8766,	 0.8599,	 0.9121
+3: 0.3125164757456098,	 0.3604204482012277	 --- 0.8941,	 0.87,	 0.8306,	 0.9682,	 0.9201
+4: 0.29024908823626383,	 0.3509752158384891	 --- 0.8916,	 0.8736,	 0.8675,	 0.9172,	 0.9175
+6: 0.291781804391316,	 0.3349336995894513	 --- 0.8982,	 0.8773,	 0.8475,	 0.9554,	 0.9269
+10: 0.24268588327226184,	 0.32802720050519124	 --- 0.9012,	 0.8845,	 0.8743,	 0.9299,	 0.931
+11: 0.24120763807069687,	 0.3259189309357306	 --- 0.893,	 0.8736,	 0.8588,	 0.9299,	 0.9239
+13: 0.23529998677117483,	 0.32327333693846466	 --- 0.9124,	 0.8953,	 0.8678,	 0.9618,	 0.9302
+16: 0.21043488862968626,	 0.3092834005125593	 --- 0.8966,	 0.8809,	 0.8827,	 0.9108,	 0.9351
+18: 0.19386299012672334,	 0.3028372652990078	 --- 0.9085,	 0.8917,	 0.8713,	 0.949,	 0.937
+
+model_path: /content/openmapflow/crop-mask-example/data/models/Togo25epPreTrain_TransOrig-n_ep20-Feb_12-lr001-b_size64-upsm_ratio10.pt
+
+-----------------------------------------------------
+EVALUATION METRICS:
+{'accuracy': 0.8123, 'f1': 0.7734, 'precision': 0.6644, 'recall': 0.9252, 'roc_auc': 0.907}

@@ -1,0 +1,115 @@
+Togo25epPreTrain_TransOrig-n_ep10-Feb_12-lr001-b_size64-upsm_ratio10:
+  class_probability:
+    0: 0.6537216828478964
+    1: 0.34627831715210355
+  test_metrics:
+    accuracy: 0.7961
+    f1: 0.749
+    precision: 0.6528
+    recall: 0.8785
+    roc_auc: 0.9023
+  test_size: 309
+Togo25epPreTrain_TransOrig-n_ep20-Feb_12-lr001-b_size64-upsm_ratio10:
+  class_probability:
+    0: 0.6537216828478964
+    1: 0.34627831715210355
+  test_metrics:
+    accuracy: 0.8123
+    f1: 0.7734
+    precision: 0.6644
+    recall: 0.9252
+    roc_auc: 0.907
+  test_size: 309
+Togo25epPreTrain_TransOrig-n_ep30-Feb_12-lr001-b_size64-upsm_ratio10:
+  class_probability:
+    0: 0.6537216828478964
+    1: 0.34627831715210355
+  test_metrics:
+    accuracy: 0.8123
+    f1: 0.7717
+    precision: 0.6667
+    recall: 0.9159
+    roc_auc: 0.9
+  test_size: 309
+Togo25epPreTrain_TransOrig-n_ep40-Feb_12-lr001-b_size64-upsm_ratio10:
+  class_probability:
+    0: 0.6537216828478964
+    1: 0.34627831715210355
+  test_metrics:
+    accuracy: 0.7896
+    f1: 0.7471
+    precision: 0.64
+    recall: 0.8972
+    roc_auc: 0.8828
+  test_size: 309
+TransOrig-n_ep5-Feb_12-lr001-b_size64-upsm_ratio05:
+  class_probability:
+    0: 0.6537216828478964
+    1: 0.34627831715210355
+  test_metrics:
+    accuracy: 0.7832
+    f1: 0.6884
+    precision: 0.6852
+    recall: 0.6916
+    roc_auc: 0.842
+  test_size: 309
+TransOrig-n_ep25-Feb_12-lr001-b_size64-upsm_ratio05:
+  class_probability:
+    0: 0.6537216828478964
+    1: 0.34627831715210355
+  test_metrics:
+    accuracy: 0.7605
+    f1: 0.7218
+    precision: 0.6038
+    recall: 0.8972
+    roc_auc: 0.8755
+  test_size: 309
+TransOrig-n_ep30-Feb_12-lr001-b_size64-upsm_ratio05:
+  class_probability:
+    0: 0.6537216828478964
+    1: 0.34627831715210355
+  test_metrics:
+    accuracy: 0.7217
+    f1: 0.6767
+    precision: 0.566
+    recall: 0.8411
+    roc_auc: 0.8538
+  test_size: 309
+Trans_UpsampleTogo-n_ep30-Feb_12-lr001-b_size64-upsm_ratio05:
+  class_probability:
+    0: 0.6537216828478964
+    1: 0.34627831715210355
+  test_metrics:
+    accuracy: 0.7702
+    f1: 0.7126
+    precision: 0.6286
+    recall: 0.8224
+    roc_auc: 0.8647
+  test_size: 309
+CVPR_BGB:
+  local_testing_original_size: 309
+  local_testing_positive_class_percentage: 0.3463
+  test_metrics:
+    accuracy: 0.7638
+    f1: 0.7224
+    precision: 0.609
+    recall: 0.8879
+    roc_auc: 0.8404
+Togo_crop-mask_2019_February:
+  local_testing_original_size: 309
+  local_testing_positive_class_percentage: 0.3463
+  test_metrics:
+    accuracy: 0.7638
+    f1: 0.7224
+    precision: 0.609
+    recall: 0.8879
+    roc_auc: 0.8404
+eunice-crop:
+  local_testing_original_size: 309
+  local_testing_positive_class_percentage: 0.3463
+  test_metrics:
+    accuracy: 0.7832
+    f1: 0.7149
+    precision: 0.6562
+    recall: 0.785
+    roc_auc: 0.8452
