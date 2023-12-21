@@ -38,7 +38,7 @@ setup(
     scripts=["openmapflow/scripts/openmapflow", "openmapflow/scripts/deploy.sh"],
     install_requires=[
         "numpy",
-        "pandas==1.3.5",
+        "pandas>=1.3.5",
         "pyyaml>=6.0",
         "requests",
         "tqdm>=4.9.0",
@@ -46,7 +46,6 @@ setup(
     extras_require={
         "data": [
             "cmocean",
-            "dask",
             "earthengine-api",
             "geopandas",
             "google-cloud-storage",
@@ -56,7 +55,6 @@ setup(
         ],
         "all": [
             "cmocean",
-            "dask",
             "earthengine-api",
             "geopandas",
             "google-cloud-storage",
