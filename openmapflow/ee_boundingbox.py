@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from math import cos, radians
-from typing import List, Tuple, Union
+from typing import Tuple, Union
 
 import ee
 
