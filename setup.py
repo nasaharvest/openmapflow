@@ -51,7 +51,7 @@ setup(
             "google-cloud-storage",
             "netCDF4",
             "rasterio",
-            "xarray",
+            "xarray==0.19",
         ],
         "all": [
             "cmocean",
@@ -61,7 +61,7 @@ setup(
             "ipython",
             "netCDF4",
             "rasterio",
-            "xarray",
+            "xarray==0.19",
             "fastcore<1.5.18",
             "tsai",
         ],
