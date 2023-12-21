@@ -37,7 +37,7 @@ from openmapflow.constants import (
     START,
     SUBSET,
 )
-from openmapflow.ee_exporter import (
+from openmapflow.ee_exporter import (  # type: ignore
     EarthEngineAPI,
     EarthEngineExporter,
     get_cloud_tif_list,

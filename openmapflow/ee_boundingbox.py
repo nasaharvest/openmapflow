@@ -14,7 +14,7 @@ class EEBoundingBox(BBox):
     functionality
     """
 
-    def to_ee_polygon(self) -> ee.Geometry.Polygon:
+    def to_ee_polygon(self):
         return ee.Geometry.Polygon(
             [
                 [
@@ -39,8 +39,7 @@ class EEBoundingBox(BBox):
 
         return delta_lat * m_per_deg_lat, delta_lon * m_per_deg_lon
 
-    def to_polygons(self, metres_per_patch: int = 3300) -> List[ee.Geometry.Polygon]:
-
+    def to_polygons(self, metres_per_patch: int = 3300):
         lat_metres, lon_metres = self.to_metres()
         num_cols = int(lon_metres / metres_per_patch)
         num_rows = int(lat_metres / metres_per_patch)
@@ -59,7 +58,7 @@ class EEBoundingBox(BBox):
         lon_size = (self.max_lon - self.min_lon) / num_cols
         lat_size = (self.max_lat - self.min_lat) / num_rows
 
-        output_polygons: List[ee.Geometry.Polygon] = []
+        output_polygons = []
 
         cur_lon = self.min_lon
         while cur_lon < self.max_lon:
@@ -105,7 +104,6 @@ class EEBoundingBox(BBox):
     def from_centre(
         mid_lat: float, mid_lon: float, surrounding_metres: Union[int, Tuple[int, int]]
     ) -> "EEBoundingBox":
-
         m_per_deg_lat, m_per_deg_lon = EEBoundingBox.metre_per_degree(mid_lat)
 
         if isinstance(surrounding_metres, int):
@@ -124,9 +122,7 @@ class EEBoundingBox(BBox):
         )
 
     @staticmethod
-    def from_bounding_box(
-        bounding_box: BBox, padding_metres: int
-    ) -> ee.Geometry.Polygon:
+    def from_bounding_box(bounding_box: BBox, padding_metres: int):
         # get the mid lat, in degrees (the bounding box function returns it in radians)
         mid_lat, _ = bounding_box.get_centre(in_radians=False)
         m_per_deg_lat, m_per_deg_lon = EEBoundingBox.metre_per_degree(mid_lat)

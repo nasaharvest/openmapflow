@@ -1,6 +1,7 @@
 *.egg-info
 *.pyc
 
+.mypy_cache/
 .vscode/
 
 build/

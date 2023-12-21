@@ -11,7 +11,7 @@ from google.cloud import storage
 from openmapflow.bbox import BBox
 from openmapflow.config import GCLOUD_LOCATION, GCLOUD_PROJECT_ID, PROJECT
 from openmapflow.config import BucketNames as bn
-from openmapflow.ee_exporter import get_ee_task_amount
+from openmapflow.ee_exporter import get_ee_task_amount  # type: ignore
 from openmapflow.utils import tqdm
 
 

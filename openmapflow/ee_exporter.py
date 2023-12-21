@@ -1,3 +1,4 @@
+# type: ignore
 import json
 import os
 import warnings
@@ -208,7 +209,6 @@ class EarthEngineExporter:
         test: bool = False,
         file_dimensions: Optional[int] = None,
     ) -> bool:
-
         filename = str(polygon_identifier)
 
         # Description of the export cannot contain certrain characters
@@ -289,7 +289,6 @@ class EarthEngineExporter:
         num_labelled_points: int = 3000,
         surrounding_metres: int = 80,
     ) -> None:
-
         for expected_column in [START, END, LAT, LON]:
             assert expected_column in labels
 
