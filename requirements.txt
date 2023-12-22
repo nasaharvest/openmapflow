@@ -2,5 +2,5 @@
 black==22.8.0
 isort
 flake8
-mypy==0.812
+mypy
 torchserve
