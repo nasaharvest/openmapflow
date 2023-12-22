@@ -29,7 +29,6 @@ jobs:
       run: python -m flake8 .
     - name: mypy
       run: |
-        python -m mypy --install-types
         python -m mypy openmapflow
         python -m mypy tests
         python -m mypy buildings-example/*.py

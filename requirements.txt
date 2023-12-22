@@ -3,4 +3,9 @@ black==22.8.0
 isort
 flake8
 mypy
+types-PyYAML
+types-decorator
+types-python-dateutil
+types-requests
+types-setuptools
 torchserve
