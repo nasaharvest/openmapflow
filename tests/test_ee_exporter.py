@@ -6,7 +6,7 @@ import pandas as pd
 
 from openmapflow.bbox import BBox
 from openmapflow.constants import END, LAT, LON, START
-from openmapflow.ee_exporter import (
+from openmapflow.ee_exporter import (  # type: ignore
     EarthEngineExporter,
     get_cloud_tif_list,
     get_ee_task_amount,
