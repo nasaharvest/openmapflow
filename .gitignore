@@ -1,6 +1,6 @@
 *.egg-info
 *.pyc
-
+.dvc/*
 .mypy_cache/
 .vscode/
 
