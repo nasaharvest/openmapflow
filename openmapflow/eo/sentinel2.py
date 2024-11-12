@@ -8,7 +8,7 @@ from openmapflow.bands import S2_BANDS as BANDS
 from openmapflow.utils import date_to_string
 
 # These are algorithm settings for the cloud filtering algorithm
-image_collection = "COPERNICUS/S2"
+image_collection = "COPERNICUS/S2_HARMONIZED"
 
 # Ranges from 0-1.Lower value will mask more pixels out.
 # Generally 0.1-0.3 works well with 0.2 being used most commonly
