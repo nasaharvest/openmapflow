@@ -37,7 +37,7 @@ setup(
     },
     scripts=["openmapflow/scripts/openmapflow", "openmapflow/scripts/deploy.sh"],
     install_requires=[
-        "numpy",
+        "numpy==1.26.4",
         "pandas>=1.3.5,<2",
         "pyyaml>=6.0",
         "requests",
@@ -51,6 +51,7 @@ setup(
             "google-cloud-storage",
             "netCDF4",
             "rasterio",
+            "rioxarray",
             "xarray==0.19",
         ],
         "all": [
@@ -61,6 +62,7 @@ setup(
             "ipython",
             "netCDF4",
             "rasterio",
+            "rioxarray",
             "xarray==0.19",
             "fastcore<1.5.18",
             "tsai",
