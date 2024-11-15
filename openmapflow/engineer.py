@@ -60,8 +60,9 @@ def load_tif(
     Returns: The loaded xr.DataArray
     """
     xr = import_optional_dependency("xarray")
+    rio = import_optional_dependency("rioxarray")
 
-    da = xr.open_rasterio(filepath).rename("FEATURES")
+    da = rio.open_rasterio(filepath).rename("FEATURES")
 
     da_split_by_time = []
 
