@@ -62,6 +62,7 @@ setup(
             "ipython",
             "netCDF4",
             "rasterio",
+            "rioxarray",
             "xarray==0.19",
             "fastcore<1.5.18",
             "tsai",
