@@ -37,7 +37,7 @@ setup(
     },
     scripts=["openmapflow/scripts/openmapflow", "openmapflow/scripts/deploy.sh"],
     install_requires=[
-        "numpy==1.26.4",
+        "numpy<=1.26.4",
         "pandas>=1.3.5,<2",
         "pyyaml>=6.0",
         "requests",
