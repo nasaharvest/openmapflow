@@ -136,7 +136,7 @@ class TestGenerate(TestCase):
                         {
                             "name": "Set up python",
                             "uses": "actions/setup-python@v2",
-                            "with": {"python-version": 3.8},
+                            "with": {"python-version": 3.9},
                         },
                         {
                             "name": "Install dependencies",
@@ -200,7 +200,7 @@ class TestGenerate(TestCase):
                         {
                             "name": "Set up python",
                             "uses": "actions/setup-python@v2",
-                            "with": {"python-version": 3.8},
+                            "with": {"python-version": 3.9},
                         },
                         {
                             "name": "Install dependencies",
