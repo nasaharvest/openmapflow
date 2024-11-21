@@ -1,3 +1,4 @@
 dvc[gs]>=2.10.1
 -e .."[all]"
 geopandas==0.11.1
+fiona==1.9.6
